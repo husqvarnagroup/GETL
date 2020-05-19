@@ -1,0 +1,6 @@
+site_name: GETL
+nav:
+    - Home: 'index.md'
+    - Issue Tracker: 'https://github.com/husqvarnagroup/GETL/issues'
+theme: readthedocs
+repo_url: https://github.com/husqvarnagroup/GETL
