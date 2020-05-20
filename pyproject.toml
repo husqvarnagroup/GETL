@@ -2,7 +2,10 @@
 name = "getl"
 version = "0.1.0"
 description = "An elegant way to ETL'ing"
-authors = ["Niels Lemmens <draso.odin@gmail.com>"]
+authors = [
+    "Linus Wallin <linus.wallin@husqvarnagroup.com>",
+    "Niels Lemmens <niels.lemmens@husqvarnagroup.com>",
+]
 license = ""
 
 [tool.poetry.dependencies]
