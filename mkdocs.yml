@@ -1,6 +1,12 @@
 site_name: GETL
 nav:
     - Home: 'index.md'
-    - Issue Tracker: 'https://github.com/husqvarnagroup/GETL/issues'
+    - installation.md
+    - 'User Guide':
+      - 'user-guide/intro.md'
+      - 'user-guide/lift-def.md'
+      - 'user-guide/lift-job-types.md'
+    - 'About':
+      - Issue Tracker: 'https://github.com/husqvarnagroup/GETL/issues'
 theme: readthedocs
 repo_url: https://github.com/husqvarnagroup/GETL

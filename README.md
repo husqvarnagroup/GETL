@@ -1,7 +1,12 @@
 GETL
 ====
 
+[![Build Status](https://dev.azure.com/husqvarna-ailab/GETL/_apis/build/status/husqvarnagroup.GETL?branchName=master)](https://dev.azure.com/husqvarna-ailab/GETL/_build/latest?definitionId=1&branchName=master)
+[![Quality Gate Status](https://sonarcloud.io/api/project_badges/measure?project=GETL&metric=alert_status)](https://sonarcloud.io/dashboard?id=GETL)
+
 An elegant way to ETL'ing.
+
+- View the [GETL documentation](https://getl.readthedocs.io)
 
 Features
 --------
@@ -14,8 +19,20 @@ Installation
 Install GETL by running:
 
 ```sh
-pip install {TODO}
+git clone git@github.com:husqvarnagroup/GETL.git
+pip install GETL
 ```
+
+Or installing through git+https immediately:
+
+```sh
+pip install git+https://github.com/husqvarnagroup/GETL.git
+```
+
+To install the GETL in databricks, go to the cluster settings, then *Libraries*, and then *Install New*.
+- Library Source: `PyPI`
+- Package: `git+https://github.com/husqvarnagroup/GETL.git`
+
 
 Contribute
 ----------
