@@ -28,6 +28,12 @@ steps:
     unzip -o $HOME/.sonar/sonar-scanner.zip -d $HOME/.sonar/
     export PATH=$SONAR_SCANNER_HOME/bin:$PATH
     export SONAR_SCANNER_OPTS="-server"
+    sonar-scanner \
+      -Dsonar.organization=ailab \
+      -Dsonar.projectKey=GETL \
+      -Dsonar.sources=. \
+      -Dsonar.host.url=https://sonarcloud.io \
+      -Dsonar.login=7bf2abdc8e22bfee58b54dec413240aa516d7ee4 
   displayName: 'Install sonar scanner'
 
 - script: |
@@ -36,12 +42,7 @@ steps:
   displayName: 'Install dependencies'
 
 - script: |
-    sonar-scanner \
-      -Dsonar.organization=ailab \
-      -Dsonar.projectKey=GETL \
-      -Dsonar.sources=. \
-      -Dsonar.host.url=https://sonarcloud.io \
-      -Dsonar.login=7bf2abdc8e22bfee58b54dec413240aa516d7ee4 
+    echo "Hello world"
   displayName: 'Sonar scanner'
 
 - script: |
