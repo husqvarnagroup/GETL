@@ -6,7 +6,7 @@ authors = [
     "Linus Wallin <linus.wallin@husqvarnagroup.com>",
     "Niels Lemmens <niels.lemmens@husqvarnagroup.com>",
 ]
-license = ""
+license = "MIT"
 
 [tool.poetry.dependencies]
 python = "^3.7"
