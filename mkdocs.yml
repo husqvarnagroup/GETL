@@ -10,3 +10,6 @@ nav:
       - Issue Tracker: 'https://github.com/husqvarnagroup/GETL/issues'
 theme: readthedocs
 repo_url: https://github.com/husqvarnagroup/GETL
+plugins:
+    - search
+    - LiftBlock
