@@ -4,7 +4,42 @@ from operator import attrgetter
 from pathlib import Path
 from typing import Iterable
 
+from mkdocs.config.config_options import Type
 from mkdocs.plugins import BasePlugin
+from mkdocs.structure.files import File
+
+
+class RootFiles(BasePlugin):
+    config_scheme = (("files", Type(list, default=[])),)
+
+    def on_files(self, files, config):
+        project_path = Path(config["config_file_path"]).parent
+        for filename in self.config["files"]:
+            files.append(
+                File(
+                    filename,
+                    project_path,
+                    config["site_dir"],
+                    config["use_directory_urls"],
+                )
+            )
+
+        return files
+
+    def on_serve(self, server, config, builder):
+        project_path = Path(config["config_file_path"]).parent
+        for filename in self.config["files"]:
+            server.watch(str(project_path / filename), builder)
+        return server
+
+    def on_pre_page(self, page, config, files):
+        # Change the edit urls for ROOT_FILES
+        project_path = Path(config["config_file_path"]).parent
+        for filename in self.config["files"]:
+            root_file = project_path / filename
+            if root_file.samefile(page.file.abs_src_path):
+                page.edit_url = f"{config['repo_url']}edit/master/{filename}"
+        return page
 
 
 class LiftBlock(BasePlugin):
@@ -15,7 +50,7 @@ class LiftBlock(BasePlugin):
         return project_path / "getl" / "blocks"
 
     def on_serve(self, server, config, builder):
-        server.watch(self.get_blocks_path(config), builder)
+        server.watch(str(self.get_blocks_path(config)), builder)
         return server
 
     def on_page_markdown(self, markdown, page, config, files):

@@ -19,19 +19,15 @@ Installation
 Install GETL by running:
 
 ```sh
-git clone git@github.com:husqvarnagroup/GETL.git
-pip install GETL
+# This will be the preferred way but until the code is deployed on PyPI, this is not possible
+pip install {TODO}
 ```
 
-Or installing through git+https immediately:
+Until the GETL is published on PyPI, installation can be done through the git url.
 
 ```sh
 pip install git+https://github.com/husqvarnagroup/GETL.git
 ```
-
-To install the GETL in databricks, go to the cluster settings, then *Libraries*, and then *Install New*.
-- Library Source: `PyPI`
-- Package: `git+https://github.com/husqvarnagroup/GETL.git`
 
 
 Contribute

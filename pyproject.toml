@@ -24,6 +24,7 @@ pytest = "^5.4.2"
 mkdocs = "^1.1.2"
 
 [tool.poetry.plugins."mkdocs.plugins"]
+RootFiles = "mkdocs_plugins:RootFiles"
 LiftBlock = "mkdocs_plugins:LiftBlock"
 
 [build-system]

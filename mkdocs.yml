@@ -1,6 +1,6 @@
 site_name: GETL
 nav:
-    - Home: 'index.md'
+    - Home: 'README.md'
     - installation.md
     - 'User Guide':
       - 'user-guide/intro.md'
@@ -8,9 +8,15 @@ nav:
       - 'user-guide/lift-job-types.md'
     - 'About':
       - Issue Tracker: 'https://github.com/husqvarnagroup/GETL/issues'
-      - License: 'https://github.com/husqvarnagroup/GETL/blob/master/LICENSE'
+      - 'CHANGELOG.md'
+      - License: 'LICENSE.md'
 theme: readthedocs
 repo_url: https://github.com/husqvarnagroup/GETL
 plugins:
     - search
     - LiftBlock
+    - RootFiles:
+        files:
+          - 'README.md'
+          - 'CHANGELOG.md'
+          - 'LICENSE.md'
