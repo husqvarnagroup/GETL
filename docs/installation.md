@@ -1,6 +1,11 @@
 # Installation
 
-## Through pip
+## Prerequisites
+
+- [Python 3.7](https://www.python.org/downloads/) (Python 3.8 support comming soon with spark 3.0)
+- [Apache Spark 2.4](https://spark.apache.org/downloads.html)
+
+## Install the GETL
 
 Install GETL by running:
 
@@ -9,20 +14,15 @@ Install GETL by running:
 pip install {TODO}
 ```
 
-Or by cloning the GETL repository.
-
-```sh
-git clone git@github.com:husqvarnagroup/GETL.git
-pip install GETL
-```
-
-Or installing through git+https immediately:
+Until the GETL is published on PyPI, installation can be done through the git url.
 
 ```sh
 pip install git+https://github.com/husqvarnagroup/GETL.git
 ```
 
-## On a databricks cluster
+### On a databricks cluster
+
+The GETL is only tested on Databricks Runtime Version 6.5 (Apache Spark 2.4.5)
 
 To install the GETL in databricks, the GETL will need to be added to the cluster Libraries.
 
