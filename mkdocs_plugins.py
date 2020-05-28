@@ -8,12 +8,17 @@ from mkdocs.plugins import BasePlugin
 class LiftBlock(BasePlugin):
     config_scheme = ()
 
+    def on_serve(self, server, config, builder):
+        project_path = Path(config["config_file_path"]).parent
+        self.blocks_path = project_path / "getl" / "blocks"
+
+        server.watch(blocks_path, builder)
+        return server
+
     def on_page_markdown(self, markdown, page, config, files):
         if "<lift-blocks>" in markdown:
             io = StringIO()
-            project_path = Path(config["config_file_path"]).parent
-            blocks_path = project_path / "getl" / "blocks"
-            write_file(blocks_path, io)
+            write_file(self.blocks_path, io)
             return markdown.replace("<lift-blocks>", io.getvalue())
         return markdown
 
