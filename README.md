@@ -48,4 +48,4 @@ If you are having issues, please create an issue on our [github](https://github.
 License
 -------
 
-The license will be chosen shortly.
+MIT License
