@@ -6,12 +6,15 @@ nav:
       - 'user-guide/intro.md'
       - 'user-guide/lift-def.md'
       - 'user-guide/lift-job-types.md'
+      - 'user-guide/transform-functions.md'
     - 'About':
       - Issue Tracker: 'https://github.com/husqvarnagroup/GETL/issues'
       - 'CHANGELOG.md'
       - License: 'LICENSE.md'
 theme: readthedocs
 repo_url: https://github.com/husqvarnagroup/GETL
+markdown_extensions:
+    - def_list
 plugins:
     - search
     - LiftBlock
