@@ -48,7 +48,6 @@ class LiftBlock(BasePlugin):
 
     def get_blocks_path(self, config):
         project_path = Path(config["config_file_path"]).parent
-        project_path = Path("/home/ec2-user/projects/big-data-getl/getl")
         return project_path / "getl" / "blocks"
 
     def on_serve(self, server, config, builder):
