@@ -1,0 +1,70 @@
+---
+Parameters:
+  PathToRawFiles:
+    Description: The paths given in a list to the raw files
+  PathToSchema:
+    Description: The paths given in a list to the raw files
+  TrustedPlantShowPath:
+    Description: The path to the trusted show plant dataset
+  TrustedSearchPath:
+    Description: The path to the trusted search dataset
+
+FileSources:
+  PrefixBasedDate:
+    Type: metadata::prefix_based_date
+    Properties:
+      FileSourceBasePrefix: ${TrustedSearchPath}
+      UpdateAfter: WriteToDatabase
+
+LiftJob:
+  RawFiles:
+    Type: load
+    Format: json
+    SchemaPath: ${PathToSchema}
+    Path: ${PathToRawFiles}
+
+  BaseDataset:
+    Type: transform
+    Input: RawFiles
+    Functions:
+      - add_column.date.unixtime_to_utcz:
+          from_column: timestamp
+          to_column: utcTimestamp
+      - add_column.date.year:
+          from_column: utcTimestamp
+          to_column: year
+      - add_column.date.month:
+          from_column: utcTimestamp
+          to_column: month
+      - add_column.date.dayofmonth:
+          from_column: utcTimestamp
+          to_column: dayofmonth
+      - add_column.date.date:
+          from_column: utcTimestamp
+          to_column: date
+
+  SearchDataset:
+    Type: transform
+    Input: BaseDataset
+    Functions:
+      - where:
+          predicate: [payload.type, "=", search]
+
+  PlantShowDataset:
+    Type: transform
+    Input: BaseDataset
+    Functions:
+      - where:
+          predicate: [payload.type, "=", show-plant]
+
+  WriteToShowPlant:
+    Type: write
+    Input: PlantShowDataset
+    Format: json
+    Path: ${TrustedPlantShowPath}
+
+  WriteToSearch:
+    Type: write
+    Input: SearchDataset
+    Format: json
+    Path: ${TrustedSearchPath}

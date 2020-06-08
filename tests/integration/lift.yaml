@@ -1,0 +1,33 @@
+---
+Parameters:
+  ReadPath:
+    Description: The path given for the files in trusted
+  WritePath:
+    Description: The path to where to write files
+  FileRegistryBasePrefix:
+    Description: The prefix to where to save the metadata regarding file sources
+
+FileRegistry:
+  PrefixBasedDate:
+    Type: fileregistry::prefix_based_date
+    Properties:
+      BasePrefix: ${FileRegistryBasePrefix}
+      UpdateAfter: WriteToS3
+      HiveDatabaseName: file_registry_dev
+      HiveTableName: example
+      DefaultStartDate: "2020-01-01"
+      PartitionFormat: year=%Y/month=%m/day=%d
+
+LiftJob:
+  TrustedFiles:
+    Type: load::batch_parquet
+    Properties:
+      FileRegistry: PrefixBasedDate
+      Path: ${ReadPath}
+
+  WriteToS3:
+    Type: write::batch_delta
+    Input: TrustedFiles
+    Properties:
+      Path: ${WritePath}
+      Mode: overwrite

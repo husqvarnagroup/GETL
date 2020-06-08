@@ -1,0 +1,15 @@
+<employee>
+	<name>name1</name>
+	<empid>123</empid>
+	<happy>true</happy>
+</employee>
+<employee>
+	<name>name2</name>
+	<empid>234</empid>
+	<happy>happy</happy>
+</employee>
+<employee>
+	<name>name3</name>
+	<empid>456</empid>
+	<happy>false</happy>
+</employee>

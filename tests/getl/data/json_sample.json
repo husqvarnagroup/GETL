@@ -1,0 +1,10 @@
+{
+    "name": "Mark Steelspitter",
+    "empid": 9,
+    "happy": false,
+    "gear": {
+        "helmet": "viking helmet",
+        "armor": "steel plate",
+        "shoulder-pads": "sturdy leather"
+    }
+}
