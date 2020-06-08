@@ -18,10 +18,14 @@ classifiers = [
 
 [tool.poetry.dependencies]
 python = "^3.7, <3.8"
+boto3 = "^1.13.24"
+pyspark = "^2.4.6"
+oyaml = "^0.9"
 
 [tool.poetry.dev-dependencies]
 pytest = "^5.4.2"
 mkdocs = "^1.1.2"
+moto = "^1.3.14"
 
 [tool.poetry.plugins."mkdocs.plugins"]
 RootFiles = "mkdocs_plugins:RootFiles"
