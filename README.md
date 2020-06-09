@@ -20,13 +20,7 @@ Install GETL by running:
 
 ```sh
 # This will be the preferred way but until the code is deployed on PyPI, this is not possible
-pip install {TODO}
-```
-
-Until the GETL is published on PyPI, installation can be done through the git url.
-
-```sh
-pip install git+https://github.com/husqvarnagroup/GETL.git
+pip install husqvarna-getl
 ```
 
 
