@@ -27,7 +27,7 @@ class RootFiles(BasePlugin):
 
         return files
 
-    def on_serve(self, server, config, builder):
+    def on_serve(self, server, config, builder=None):
         project_path = Path(config["config_file_path"]).parent
         for filename in self.config["files"]:
             server.watch(str(project_path / filename), builder)
@@ -50,7 +50,7 @@ class LiftBlock(BasePlugin):
         project_path = Path(config["config_file_path"]).parent
         return project_path / "getl" / "blocks"
 
-    def on_serve(self, server, config, builder):
+    def on_serve(self, server, config, builder=None):
         server.watch(str(self.get_blocks_path(config)), builder)
         return server
 
