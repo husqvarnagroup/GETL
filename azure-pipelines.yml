@@ -12,8 +12,6 @@ strategy:
   matrix:
     Python37:
       python.version: '3.7'
-    Python38:
-      python.version: '3.8'
 
 steps:
 - task: UsePythonVersion@0
@@ -40,10 +38,6 @@ steps:
     python -m pip install --upgrade pip poetry
     poetry install
   displayName: 'Install dependencies'
-
-- script: |
-    echo "Hello world"
-  displayName: 'Sonar scanner'
 
 - script: |
     poetry run pytest
