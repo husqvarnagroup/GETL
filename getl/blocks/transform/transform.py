@@ -3,13 +3,13 @@ import logging
 from typing import Dict, List, Tuple, TypeVar
 
 from pyspark.sql import DataFrame, functions as F, types as T
-from pyspark.sql.column import Column
 from pyspark.sql.utils import AnalysisException
 
 LOGGING = logging.getLogger(__name__)
 PREDICATE = Tuple[str, str, str]
 LOGICALPREDICATE = Tuple[PREDICATE, str, PREDICATE]
 PredicateType = TypeVar("T", PREDICATE, LOGICALPREDICATE)
+A = TypeVar("A", str, int, bool)
 
 
 def select(dataframe: DataFrame, cols: List[Dict[str, str]]) -> DataFrame:
@@ -231,7 +231,7 @@ def _column_present(dataframe: DataFrame, column: str) -> bool:
         return False
 
 
-def _format_variable(operand: str, variable: TypeVar("A", str, int, bool)) -> str:
+def _format_variable(operand: str, variable: A) -> str:
     """Convert constant to SQL format according to its datatype."""
 
     def add_quotes_around_string(variable, operand):

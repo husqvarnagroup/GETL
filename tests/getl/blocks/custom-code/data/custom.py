@@ -1,5 +1,4 @@
 """Custom code test."""
-import peewee
 from pyspark.sql import functions as F
 
 

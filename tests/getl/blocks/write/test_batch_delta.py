@@ -1,8 +1,8 @@
 """Testing the module batch delta."""
 import pytest
-from getl.blocks.write.batch_delta import BatchDelta
 from mock import Mock, call
-from pyspark.sql import types as T
+
+from getl.blocks.write.batch_delta import BatchDelta
 
 
 @pytest.mark.parametrize(

@@ -4,8 +4,9 @@ Entrypoint for the generic transform block.
 from importlib import import_module
 from typing import Callable, Dict, List, Optional, Union
 
-from getl.block import BlockConfig
 from pyspark.sql import DataFrame
+
+from getl.block import BlockConfig
 
 
 def resolve(func, bconf: BlockConfig) -> DataFrame:

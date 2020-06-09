@@ -1,9 +1,10 @@
 """Unit test for GETL load method."""
 from os import environ
 
-from getl.blocks.load.entrypoint import batch_json, batch_xml, resolve
 from mock import Mock
 from pyspark.sql import types as T
+
+from getl.blocks.load.entrypoint import batch_json, batch_xml, resolve
 
 environ[
     "PYSPARK_SUBMIT_ARGS"
@@ -17,6 +18,7 @@ SCHEMA = T.StructType(
         T.StructField("extra", T.BooleanType(), True),
     ]
 )
+
 
 # FUNCTIONS
 def test_batch_json(spark_session, helpers):
@@ -137,7 +139,7 @@ def test_batch_xml_batching_new_column(spark_session, helpers):
     result_df = resolve(batch_xml, conf)
 
     # Assert
-    assert result_df.collect()[4][3] == False
+    assert result_df.collect()[4][3] is False
     assert result_df.count() == 5
 
 

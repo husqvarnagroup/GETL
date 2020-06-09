@@ -47,7 +47,7 @@ def create_princess_age_null_df(spark_session) -> DataFrame:
         {"name": "Cinderella", "age": 16},
         {"name": "Snow white", "age": 17},
         {"name": "Belle", "age": None},
-        {"name": "Jasmine", "age": None,},
+        {"name": "Jasmine", "age": None},
     ]
 
     return (

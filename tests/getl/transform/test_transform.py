@@ -3,9 +3,10 @@
 
 from unittest import mock
 
-import getl.blocks.transform.transform as tr
 import pytest
 from pyspark.sql import DataFrame, types as T
+
+import getl.blocks.transform.transform as tr
 from tests.getl.data.samples import create_princess_age_null_df, create_princess_df
 
 ###############
@@ -293,9 +294,9 @@ def test_filter_success(predicate, princess_names, spark_session):
             [{"col": "name", "alias": "id"}, {"col": "name", "alias": "firstname"}],
             "DataFrame[id: string, firstname: string]",
         ),
-        ([{"col": "items.weakness", "alias": "hello"},], "DataFrame[hello: string]"),
+        ([{"col": "items.weakness", "alias": "hello"}], "DataFrame[hello: string]"),
         (
-            [{"col": "items.created", "alias": "created", "cast": "date"},],
+            [{"col": "items.created", "alias": "created", "cast": "date"}],
             "DataFrame[created: date]",
         ),
     ],
@@ -416,19 +417,6 @@ def test_cast_attribute_error(spark_session):
 ################
 # RENAME tests #
 ################
-
-
-@pytest.mark.spark
-@pytest.mark.parametrize("col, new_name", [("age", "years")])
-def test_rename_returns_df_successfully(col, new_name, spark_session):
-    """rename_column returns DF successfully after renaming column."""
-    # Act
-    result = tr.rename_column(create_princess_df(spark_session), col, new_name)
-
-    # Assert
-    assert isinstance(result, DataFrame)
-    assert new_name in result.columns
-    assert col not in result.columns
 
 
 @pytest.mark.spark

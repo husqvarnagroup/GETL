@@ -7,9 +7,10 @@ import sys
 import tempfile
 from types import FunctionType, ModuleType
 
+from pyspark.sql import DataFrame
+
 from getl.block import BlockConfig
 from getl.common.utils import fetch_s3_file
-from pyspark.sql import DataFrame
 
 
 def resolve(func: FunctionType, bconf: BlockConfig) -> DataFrame:

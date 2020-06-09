@@ -2,11 +2,11 @@
 from datetime import datetime, timedelta
 
 import pytest
-from getl.block import BlockConfig, BlockLog
-from getl.blocks.fileregistry.entrypoint import PrefixBasedDate, prefix_based_date
-from getl.blocks.fileregistry.prefix_based_date import FileRegistryRow
 from mock import Mock, patch
 from pyspark.sql import functions as F
+
+from getl.block import BlockConfig, BlockLog
+from getl.blocks.fileregistry.entrypoint import PrefixBasedDate, prefix_based_date
 
 
 # HELPERS

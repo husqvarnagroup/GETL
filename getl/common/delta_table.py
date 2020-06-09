@@ -1,8 +1,9 @@
 """Module for handling delta table operations."""
 from dataclasses import dataclass
 
-from getl.logging import get_logger
 from pyspark.sql import DataFrame, SparkSession
+
+from getl.logging import get_logger
 
 LOGGER = get_logger(__name__)
 

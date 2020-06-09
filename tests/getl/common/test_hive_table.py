@@ -1,7 +1,8 @@
 """Testing module hive table."""
 import pytest
-from getl.common.hive_table import HiveTable
 from mock import Mock, call
+
+from getl.common.hive_table import HiveTable
 
 
 @pytest.mark.parametrize(

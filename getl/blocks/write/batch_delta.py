@@ -1,11 +1,12 @@
 """Module for writing files to s3 as delta files."""
 from dataclasses import dataclass
 
+from pyspark.sql import DataFrame, SparkSession
+from pyspark.sql.utils import AnalysisException, ParseException
+
 from getl.common.delta_table import DeltaTable
 from getl.common.utils import delete_files, fetch_filepaths_from_prefix
 from getl.logging import get_logger
-from pyspark.sql import DataFrame, SparkSession
-from pyspark.sql.utils import AnalysisException, ParseException
 
 LOGGER = get_logger(__name__)
 
@@ -65,7 +66,7 @@ class BatchDelta:
                 spark.sql(optimize_sql)
 
         except ParseException:
-            LOGGER.warning(f"Optimize command is not supported in this environmnet")
+            LOGGER.warning("Optimize command is not supported in this environmnet")
 
     @staticmethod
     def vacuum(spark: SparkSession, path: str, retain_hours: int = 168):
@@ -74,4 +75,4 @@ class BatchDelta:
         try:
             spark.sql(f'VACUUM "{path}" RETAIN {retain_hours} HOURS')
         except ParseException:
-            LOGGER.warning(f"Vacuum command is not supported in this environmnet")
+            LOGGER.warning("Vacuum command is not supported in this environmnet")

@@ -1,7 +1,8 @@
 """Entry point for using the getl."""
+from pyspark.sql import SparkSession
+
 from getl.lift_definition import resolve_lift_definition
 from getl.manager import Manager
-from pyspark.sql import SparkSession
 
 
 def lift(spark: SparkSession, lift_def: str, parameters: dict) -> dict:

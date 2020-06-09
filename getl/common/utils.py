@@ -18,9 +18,9 @@ from urllib.parse import urlparse
 
 import boto3
 from botocore.exceptions import ClientError
+from pyspark.sql.types import StructType
 
 from getl.logging import get_logger
-from pyspark.sql.types import StructType
 
 LOGGER = get_logger(__name__)
 JsonSchemaType = TypeVar("T", int, float, str)

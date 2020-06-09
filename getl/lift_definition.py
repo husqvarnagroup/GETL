@@ -2,6 +2,7 @@
 from typing import Any
 
 import oyaml as yaml
+
 from getl.common.utils import fetch_s3_file
 
 

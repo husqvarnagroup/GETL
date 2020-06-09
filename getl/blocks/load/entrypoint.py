@@ -3,11 +3,12 @@ import functools
 import json
 from typing import List
 
+from pyspark.sql import DataFrame, SparkSession, types as T
+from pyspark.sql.utils import AnalysisException
+
 from getl.block import BlockConfig
 from getl.common.errors import NoDataToProcess
 from getl.common.utils import fetch_s3_file, json_to_spark_schema
-from pyspark.sql import DataFrame, SparkSession, types as T
-from pyspark.sql.utils import AnalysisException
 
 
 def resolve(func, conf: BlockConfig) -> DataFrame:

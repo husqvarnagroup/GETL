@@ -1,16 +1,16 @@
 """Unit test for GETL utils function."""
 from unittest import mock
 
-from botocore.exceptions import ClientError
-
 import pytest
+from botocore.exceptions import ClientError
+from pyspark.sql.types import StructType
+
 from getl.common.utils import (
     copy_and_cleanup,
     copy_keys,
     delete_files,
     json_to_spark_schema,
 )
-from pyspark.sql.types import StructType
 from tests.getl.data.utils.example_schema import create_json_schema
 
 
@@ -55,7 +55,7 @@ def test_json_to_spark_schema_invalid(invalid_schema, missed_key):
     ) in str(key_error)
 
 
-@pytest.mark.parametrize("invalid_json", ["invalid", {"invalid",}])
+@pytest.mark.parametrize("invalid_json", ["invalid", {"invalid"}])
 def test_json_to_spark_invalid_json(invalid_json):
     """json_to_spark_schema should raise TypeError for invalid json."""
     # Arrange & Act

@@ -1,5 +1,6 @@
 """Unit tests for the manager class that is the controller of the ETL process."""
 import pytest
+
 from getl.block import BlockConfig, BlockLog
 
 
@@ -81,7 +82,7 @@ def test_block_config_get_exeception():
 
     # Act
     with pytest.raises(KeyError) as excinfo:
-        res = conf.get("Key")
+        conf.get("Key")
 
     # Assert
     assert 'Could not find "Key" in properties' in str(excinfo.value)

@@ -1,7 +1,7 @@
 """Testing the module delta tables."""
-from getl.common.delta_table import DeltaTable
-from mock import Mock
 from pyspark.sql import types as T
+
+from getl.common.delta_table import DeltaTable
 
 
 def create_dataframe(spark_session, data):

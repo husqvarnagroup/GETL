@@ -2,8 +2,6 @@
 import json
 from pathlib import Path
 
-from getl.block import BlockConfig, BlockLog
-from getl.blocks.custom.entrypoint import python_codeblock
 from pyspark.sql import functions as F
 
 BASE_DIR = Path(__file__).parent / "data"

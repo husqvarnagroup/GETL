@@ -5,10 +5,11 @@ from os import walk
 from pathlib import Path
 
 import pytest
-from getl.blocks.fileregistry.prefix_based_date import PrefixBasedDate
-from getl.lift import lift
 from mock import patch
 from pyspark.sql import functions as F
+
+from getl.blocks.fileregistry.prefix_based_date import PrefixBasedDate
+from getl.lift import lift
 
 # CONSTANTS
 LIFT_YAML = Path(__file__).parent / "lift.yaml"
@@ -88,7 +89,7 @@ def test_lift_parquet_to_delta(
 
     # Configure s3 mock
     helpers.create_s3_files(
-        {"lift.yaml": LIFT_YAML.read_text(), **get_file_names(base_path_filesystem),}
+        {"lift.yaml": LIFT_YAML.read_text(), **get_file_names(base_path_filesystem)}
     )
 
     params = {

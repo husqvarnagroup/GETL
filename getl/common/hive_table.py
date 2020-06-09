@@ -1,8 +1,9 @@
 """Module for handling hive table operations."""
 from dataclasses import dataclass
 
-from getl.logging import get_logger
 from pyspark.sql import SparkSession
+
+from getl.logging import get_logger
 
 LOGGER = get_logger(__name__)
 

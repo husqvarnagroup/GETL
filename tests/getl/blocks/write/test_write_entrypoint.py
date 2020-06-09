@@ -1,13 +1,11 @@
 """Unit tests for the write entrypoint."""
-import sys
 
 import pytest
-from getl.blocks.write.batch_delta import BatchDelta
-from getl.blocks.write.entrypoint import batch_delta
-from getl.common.delta_table import DeltaTable
-from getl.common.hive_table import HiveTable
 from mock import Mock, patch
 from pyspark.sql import types as T
+
+from getl.blocks.write.batch_delta import BatchDelta
+from getl.blocks.write.entrypoint import batch_delta
 
 
 def create_dataframe(spark_session, data):

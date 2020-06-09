@@ -1,18 +1,16 @@
 """ConfTest fixture for SparkSession and logger."""
 import logging
 import os
-import sys
-import urllib.request
 from datetime import datetime
 from pathlib import Path
 
 import boto3
-
 import pytest
-from getl.block import BlockConfig, BlockLog
-from getl.blocks.custom.entrypoint import python_codeblock
 from moto import mock_s3
 from pyspark.sql import SparkSession
+
+from getl.block import BlockConfig, BlockLog
+from getl.blocks.custom.entrypoint import python_codeblock
 
 
 def quiet_py4j():
@@ -69,9 +67,7 @@ class Helpers:
     def execute_code_block(self, dataframe, input_name, code, extra_props={}, pkg=[]):
         """Wrapper for executing a python code block."""
         if not callable(code):
-            self.create_s3_files(
-                {"custom.py": Path(code).read_text(),}
-            )
+            self.create_s3_files({"custom.py": Path(code).read_text()})
             code_props = {"CustomCodePath": "s3://tmp-bucket/custom.py"}
 
         else:

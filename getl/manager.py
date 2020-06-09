@@ -4,10 +4,11 @@ from importlib import import_module
 from types import FunctionType, ModuleType
 from typing import Any
 
+from pyspark.sql import DataFrame, SparkSession
+
 from getl.block import BlockConfig, BlockLog
 from getl.common.errors import NoDataToProcess
 from getl.logging import get_logger
-from pyspark.sql import DataFrame, SparkSession
 
 LOGGER = get_logger(__name__)
 

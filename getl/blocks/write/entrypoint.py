@@ -1,9 +1,10 @@
 """Entrypoint for the write block."""
+from pyspark.sql import DataFrame
+
 from getl.block import BlockConfig
 from getl.blocks.write.batch_delta import BatchDelta
 from getl.common.hive_table import HiveTable
 from getl.logging import get_logger
-from pyspark.sql import DataFrame
 
 LOGGER = get_logger(__name__)
 UPSERT_MODE = "upsert"

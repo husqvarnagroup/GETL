@@ -1,6 +1,7 @@
 """Unit tests helper functions for lift file."""
-import getl.lift_definition as liftdef
 import oyaml as yaml
+
+import getl.lift_definition as liftdef
 
 
 # TESTS

@@ -30,6 +30,18 @@ steps:
   displayName: 'Install dependencies'
 
 - script: |
+    poetry run flake8
+  displayName: 'Check flake8'
+
+- script: |
+    poetry run isort --check-only --diff --quiet
+  displayName: 'Check isort'
+
+- script: |
+    poetry run black --check --fast .
+  displayName: 'Check black'
+
+- script: |
     poetry run pytest --cov=getl
   displayName: 'Test the code'
 
