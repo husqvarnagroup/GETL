@@ -19,6 +19,19 @@ steps:
     versionSpec: '$(python.version)'
   displayName: 'Use Python $(python.version)'
 
+
+- script: |
+    python -m pip install --upgrade pip poetry
+    poetry install
+  displayName: 'Install dependencies'
+
+- script: |
+    poetry run pytest --cov=getl
+  displayName: 'pytest'
+
+- script: |
+    poetry run coverage xml
+
 - script: |
     export SONAR_SCANNER_VERSION=4.2.0.1873
     export SONAR_SCANNER_HOME=$HOME/.sonar/sonar-scanner-$SONAR_SCANNER_VERSION-linux
@@ -32,13 +45,4 @@ steps:
       -Dsonar.sources=. \
       -Dsonar.host.url=https://sonarcloud.io \
       -Dsonar.login=7bf2abdc8e22bfee58b54dec413240aa516d7ee4 
-  displayName: 'Install sonar scanner'
-
-- script: |
-    python -m pip install --upgrade pip poetry
-    poetry install
-  displayName: 'Install dependencies'
-
-- script: |
-    poetry run pytest
-  displayName: 'pytest'
+  displayName: 'Sonar scanner'
