@@ -3,6 +3,7 @@ GETL
 
 [![Build Status](https://dev.azure.com/husqvarna-ailab/GETL/_apis/build/status/husqvarnagroup.GETL?branchName=master)](https://dev.azure.com/husqvarna-ailab/GETL/_build/latest?definitionId=1&branchName=master)
 [![Quality Gate Status](https://sonarcloud.io/api/project_badges/measure?project=GETL&metric=alert_status)](https://sonarcloud.io/dashboard?id=GETL)
+[![pre-commit](https://img.shields.io/badge/pre--commit-enabled-brightgreen?logo=pre-commit&logoColor=white)](https://github.com/pre-commit/pre-commit)
 
 An elegant way to ETL'ing.
 

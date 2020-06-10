@@ -8,6 +8,7 @@ nav:
       - 'user-guide/lift-job-types.md'
       - 'user-guide/transform-functions.md'
     - 'About':
+      - 'CONTRIBUTING.md'
       - Issue Tracker: 'https://github.com/husqvarnagroup/GETL/issues'
       - 'CHANGELOG.md'
       - License: 'LICENSE.md'
@@ -22,4 +23,5 @@ plugins:
         files:
           - 'README.md'
           - 'CHANGELOG.md'
+          - 'CONTRIBUTING.md'
           - 'LICENSE.md'
