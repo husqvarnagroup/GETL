@@ -4,16 +4,16 @@ repos:
   hooks:
     - id: black
       name: Black
-      entry: black
+      entry: poetry run black
       language: system
       types: [python]
     - id: isort
       name: Isort
-      entry: isort -y
+      entry: poetry run isort -y
       language: system
       types: [python]
     - id: flake8
       name: Flake8
-      entry: flake8
+      entry: poetry run flake8
       language: system
       types: [python]
