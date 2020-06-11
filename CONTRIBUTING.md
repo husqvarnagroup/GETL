@@ -15,7 +15,7 @@ Install GETL by running:
 poetry install
 
 # Install the git pre-commit hooks
-poetry run pip-commit install
+poetry run pre-commit install
 ```
 
 ## Running tests
