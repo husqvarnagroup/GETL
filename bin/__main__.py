@@ -8,10 +8,14 @@ PLUGIN_DIR = BIN_DIR / "commands"
 
 class MyCLI(click.MultiCommand):
     def list_commands(self, ctx):
-        return sorted(command_file.stem for command_file in PLUGIN_DIR.glob("*.py"))
+        return sorted(
+            command_file.stem.replace("_", "-")
+            for command_file in PLUGIN_DIR.glob("*.py")
+        )
 
     def get_command(self, ctx, name):
-        command_file = PLUGIN_DIR / f"{name}.py"
+        file_name = name.replace("-", "_")
+        command_file = PLUGIN_DIR / f"{file_name}.py"
         if not command_file.exists():
             raise click.ClickException(f"Command {name} not found")
         ns = {"__file__": str(command_file.absolute())}
