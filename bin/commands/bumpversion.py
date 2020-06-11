@@ -24,7 +24,7 @@ def set_version(version_number: str):
     pyproject_toml.write_text(new_file_text)
 
 
-@click.command()
+@click.command(help="Bumps version and creates a git commit + tag")
 @click.argument("version_part", default="patch")
 @click.option("--dry-run", is_flag=True)
 def cli(version_part, dry_run):
