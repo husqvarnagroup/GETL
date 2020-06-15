@@ -22,7 +22,7 @@ packages = [
 [tool.poetry.dependencies]
 python = "^3.7, <3.8"
 boto3 = "^1.13.24"
-pyspark = "^2.4.6"
+pyspark = "^2.4.4"
 oyaml = "^0.9"
 
 [tool.poetry.dev-dependencies]
