@@ -44,7 +44,8 @@ class PrefixBasedDate(FileRegistry):
 
     def update(self) -> None:
         """Update file registry column date_lifted to current date."""
-        fr_utils.update_date_lifted(self.file_registry_path, self.spark)
+        delta_table = DeltaTable(self.file_registry_path, self.spark)
+        fr_utils.update_date_lifted(delta_table)
 
     def load(self, s3_path: str, suffix: str) -> List[str]:
         """Fetch new filepaths that have not been lifted from s3."""

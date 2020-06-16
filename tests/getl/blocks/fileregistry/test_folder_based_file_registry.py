@@ -37,23 +37,23 @@ def create_file_registry(helpers, spark, files, file_registry_path):
 
 
 # TESTS
-def test_creates_folder_based_obj():
+def test_creates_folder_based_obj(spark_session, tmp_dir):
     """Function should return a folder_based object."""
     # Arrange
     props = {
-        "BasePath": "s3://bucket/path/to/filereg",
+        "BasePath": f"{tmp_dir}/bucket/path/to/filereg",
         "UpdateAfter": "OtherSection",
         "HiveDatabaseName": "file_registry_dev",
         "HiveTableName": "example",
     }
-    conf = BlockConfig("CurrentSection", None, None, props)
+    conf = BlockConfig("CurrentSection", spark_session, None, props)
 
     # Act
     res = folder_based(conf)
 
     # Assert
     assert isinstance(res, FolderBased)
-    assert res.file_registry_path == "s3://bucket/path/to/filereg"
+    assert res.file_registry_path == f"{tmp_dir}/bucket/path/to/filereg"
     assert res.update_after == "OtherSection"
 
 

@@ -34,39 +34,45 @@ class FolderBased(FileRegistry):
         self.hive_database_name = bconf.get("HiveDatabaseName")
         self.hive_table_name = bconf.get("HiveTableName")
         self.spark = bconf.spark
+        self.delta_table = self._get_or_create(self.file_registry_path)
 
     def update(self) -> None:
         """Update file registry column date_lifted to current date."""
-        fr_utils.update_date_lifted(self.file_registry_path, self.spark)
+        fr_utils.update_date_lifted(self.delta_table)
 
     def load(self, s3_path: str, suffix: str) -> List[str]:
         """Fetch new filepaths that have not been lifted from s3."""
-        dataframe = self._fetch_file_registry(self.file_registry_path)
 
-        # If file registry is found
-        if dataframe:
-            LOGGER.info("File registry found at %s", self.file_registry_path)
+        # Get files from S3
+        list_of_rows = self._get_new_s3_files(s3_path, suffix)
 
-            # Get files from S3
-            list_of_rows = self._get_new_s3_files(s3_path, suffix)
+        # Update the metadata store with the new keys
+        updated_dataframe = self._update_file_registry(list_of_rows)
 
-            # Update the metadata store with the new keys
-            updated_dataframe = self._update_file_registry(list_of_rows)
+        # Make sure that we do not lift the same files twice
+        list_of_rows = self._get_files_to_lift(updated_dataframe)
 
-            # Make sure that we do not lift the same files twice
-            list_of_rows = self._get_files_to_lift(updated_dataframe)
-
-        else:
-            LOGGER.info("No registry found create one at %s", self.file_registry_path)
-            list_of_rows = self._get_new_s3_files(s3_path, suffix)
-            self._create_file_registry(self.file_registry_path, list_of_rows)
-
+        # Log how many new files we found
         LOGGER.info("Found %s new keys in s3", len(list_of_rows))
+
         return [row.file_path for row in list_of_rows]
 
     ###########
     # PRIVATE #
     ###########
+    def _get_or_create(self, file_registry_path: str) -> "DeltaTable":
+        """Get or create a delta table instance for a file registry."""
+        dataframe = self._fetch_file_registry(file_registry_path)
+
+        # If file registry is found
+        if not dataframe:
+            LOGGER.info("No registry found create one at %s", self.file_registry_path)
+            self._create_file_registry(self.file_registry_path, [])
+        else:
+            LOGGER.info("File registry found at %s", self.file_registry_path)
+
+        return DeltaTable(file_registry_path, self.spark)
+
     @staticmethod
     def _get_files_to_lift(dataframe: DataFrame) -> List[str]:
         """Get a list of S3 paths from the file registry that needs to be lifted."""
@@ -83,8 +89,7 @@ class FolderBased(FileRegistry):
         updates_df = self._rows_to_dataframe(list_of_rows)
 
         # Update the file registry
-        delta_table = DeltaTable(self.file_registry_path, self.spark)
-        return delta_table.insert_all(
+        return self.delta_table.insert_all(
             updates_df, "source.file_path = updates.file_path"
         )
 
@@ -120,15 +125,15 @@ class FolderBased(FileRegistry):
         dataframe = self._rows_to_dataframe(rows_of_paths)
 
         # Create hive table
-        self._create_hive_table(file_registry_path)
         dataframe.write.save(path=file_registry_path, format="delta", mode="overwrite")
+        self._create_hive_table(file_registry_path)
 
     def _create_hive_table(self, file_registry_path: str):
         hive = HiveTable(self.spark, self.hive_database_name, self.hive_table_name)
         hive.create(
             file_registry_path,
             db_schema="""
-            file_path STRING NOT NULL,
+            file_path STRING,
             date_lifted TIMESTAMP
         """,
         )
