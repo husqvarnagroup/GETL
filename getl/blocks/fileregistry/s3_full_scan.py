@@ -3,7 +3,6 @@ from collections import namedtuple
 from typing import List
 
 from pyspark.sql import DataFrame, functions as F, types as T
-from pyspark.sql.utils import AnalysisException
 
 import getl.blocks.fileregistry.fileregistry_utils as fr_utils
 from getl.block import BlockConfig
@@ -62,7 +61,7 @@ class S3FullScan(FileRegistry):
     ###########
     def _get_or_create(self, file_registry_path: str) -> "DeltaTable":
         """Get or create a delta table instance for a file registry."""
-        dataframe = self._fetch_file_registry(file_registry_path)
+        dataframe = fr_utils.fetch_file_registry(file_registry_path, self.spark)
 
         # If file registry is found
         if not dataframe:
@@ -100,7 +99,7 @@ class S3FullScan(FileRegistry):
 
         # Keys found under the s3_path
         keys = list(
-            fetch_filepaths_from_prefix(s3_path + "/", suffix, prepend_bucket=True)
+            fetch_filepaths_from_prefix(f"{s3_path}/", suffix, prepend_bucket=True)
         )
         LOGGER.info("Search %s for files. Found: %s files", s3_path, len(keys))
 
@@ -108,15 +107,6 @@ class S3FullScan(FileRegistry):
         list_of_rows = [FileRegistryRow(key, None) for key in keys] + list_of_rows
 
         return list_of_rows
-
-    def _fetch_file_registry(self, path: str) -> DataFrame:
-        try:
-            return self.spark.read.load(path, format="delta")
-        except AnalysisException as spark_exception:
-            exceptions = ["Incompatible format detected", "doesn't exist"]
-
-            if not any([e in str(spark_exception) for e in exceptions]):
-                raise spark_exception
 
     def _create_file_registry(
         self, file_registry_path: str, rows_of_paths: List[str]
