@@ -18,7 +18,7 @@ LOGGER = get_logger(__name__)
 FileRegistryRow = namedtuple("FileRegistryRow", "file_path, date_lifted")
 
 
-class FolderBased(FileRegistry):
+class S3FullScan(FileRegistry):
     """File registry that works with any prefix in S3."""
 
     schema = T.StructType(

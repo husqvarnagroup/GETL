@@ -3,8 +3,8 @@ from types import FunctionType
 
 from getl.block import BlockConfig
 from getl.blocks.fileregistry.base import FileRegistry
-from getl.blocks.fileregistry.folder_based import FolderBased
 from getl.blocks.fileregistry.prefix_based_date import PrefixBasedDate
+from getl.blocks.fileregistry.s3_full_scan import S3FullScan
 
 
 def resolve(func: FunctionType, bconf: BlockConfig) -> FileRegistry:
@@ -25,7 +25,7 @@ def prefix_based_date(bconf: BlockConfig) -> FileRegistry:
     return PrefixBasedDate(bconf)
 
 
-def folder_based(bconf: BlockConfig) -> FileRegistry:
+def s3_full_scan(bconf: BlockConfig) -> FileRegistry:
     """Find all new files in a folder
 
     PrefixBasedDate:
@@ -35,4 +35,4 @@ def folder_based(bconf: BlockConfig) -> FileRegistry:
             BasePrefix: s3://husqvarna-datalake/file-registry
             UpdateAfter: WriteToDatabase
     """
-    return FolderBased(bconf)
+    return S3FullScan(bconf)
