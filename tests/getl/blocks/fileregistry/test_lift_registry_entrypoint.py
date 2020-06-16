@@ -86,7 +86,7 @@ def test_creates_prefix_based_date_obj():
 
 @patch.object(PrefixBasedDate, "_create_hive_table")
 @patch.object(PrefixBasedDate, "_create_file_registry_path")
-def test_pbd_load_no_previus_data(
+def test_pbd_load_no_previous_data(
     m_file_registry, m_hive_table, spark_session, helpers, tmp_dir
 ):
     """Test the load method for prefixed based date when there is no prev data."""
@@ -133,7 +133,7 @@ def test_pbd_load_no_previus_data(
 
 
 @patch.object(PrefixBasedDate, "_create_file_registry_path")
-def test_prevoius_data_with_only_null_values(
+def test_previous_data_with_only_null_values(
     m_file_registry, s3_mock, spark_session, tmp_dir, helpers
 ):
     """When there is only null values and no new files."""
@@ -174,7 +174,7 @@ def test_prevoius_data_with_only_null_values(
 
 
 @patch.object(PrefixBasedDate, "_create_file_registry_path")
-def test_pbd_load_with_previus_data(
+def test_pbd_load_with_previous_data(
     m_file_registry, spark_session, s3_mock, tmp_dir, helpers
 ):
     """Test the load method for prefixed based date when there is prev data."""
