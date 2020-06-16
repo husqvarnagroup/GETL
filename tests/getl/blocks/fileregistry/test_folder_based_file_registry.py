@@ -1,6 +1,4 @@
 """Unit tests for the custom code index function."""
-from datetime import datetime, timedelta
-
 import pytest
 from mock import Mock, patch
 from pyspark.sql import functions as F
@@ -29,7 +27,7 @@ def setup_bconf(base_prefix, spark_session):
         "BasePrefix": base_prefix,
         "UpdateAfter": "OtherSection",
         "HiveDatabaseName": "file_registry_dev",
-        "HiveTableName": "example"
+        "HiveTableName": "example",
     }
 
     return BlockConfig("CurrentSection", spark_session, None, props, BlockLog())
@@ -50,7 +48,7 @@ def test_creates_folder_based_obj():
         "BasePrefix": "s3/prefix",
         "UpdateAfter": "OtherSection",
         "HiveDatabaseName": "file_registry_dev",
-        "HiveTableName": "example"
+        "HiveTableName": "example",
     }
     conf = BlockConfig("CurrentSection", None, None, props)
 
@@ -66,25 +64,25 @@ def test_creates_folder_based_obj():
 @patch.object(FolderBased, "_create_hive_table")
 @patch.object(FolderBased, "_create_file_registry_path")
 def test_folder_based_no_previous_data(
-    m_file_registry, m_hive_table, spark_session, helpers, tmp_dir):
+    m_file_registry, m_hive_table, spark_session, helpers, tmp_dir
+):
     """Test the load method for when there is no previous data."""
     # Arrange
     params = setup_params(tmp_dir, m_file_registry)
-    conf = setup_bconf(
-        params["file_registry_base"],
-        spark_session
-    )
+    conf = setup_bconf(params["file_registry_base"], spark_session)
 
     # Configure s3 mock
     helpers.create_s3_files(
         {
-            'dataset/live/2020/06/f1.parquet.crc': None,
-            'dataset/live/2020/07/f2.parquet.crc': None
+            "dataset/live/2020/06/f1.parquet.crc": None,
+            "dataset/live/2020/07/f2.parquet.crc": None,
         }
     )
 
-    expected = ['s3://tmp-bucket/dataset/live/2020/06/f1.parquet.crc',
-                's3://tmp-bucket/dataset/live/2020/07/f2.parquet.crc']
+    expected = [
+        "s3://tmp-bucket/dataset/live/2020/06/f1.parquet.crc",
+        "s3://tmp-bucket/dataset/live/2020/07/f2.parquet.crc",
+    ]
 
     # Act
     actual = folder_based(conf).load("s3://tmp-bucket/dataset/live", ".parquet.crc")
@@ -110,26 +108,24 @@ def test_folder_based_no_previous_data(
 
 @patch.object(FolderBased, "_create_file_registry_path")
 def test_previous_data_with_only_null_values(
-    m_file_registry, s3_mock, spark_session, tmp_dir, helpers):
+    m_file_registry, s3_mock, spark_session, tmp_dir, helpers
+):
     """When there is only null values and no new files."""
     # Arrange
     params = setup_params(tmp_dir, m_file_registry)
-    conf = setup_bconf(
-        params["file_registry_base"],
-        spark_session
-    )
+    conf = setup_bconf(params["file_registry_base"], spark_session)
 
     s3_files = [
-        ('s3://tmp-bucket/dataset/live/2020/06/01/f1.parquet.crc', None),
-        ('s3://tmp-bucket/dataset/live/2020/07/01/f2.parquet.crc', None)
+        ("s3://tmp-bucket/dataset/live/2020/06/01/f1.parquet.crc", None),
+        ("s3://tmp-bucket/dataset/live/2020/07/01/f2.parquet.crc", None),
     ]
     create_file_registry(helpers, spark_session, s3_files, params["file_registry_path"])
 
     # Files in s3 mock
     helpers.create_s3_files(
         {
-            'dataset/live/2020/06/01/f1.parquet.crc': None,
-            'dataset/live/2020/07/01/f2.parquet.crc': None
+            "dataset/live/2020/06/01/f1.parquet.crc": None,
+            "dataset/live/2020/07/01/f2.parquet.crc": None,
         }
     )
 
@@ -139,43 +135,35 @@ def test_previous_data_with_only_null_values(
     # Assert
     base = params["s3_path"]
     check_list = [
-        f'{base}/2020/06/01/f1.parquet.crc',
-        f'{base}/2020/07/01/f2.parquet.crc',
+        f"{base}/2020/06/01/f1.parquet.crc",
+        f"{base}/2020/07/01/f2.parquet.crc",
     ]
     assert all(elem in check_list for elem in actual)
 
 
 @patch.object(FolderBased, "_create_file_registry_path")
 def test_folder_based_load_with_previous_data(
-    m_file_registry, spark_session, s3_mock, tmp_dir, helpers):
+    m_file_registry, spark_session, s3_mock, tmp_dir, helpers
+):
     """Test the load method for when there is previous unlifed data."""
-     # Arrange
+    # Arrange
     params = setup_params(tmp_dir, m_file_registry)
-    conf = setup_bconf(
-        params["file_registry_base"],
-        spark_session
-    )
+    conf = setup_bconf(params["file_registry_base"], spark_session)
 
     # Create a existing file registry
-    s3_files = [
-        ('s3://tmp-bucket/dataset/live/2020/06/01/f1.parquet.crc', None)
-    ]
+    s3_files = [("s3://tmp-bucket/dataset/live/2020/06/01/f1.parquet.crc", None)]
     create_file_registry(helpers, spark_session, s3_files, params["file_registry_path"])
 
     # Files in the s3 mock, new files to add
-    helpers.create_s3_files(
-        {
-            'dataset/live/2020/07/01/f1.parquet.crc': None
-        }
-    )
+    helpers.create_s3_files({"dataset/live/2020/07/01/f1.parquet.crc": None})
 
     # Act
     actual = folder_based(conf).load(params["s3_path"], suffix=".parquet.crc")
     # Assert
     assert m_file_registry.called
     expected = [
-        params["s3_path"] + '/2020/06/01/f1.parquet.crc',
-        params["s3_path"] + '/2020/07/01/f1.parquet.crc'
+        params["s3_path"] + "/2020/06/01/f1.parquet.crc",
+        params["s3_path"] + "/2020/07/01/f1.parquet.crc",
     ]
     assert all(elem in expected for elem in actual)
 
@@ -187,8 +175,8 @@ def test_folder_based_load_with_previous_data(
         (
             "s3://husqvarna-datalake/raw/amc/live",
             "s3://husqvarna-datalake/file-registry/raw/amc/live",
-        )
-    ]
+        ),
+    ],
 )
 def test_create_file_registry_path(s3_path, result):
     props = {
@@ -217,7 +205,7 @@ def test_create_hive_table(path, table):
         "BasePrefix": "",
         "UpdateAfter": "",
         "HiveDatabaseName": "file_registry_dev",
-        "HiveTableName": table
+        "HiveTableName": table,
     }
     conf = BlockConfig("CurrentSection", spark, None, props, BlockLog())
     fb = FolderBased(conf)
