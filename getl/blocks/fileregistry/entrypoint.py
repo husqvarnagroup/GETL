@@ -3,6 +3,7 @@ from types import FunctionType
 
 from getl.block import BlockConfig
 from getl.blocks.fileregistry.base import FileRegistry
+from getl.blocks.fileregistry.folder_based import FolderBased
 from getl.blocks.fileregistry.prefix_based_date import PrefixBasedDate
 
 
@@ -14,13 +15,24 @@ def resolve(func: FunctionType, bconf: BlockConfig) -> FileRegistry:
 def prefix_based_date(bconf: BlockConfig) -> FileRegistry:
     """Find all new files based on date format YYYY/MM/DD
 
-    ```
     PrefixBasedDate:
         Type: fileregistry::prefix_based_date
         Properties:
             TableName: plantlib
             BasePrefix: s3://husqvarna-datalake/file-registry
             UpdateAfter: WriteToDatabase
-    ```
     """
     return PrefixBasedDate(bconf)
+
+
+def folder_based(bconf: BlockConfig) -> FileRegistry:
+    """Find all new files in a folder
+
+    PrefixBasedDate:
+        Type: fileregistry::folder_based
+        Properties:
+            TableName: plantlib
+            BasePrefix: s3://husqvarna-datalake/file-registry
+            UpdateAfter: WriteToDatabase
+    """
+    return FolderBased(bconf)
