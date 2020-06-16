@@ -1,17 +1,16 @@
 """File registry that works with a prefix in S3."""
 from collections import namedtuple
-from datetime import datetime
-from pathlib import Path
 from typing import List
 
 from pyspark.sql import DataFrame, functions as F, types as T
 from pyspark.sql.utils import AnalysisException
 
+import getl.blocks.fileregistry.fileregistry_utils as fr_utils
 from getl.block import BlockConfig
 from getl.blocks.fileregistry.base import FileRegistry
 from getl.common.delta_table import DeltaTable
 from getl.common.hive_table import HiveTable
-from getl.common.utils import extract_bucket_and_prefix, fetch_filepaths_from_prefix
+from getl.common.utils import fetch_filepaths_from_prefix
 from getl.logging import get_logger
 
 # pylint: disable=E1101,W0221
@@ -29,25 +28,19 @@ class FolderBased(FileRegistry):
         ]
     )
 
-    def __init__(self, bconf: BlockConfig):
-        self.file_registry_prefix = bconf.props["BasePrefix"]
-        self.update_after = bconf.props["UpdateAfter"]
-        self.hive_database_name = bconf.props["HiveDatabaseName"]
-        self.hive_table_name = bconf.props["HiveTableName"]
+    def __init__(self, bconf: BlockConfig) -> None:
+        self.file_registry_path = bconf.get("BasePath")
+        self.update_after = bconf.get("UpdateAfter")
+        self.hive_database_name = bconf.get("HiveDatabaseName")
+        self.hive_table_name = bconf.get("HiveTableName")
         self.spark = bconf.spark
-        self.file_registry_path = None
 
     def update(self) -> None:
         """Update file registry column date_lifted to current date."""
-        delta_table = DeltaTable(self.file_registry_path, self.spark)
-        delta_table.delta_table.update(
-            F.col("date_lifted").isNull(),
-            {"date_lifted": "'{}'".format(str(datetime.now()))},
-        )
+        fr_utils.update_date_lifted(self.file_registry_path, self.spark)
 
     def load(self, s3_path: str, suffix: str) -> List[str]:
         """Fetch new filepaths that have not been lifted from s3."""
-        self.file_registry_path = self._create_file_registry_path(s3_path)
         dataframe = self._fetch_file_registry(self.file_registry_path)
 
         # If file registry is found
@@ -138,21 +131,6 @@ class FolderBased(FileRegistry):
             file_path STRING NOT NULL,
             date_lifted TIMESTAMP
         """,
-        )
-
-    def _create_file_registry_path(self, s3_path: str) -> str:
-        LOGGER.info(
-            "Combining base prefix: %s with read path: %s",
-            self.file_registry_prefix,
-            s3_path,
-        )
-        file_registry_bucket, file_registry_prefix = extract_bucket_and_prefix(
-            self.file_registry_prefix
-        )
-        _, prefix = extract_bucket_and_prefix(s3_path)
-
-        return "s3://{}".format(
-            Path(file_registry_bucket) / file_registry_prefix / prefix
         )
 
     def _rows_to_dataframe(self, rows: List[FileRegistryRow]) -> DataFrame:

@@ -8,23 +8,19 @@ from getl.blocks.fileregistry.entrypoint import FolderBased, folder_based
 
 
 # HELPERS
-def setup_params(tmp_dir, m_file_registry):
+def setup_params(tmp_dir):
     # Arrange
-    prefix_source = "dataset/live"
-    file_registry_base = "{}/file-registry".format(tmp_dir)
-    file_registry_path = "{}/dataset/live".format(file_registry_base)
-    m_file_registry.return_value = file_registry_path
+    prefix = "file_registry/dataset/live"
 
     return {
-        "s3_path": "s3://tmp-bucket/{}".format(prefix_source),
-        "file_registry_path": file_registry_path,
-        "file_registry_base": file_registry_base,
+        "s3_path": f"s3://tmp-bucket/{prefix}",
+        "file_registry_local": f"{tmp_dir}/{prefix}",
     }
 
 
-def setup_bconf(base_prefix, spark_session):
+def setup_bconf(base_path, spark_session):
     props = {
-        "BasePrefix": base_prefix,
+        "BasePath": base_path,
         "UpdateAfter": "OtherSection",
         "HiveDatabaseName": "file_registry_dev",
         "HiveTableName": "example",
@@ -45,7 +41,7 @@ def test_creates_folder_based_obj():
     """Function should return a folder_based object."""
     # Arrange
     props = {
-        "BasePrefix": "s3/prefix",
+        "BasePath": "s3://bucket/path/to/filereg",
         "UpdateAfter": "OtherSection",
         "HiveDatabaseName": "file_registry_dev",
         "HiveTableName": "example",
@@ -57,19 +53,16 @@ def test_creates_folder_based_obj():
 
     # Assert
     assert isinstance(res, FolderBased)
-    assert res.file_registry_prefix == "s3/prefix"
+    assert res.file_registry_path == "s3://bucket/path/to/filereg"
     assert res.update_after == "OtherSection"
 
 
 @patch.object(FolderBased, "_create_hive_table")
-@patch.object(FolderBased, "_create_file_registry_path")
-def test_folder_based_no_previous_data(
-    m_file_registry, m_hive_table, spark_session, helpers, tmp_dir
-):
+def test_folder_based_no_previous_data(m_hive_table, spark_session, helpers, tmp_dir):
     """Test the load method for when there is no previous data."""
     # Arrange
-    params = setup_params(tmp_dir, m_file_registry)
-    conf = setup_bconf(params["file_registry_base"], spark_session)
+    params = setup_params(tmp_dir)
+    conf = setup_bconf(params["file_registry_local"], spark_session)
 
     # Configure s3 mock
     helpers.create_s3_files(
@@ -91,11 +84,10 @@ def test_folder_based_no_previous_data(
     assert len(actual) == 2
     assert expected == sorted(actual)
     assert m_hive_table.called
-    assert m_file_registry.called
 
     # Check that a file registry delta files have been created
     actual_data = (
-        spark_session.read.load(params["file_registry_path"], format="delta")
+        spark_session.read.load(params["file_registry_local"], format="delta")
         .orderBy("file_path")
         .collect()
     )
@@ -106,20 +98,19 @@ def test_folder_based_no_previous_data(
     assert actual_data[1][1] is None
 
 
-@patch.object(FolderBased, "_create_file_registry_path")
-def test_previous_data_with_only_null_values(
-    m_file_registry, s3_mock, spark_session, tmp_dir, helpers
-):
+def test_previous_data_with_only_null_values(s3_mock, spark_session, tmp_dir, helpers):
     """When there is only null values and no new files."""
     # Arrange
-    params = setup_params(tmp_dir, m_file_registry)
-    conf = setup_bconf(params["file_registry_base"], spark_session)
+    params = setup_params(tmp_dir)
+    conf = setup_bconf(params["file_registry_local"], spark_session)
 
     s3_files = [
-        ("s3://tmp-bucket/dataset/live/2020/06/01/f1.parquet.crc", None),
-        ("s3://tmp-bucket/dataset/live/2020/07/01/f2.parquet.crc", None),
+        ("s3://tmp-bucket/file_registry/dataset/live/2020/06/01/f1.parquet.crc", None),
+        ("s3://tmp-bucket/file_registry/dataset/live/2020/07/01/f2.parquet.crc", None),
     ]
-    create_file_registry(helpers, spark_session, s3_files, params["file_registry_path"])
+    create_file_registry(
+        helpers, spark_session, s3_files, params["file_registry_local"]
+    )
 
     # Files in s3 mock
     helpers.create_s3_files(
@@ -141,18 +132,19 @@ def test_previous_data_with_only_null_values(
     assert all(elem in check_list for elem in actual)
 
 
-@patch.object(FolderBased, "_create_file_registry_path")
-def test_folder_based_load_with_previous_data(
-    m_file_registry, spark_session, s3_mock, tmp_dir, helpers
-):
+def test_folder_based_load_with_previous_data(spark_session, s3_mock, tmp_dir, helpers):
     """Test the load method for when there is previous unlifed data."""
     # Arrange
-    params = setup_params(tmp_dir, m_file_registry)
-    conf = setup_bconf(params["file_registry_base"], spark_session)
+    params = setup_params(tmp_dir)
+    conf = setup_bconf(params["file_registry_local"], spark_session)
 
     # Create a existing file registry
-    s3_files = [("s3://tmp-bucket/dataset/live/2020/06/01/f1.parquet.crc", None)]
-    create_file_registry(helpers, spark_session, s3_files, params["file_registry_path"])
+    s3_files = [
+        ("s3://tmp-bucket/file_registry/dataset/live/2020/06/01/f1.parquet.crc", None)
+    ]
+    create_file_registry(
+        helpers, spark_session, s3_files, params["file_registry_local"]
+    )
 
     # Files in the s3 mock, new files to add
     helpers.create_s3_files({"dataset/live/2020/07/01/f1.parquet.crc": None})
@@ -160,35 +152,15 @@ def test_folder_based_load_with_previous_data(
     # Act
     actual = folder_based(conf).load(params["s3_path"], suffix=".parquet.crc")
     # Assert
-    assert m_file_registry.called
     expected = [
         params["s3_path"] + "/2020/06/01/f1.parquet.crc",
         params["s3_path"] + "/2020/07/01/f1.parquet.crc",
     ]
+
+    print(actual)
+    print(expected)
+
     assert all(elem in expected for elem in actual)
-
-
-@pytest.mark.parametrize(
-    "s3_path, result",
-    [
-        ("", "s3://husqvarna-datalake/file-registry"),
-        (
-            "s3://husqvarna-datalake/raw/amc/live",
-            "s3://husqvarna-datalake/file-registry/raw/amc/live",
-        ),
-    ],
-)
-def test_create_file_registry_path(s3_path, result):
-    props = {
-        "BasePrefix": "s3://husqvarna-datalake/file-registry",
-        "UpdateAfter": "",
-        "HiveDatabaseName": "file_registry_dev",
-        "HiveTableName": "example",
-    }
-    conf = BlockConfig("CurrentSection", None, None, props, BlockLog())
-    pbd = FolderBased(conf)
-
-    assert pbd._create_file_registry_path(s3_path) == result
 
 
 @pytest.mark.parametrize(
@@ -202,7 +174,7 @@ def test_create_hive_table(path, table):
     # Arrange
     spark = Mock()
     props = {
-        "BasePrefix": "",
+        "BasePath": "",
         "UpdateAfter": "",
         "HiveDatabaseName": "file_registry_dev",
         "HiveTableName": table,

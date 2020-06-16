@@ -7,6 +7,7 @@ from typing import List
 from pyspark.sql import DataFrame, functions as F, types as T
 from pyspark.sql.utils import AnalysisException
 
+import getl.blocks.fileregistry.fileregistry_utils as fr_utils
 from getl.block import BlockConfig
 from getl.blocks.fileregistry.base import FileRegistry
 from getl.common.delta_table import DeltaTable
@@ -43,11 +44,7 @@ class PrefixBasedDate(FileRegistry):
 
     def update(self) -> None:
         """Update file registry column date_lifted to current date."""
-        dt = DeltaTable(self.file_registry_path, self.spark)
-        dt.delta_table.update(
-            F.col("date_lifted").isNull(),
-            {"date_lifted": "'{}'".format(str(datetime.now()))},
-        )
+        fr_utils.update_date_lifted(self.file_registry_path, self.spark)
 
     def load(self, s3_path: str, suffix: str) -> List[str]:
         """Fetch new filepaths that have not been lifted from s3."""
