@@ -5,8 +5,8 @@ from pathlib import Path
 from typing import List
 
 from pyspark.sql import DataFrame, functions as F, types as T
-from pyspark.sql.utils import AnalysisException
 
+import getl.blocks.fileregistry.fileregistry_utils as fr_utils
 from getl.block import BlockConfig
 from getl.blocks.fileregistry.base import FileRegistry
 from getl.common.delta_table import DeltaTable
@@ -43,16 +43,13 @@ class PrefixBasedDate(FileRegistry):
 
     def update(self) -> None:
         """Update file registry column date_lifted to current date."""
-        dt = DeltaTable(self.file_registry_path, self.spark)
-        dt.delta_table.update(
-            F.col("date_lifted").isNull(),
-            {"date_lifted": "'{}'".format(str(datetime.now()))},
-        )
+        delta_table = DeltaTable(self.file_registry_path, self.spark)
+        fr_utils.update_date_lifted(delta_table)
 
     def load(self, s3_path: str, suffix: str) -> List[str]:
         """Fetch new filepaths that have not been lifted from s3."""
         self.file_registry_path = self._create_file_registry_path(s3_path)
-        dataframe = self._fetch_file_registry(self.file_registry_path)
+        dataframe = fr_utils.fetch_file_registry(self.file_registry_path, self.spark)
 
         # If file registry is found
         if dataframe:
@@ -146,15 +143,6 @@ class PrefixBasedDate(FileRegistry):
             date = self.default_start
 
         return date
-
-    def _fetch_file_registry(self, path: str) -> DataFrame:
-        try:
-            return self.spark.read.load(path, format="delta")
-        except AnalysisException as spark_exception:
-            exceptions = ["Incompatible format detected", "doesn't exist"]
-
-            if not any([e in str(spark_exception) for e in exceptions]):
-                raise spark_exception
 
     def _create_file_registry(
         self, file_registry_path: str, rows_of_paths: List[str]
