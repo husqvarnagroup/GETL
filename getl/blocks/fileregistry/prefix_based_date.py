@@ -29,15 +29,15 @@ class PrefixBasedDate(FileRegistry):
         ]
     )
 
-    def __init__(self, bconf: BlockConfig):
-        self.file_registry_prefix = bconf.props["BasePrefix"]
-        self.update_after = bconf.props["UpdateAfter"]
-        self.hive_database_name = bconf.props["HiveDatabaseName"]
-        self.hive_table_name = bconf.props["HiveTableName"]
+    def __init__(self, bconf: BlockConfig) -> None:
+        self.file_registry_prefix = bconf.get("BasePrefix")
+        self.update_after = bconf.get("UpdateAfter")
+        self.hive_database_name = bconf.get("HiveDatabaseName")
+        self.hive_table_name = bconf.get("HiveTableName")
         self.default_start = datetime.strptime(
-            bconf.props["DefaultStartDate"], "%Y-%m-%d"
+            bconf.get("DefaultStartDate"), "%Y-%m-%d"
         ).date()
-        self.partition_format = bconf.props["PartitionFormat"]
+        self.partition_format = bconf.get("PartitionFormat")
         self.spark = bconf.spark
         self.file_registry_path = None
 
