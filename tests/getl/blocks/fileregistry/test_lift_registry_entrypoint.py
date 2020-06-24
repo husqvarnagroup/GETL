@@ -1,12 +1,11 @@
 """Unit tests for the custom code index function."""
 from datetime import datetime, timedelta
 
-import pytest
-from mock import Mock, patch
+from mock import patch
 from pyspark.sql import functions as F
 
 from getl.block import BlockConfig, BlockLog
-from getl.blocks.fileregistry.entrypoint import PrefixBasedDate, prefix_based_date
+from getl.blocks.fileregistry.entrypoint import S3DatePrefixScan, s3_date_prefix_scan
 
 
 # HELPERS
@@ -22,12 +21,11 @@ def create_s3_key(filename, date, params):
     return f'{params["prefix_source"]}/{date.strftime("%Y/%m/%d")}/{filename}'
 
 
-def setup_params(tmp_dir, m_file_registry):
+def setup_params(tmp_dir):
     # Arrange
     prefix_source = "plantlib/live"
     file_registry_base = "{}/file-registry".format(tmp_dir)
     file_registry_path = "{}/plantlib/live".format(file_registry_base)
-    m_file_registry.return_value = file_registry_path
 
     return {
         "three_days_ago": (datetime.now() - timedelta(days=3)),
@@ -41,9 +39,9 @@ def setup_params(tmp_dir, m_file_registry):
     }
 
 
-def setup_bconf(base_prefix, start_date, spark_session):
+def setup_bconf(base_path, start_date, spark_session):
     props = {
-        "BasePrefix": base_prefix,
+        "BasePath": base_path,
         "UpdateAfter": "OtherSection",
         "HiveDatabaseName": "file_registry_dev",
         "HiveTableName": "example",
@@ -56,42 +54,39 @@ def setup_bconf(base_prefix, start_date, spark_session):
 
 def create_file_registry(helpers, spark, files, file_registry_path):
     data = helpers.convert_events_to_datetime(files, "%Y/%m/%d")
-    current_df = spark.createDataFrame(data, PrefixBasedDate.schema)
+    current_df = spark.createDataFrame(data, S3DatePrefixScan.schema)
     current_df = current_df.where(~F.col("file_path").contains("f4.parquet"))
     current_df.write.save(path=file_registry_path, format="delta", mode="overwrite")
 
 
 # TESTS
-def test_creates_prefix_based_date_obj():
+def test_creates_prefix_based_date_obj(spark_session):
     """Function should return a prefix based date object."""
     # Arrange
     props = {
-        "BasePrefix": "s3/prefix",
+        "BasePath": "s3/prefix",
         "UpdateAfter": "OtherSection",
         "HiveDatabaseName": "file_registry_dev",
         "HiveTableName": "example",
         "DefaultStartDate": "2020-01-01",
         "PartitionFormat": "%Y/%m/%d",
     }
-    conf = BlockConfig("CurrentSection", None, None, props)
+    conf = BlockConfig("CurrentSection", spark_session, None, props)
 
     # Act
-    res = prefix_based_date(conf)
+    res = s3_date_prefix_scan(conf)
 
     # Assert
-    assert isinstance(res, PrefixBasedDate)
+    assert isinstance(res, S3DatePrefixScan)
     assert res.file_registry_prefix == "s3/prefix"
     assert res.update_after == "OtherSection"
 
 
-@patch.object(PrefixBasedDate, "_create_hive_table")
-@patch.object(PrefixBasedDate, "_create_file_registry_path")
-def test_pbd_load_no_previous_data(
-    m_file_registry, m_hive_table, spark_session, helpers, tmp_dir
-):
+@patch("getl.blocks.fileregistry.utils.create_hive_table")
+def test_pbd_load_no_previous_data(m_hive_table, spark_session, helpers, tmp_dir):
     """Test the load method for prefixed based date when there is no prev data."""
     # Arrange
-    params = setup_params(tmp_dir, m_file_registry)
+    params = setup_params(tmp_dir)
     conf = setup_bconf(
         params["file_registry_base"], params["two_days_ago"], spark_session
     )
@@ -109,7 +104,7 @@ def test_pbd_load_no_previous_data(
     )
 
     # Act
-    filepaths = prefix_based_date(conf).load(
+    filepaths = s3_date_prefix_scan(conf).load(
         "s3://tmp-bucket/plantlib/live", ".parquet.crc"
     )
 
@@ -129,10 +124,9 @@ def test_pbd_load_no_previous_data(
     assert data[0][1] == params["two_days_ago"].date()
     assert data[0][2] is None
     assert m_hive_table.called
-    assert m_file_registry.called
 
 
-@patch.object(PrefixBasedDate, "_create_file_registry_path")
+@patch("getl.blocks.fileregistry.utils.create_hive_table")
 def test_previous_data_with_only_null_values(
     m_file_registry, s3_mock, spark_session, tmp_dir, helpers
 ):
@@ -161,7 +155,7 @@ def test_previous_data_with_only_null_values(
     )
 
     # ACT
-    filepaths = prefix_based_date(conf).load(params["s3_path"], suffix=".parquet.crc")
+    filepaths = s3_date_prefix_scan(conf).load(params["s3_path"], suffix=".parquet.crc")
 
     # ASSERT
     base = "s3://tmp-bucket/plantlib/live"
@@ -173,7 +167,7 @@ def test_previous_data_with_only_null_values(
     assert all(elem in check_list for elem in filepaths)
 
 
-@patch.object(PrefixBasedDate, "_create_file_registry_path")
+@patch("getl.blocks.fileregistry.utils.create_hive_table")
 def test_pbd_load_with_previous_data(
     m_file_registry, spark_session, s3_mock, tmp_dir, helpers
 ):
@@ -209,7 +203,7 @@ def test_pbd_load_with_previous_data(
     )
 
     # ACT
-    filepaths = prefix_based_date(conf).load(params["s3_path"], suffix=".parquet.crc")
+    filepaths = s3_date_prefix_scan(conf).load(params["s3_path"], suffix=".parquet.crc")
 
     # ASSERT
     base = "s3://tmp-bucket/plantlib/live"
@@ -221,56 +215,31 @@ def test_pbd_load_with_previous_data(
     assert all(elem in check_list for elem in filepaths)
 
 
-@pytest.mark.parametrize(
-    "s3_path, result",
-    [
-        ("", "s3://husqvarna-datalake/file-registry"),
-        (
-            "s3://husqvarna-datalake/raw/amc/live",
-            "s3://husqvarna-datalake/file-registry/raw/amc/live",
-        ),
-    ],
-)
-def test_create_file_registry_path(s3_path, result):
-    props = {
-        "BasePrefix": "s3://husqvarna-datalake/file-registry",
-        "UpdateAfter": "",
-        "HiveDatabaseName": "file_registry_dev",
-        "HiveTableName": "example",
-        "DefaultStartDate": "2020-01-01",
-        "PartitionFormat": "%Y/%m/%d",
-    }
-    conf = BlockConfig("CurrentSection", None, None, props, BlockLog())
-    pbd = PrefixBasedDate(conf)
+# @pytest.mark.parametrize(
+#     "path, table",
+#     [
+#         ("s3://husqvarna-datalake/file-registry/amc", "amc"),
+#         ("s3://husqvarna-datalake/file-registry/test", "test"),
+#     ],
+# )
+# def test_create_hive_table(path, table):
+#     # Arrange
+#     spark = Mock()
+#     props = {
+#         "BasePrefix": "",
+#         "UpdateAfter": "",
+#         "HiveDatabaseName": "file_registry_dev",
+#         "HiveTableName": table,
+#         "DefaultStartDate": "2020-01-01",
+#         "PartitionFormat": "%Y/%m/%d",
+#     }
+#     conf = BlockConfig("CurrentSection", spark, None, props, BlockLog())
+#     pbd = PrefixBasedDate(conf)
 
-    assert pbd._create_file_registry_path(s3_path) == result
+#     # Act
+#     pbd._create_hive_table(path)
 
-
-@pytest.mark.parametrize(
-    "path, table",
-    [
-        ("s3://husqvarna-datalake/file-registry/amc", "amc"),
-        ("s3://husqvarna-datalake/file-registry/test", "test"),
-    ],
-)
-def test_create_hive_table(path, table):
-    # Arrange
-    spark = Mock()
-    props = {
-        "BasePrefix": "",
-        "UpdateAfter": "",
-        "HiveDatabaseName": "file_registry_dev",
-        "HiveTableName": table,
-        "DefaultStartDate": "2020-01-01",
-        "PartitionFormat": "%Y/%m/%d",
-    }
-    conf = BlockConfig("CurrentSection", spark, None, props, BlockLog())
-    pbd = PrefixBasedDate(conf)
-
-    # Act
-    pbd._create_hive_table(path)
-
-    # Assert
-    assert path in str(spark.sql.call_args[0])
-    assert "file_registry_dev" in str(spark.sql.call_args_list[0][0])
-    assert table in str(spark.sql.call_args_list[2][0])
+#     # Assert
+#     assert path in str(spark.sql.call_args[0])
+#     assert "file_registry_dev" in str(spark.sql.call_args_list[0][0])
+#     assert table in str(spark.sql.call_args_list[2][0])

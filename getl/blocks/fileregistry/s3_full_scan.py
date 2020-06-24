@@ -4,7 +4,7 @@ from typing import List
 
 from pyspark.sql import DataFrame, functions as F, types as T
 
-import getl.blocks.fileregistry.fileregistry_utils as fr_utils
+import getl.blocks.fileregistry.utils as fr_utils
 from getl.block import BlockConfig
 from getl.blocks.fileregistry.base import FileRegistry
 from getl.common.delta_table import DeltaTable

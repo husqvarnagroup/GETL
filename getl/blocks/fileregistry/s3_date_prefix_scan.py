@@ -1,24 +1,22 @@
 """File registry that works with YYYY/MM/DD prefixed files in s3."""
 from collections import namedtuple
 from datetime import datetime, timedelta
-from pathlib import Path
 from typing import List
 
 from pyspark.sql import DataFrame, functions as F, types as T
 
-import getl.blocks.fileregistry.fileregistry_utils as fr_utils
+import getl.blocks.fileregistry.utils as fr_utils
 from getl.block import BlockConfig
 from getl.blocks.fileregistry.base import FileRegistry
 from getl.common.delta_table import DeltaTable
-from getl.common.hive_table import HiveTable
-from getl.common.utils import extract_bucket_and_prefix, fetch_filepaths_from_prefix
+from getl.common.utils import fetch_filepaths_from_prefix
 from getl.logging import get_logger
 
 LOGGER = get_logger(__name__)
 FileRegistryRow = namedtuple("FileRegistryRow", "file_path, prefix_date, date_lifted")
 
 
-class PrefixBasedDate(FileRegistry):
+class S3DatePrefixScan(FileRegistry):
     """File registry that works with YYYY/MM/DD prefixes in s3."""
 
     schema = T.StructType(
@@ -30,50 +28,36 @@ class PrefixBasedDate(FileRegistry):
     )
 
     def __init__(self, bconf: BlockConfig) -> None:
-        self.file_registry_prefix = bconf.get("BasePrefix")
+        self.file_registry_path = bconf.get("BasePath")
         self.update_after = bconf.get("UpdateAfter")
-        self.hive_database_name = bconf.get("HiveDatabaseName")
-        self.hive_table_name = bconf.get("HiveTableName")
         self.default_start = datetime.strptime(
             bconf.get("DefaultStartDate"), "%Y-%m-%d"
         ).date()
         self.partition_format = bconf.get("PartitionFormat")
         self.spark = bconf.spark
-        self.file_registry_path = None
+        self.delta_table = fr_utils.get_or_create(
+            self.file_registry_path, df_schema=self.schema, db_schema="", conf=bconf
+        )
 
     def update(self) -> None:
         """Update file registry column date_lifted to current date."""
-        delta_table = DeltaTable(self.file_registry_path, self.spark)
-        fr_utils.update_date_lifted(delta_table)
+        fr_utils.update_date_lifted(self.delta_table)
 
     def load(self, s3_path: str, suffix: str) -> List[str]:
         """Fetch new filepaths that have not been lifted from s3."""
-        self.file_registry_path = self._create_file_registry_path(s3_path)
-        dataframe = fr_utils.fetch_file_registry(self.file_registry_path, self.spark)
 
-        # If file registry is found
-        if dataframe:
-            LOGGER.info("File registry found at %s", self.file_registry_path)
+        # Get files from S3
+        list_of_rows = self._get_new_s3_files(s3_path, suffix)
 
-            # Get latest date from metadata store
-            last_date = self._get_last_prefix_date(dataframe)
-            LOGGER.info("Last prefix date was %s", last_date)
+        # Update the metadata store with the new keys
+        updated_dataframe = self._update_file_registry(list_of_rows)
 
-            # Get new files from s3
-            list_of_rows = self._get_new_s3_files(s3_path, last_date, suffix)
+        # Make sure that we do not lift the same files twice
+        list_of_rows = self._get_files_to_lift(updated_dataframe)
 
-            # Update the metadata store with the new keys
-            updated_dataframe = self._update_file_registry(list_of_rows)
-
-            # Make sure that we do not lift the same files twice
-            list_of_rows = self._get_files_to_lift(updated_dataframe)
-
-        else:
-            LOGGER.info("No registry found create one at %s", self.file_registry_path)
-            list_of_rows = self._get_new_s3_files(s3_path, self.default_start, suffix)
-            self._create_file_registry(self.file_registry_path, list_of_rows)
-
+        # Log how many new files we found
         LOGGER.info("Found %s new keys in s3", len(list_of_rows))
+
         return [row.file_path for row in list_of_rows]
 
     ###########
@@ -143,44 +127,3 @@ class PrefixBasedDate(FileRegistry):
             date = self.default_start
 
         return date
-
-    def _create_file_registry(
-        self, file_registry_path: str, rows_of_paths: List[str]
-    ) -> DataFrame:
-        """When there is now existing file registry create one."""
-        dataframe = self._rows_to_dataframe(rows_of_paths)
-
-        # Create hive table
-        self._create_hive_table(file_registry_path)
-        dataframe.write.save(path=file_registry_path, format="delta", mode="overwrite")
-
-    def _create_hive_table(self, file_registry_path: str):
-        hive = HiveTable(self.spark, self.hive_database_name, self.hive_table_name)
-        hive.create(
-            file_registry_path,
-            db_schema="""
-            file_path STRING NOT NULL,
-            prefix_date DATE NOT NULL,
-            date_lifted TIMESTAMP
-        """,
-        )
-
-    def _create_file_registry_path(self, s3_path: str) -> str:
-        LOGGER.info(
-            "Combining base prefix: %s with read path: %s",
-            self.file_registry_prefix,
-            s3_path,
-        )
-        file_registry_bucket, file_registry_prefix = extract_bucket_and_prefix(
-            self.file_registry_prefix
-        )
-        bucket, prefix = extract_bucket_and_prefix(s3_path)
-
-        return "s3://{}".format(
-            Path(file_registry_bucket) / file_registry_prefix / prefix
-        )
-
-    def _rows_to_dataframe(self, rows: List[FileRegistryRow]) -> DataFrame:
-        """Create a dataframe from a list of paths with the file registry schema."""
-        data = [(row.file_path, row.prefix_date, row.date_lifted) for row in rows]
-        return self.spark.createDataFrame(data, self.schema)
