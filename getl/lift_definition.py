@@ -3,7 +3,7 @@ from typing import Any
 
 import oyaml as yaml
 
-from getl.common.utils import fetch_s3_file
+from getl.common.s3path import S3Path
 
 
 def resolve_lift_definition(lift_def: str, parameters: str):
@@ -19,7 +19,7 @@ def fetch_lift_definition(lift_def: str) -> dict:
     if "LiftJob" in lift_def:
         return yaml.safe_load(lift_def)
 
-    return yaml.safe_load(fetch_s3_file(lift_def))
+    return yaml.safe_load(S3Path(lift_def).read_text())
 
 
 def _replace_variables(lift_def: Any, params: dict) -> dict:

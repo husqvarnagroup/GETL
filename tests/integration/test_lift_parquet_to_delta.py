@@ -77,7 +77,7 @@ def test_lift_parquet_to_delta(
     """Lift parquet files to delta, with no previus file registry."""
     # Arrange
     base_path_filesystem = generate_data
-    read_path = "s3://tmp-bucket/{}".format(base_path_filesystem)
+    read_path = "s3://tmp-bucket{}".format(base_path_filesystem)
     write_path = "{}/files".format(tmp_dir)
     file_registry_path = "{}/file_registry/{}".format(tmp_dir, base_path_filesystem)
     m_file_registry.return_value = file_registry_path

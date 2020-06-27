@@ -9,7 +9,6 @@ from getl.block import BlockConfig
 from getl.blocks.fileregistry.base import FileRegistry
 from getl.common.delta_table import DeltaTable
 from getl.common.hive_table import HiveTable
-from getl.common.utils import fetch_filepaths_from_prefix
 from getl.logging import get_logger
 
 # pylint: disable=E1101,W0221
@@ -95,16 +94,14 @@ class S3FullScan(FileRegistry):
     @staticmethod
     def _get_new_s3_files(s3_path: str, suffix: str) -> List[FileRegistryRow]:
         """Get all files in S3 as a dataframe."""
-        list_of_rows = []
+        base_s3path = S3Path(s3_path)
+        keys = list(base_s3path.glob(suffix))
 
         # Keys found under the s3_path
-        keys = list(
-            fetch_filepaths_from_prefix(f"{s3_path}/", suffix, prepend_bucket=True)
-        )
         LOGGER.info("Search %s for files. Found: %s files", s3_path, len(keys))
 
         # Convert keys into a file registry row
-        list_of_rows = [FileRegistryRow(key, None) for key in keys] + list_of_rows
+        list_of_rows = [FileRegistryRow(key, None) for key in keys]
 
         return list_of_rows
 

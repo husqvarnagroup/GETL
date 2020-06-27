@@ -1,7 +1,6 @@
 """File registry that works with YYYY/MM/DD prefixed files in s3."""
 from collections import namedtuple
 from datetime import datetime, timedelta
-from pathlib import Path
 from typing import List
 
 from pyspark.sql import DataFrame, functions as F, types as T
@@ -11,7 +10,7 @@ from getl.block import BlockConfig
 from getl.blocks.fileregistry.base import FileRegistry
 from getl.common.delta_table import DeltaTable
 from getl.common.hive_table import HiveTable
-from getl.common.utils import extract_bucket_and_prefix, fetch_filepaths_from_prefix
+from getl.common.s3path import S3Path
 from getl.logging import get_logger
 
 LOGGER = get_logger(__name__)
@@ -110,19 +109,12 @@ class PrefixBasedDate(FileRegistry):
         list_of_rows = []
 
         for date in self._get_dates_from(start):
-            # Create prefix to search for files in s3
-            prefix = "{}/{}".format(s3_path, date.strftime(self.partition_format))
+            base_s3path = S3Path(s3_path) / date.strftime(self.partition_format)
 
-            # Keys found under the prefix
-            keys = list(
-                fetch_filepaths_from_prefix(prefix, suffix, prepend_bucket=True)
-            )
+            keys = list(base_s3path.glob(suffix))
             LOGGER.info("Search prefix %s for files found: %s", prefix, len(keys))
 
-            # Convert keys with date into a file registry row
-            list_of_rows = [
-                FileRegistryRow(key, date, None) for key in keys
-            ] + list_of_rows
+            list_of_rows.extend(FileRegistryRow(str(key), date, None) for key in keys)
 
         return list_of_rows
 
@@ -137,7 +129,7 @@ class PrefixBasedDate(FileRegistry):
 
     def _get_last_prefix_date(self, dataframe: DataFrame) -> str:
         """Return the latest date_lifted column from the dataframe."""
-        date = (dataframe.groupby().agg(F.max("prefix_date")).collect())[0][0]
+        date = (dataframe.agg(F.max("prefix_date")).collect())[0][0]
 
         if not date:
             date = self.default_start
@@ -171,16 +163,12 @@ class PrefixBasedDate(FileRegistry):
             self.file_registry_prefix,
             s3_path,
         )
-        file_registry_bucket, file_registry_prefix = extract_bucket_and_prefix(
-            self.file_registry_prefix
-        )
-        bucket, prefix = extract_bucket_and_prefix(s3_path)
+        file_registry_s3_path = S3Path(self.file_registry_prefix)
+        s3_prefix = S3Path(s3_path).key
 
-        return "s3://{}".format(
-            Path(file_registry_bucket) / file_registry_prefix / prefix
-        )
+        return str(file_registry_s3_path / s3_prefix)
 
     def _rows_to_dataframe(self, rows: List[FileRegistryRow]) -> DataFrame:
         """Create a dataframe from a list of paths with the file registry schema."""
         data = [(row.file_path, row.prefix_date, row.date_lifted) for row in rows]
-        return self.spark.createDataFrame(data, self.schema)
+        return self.spark.createDataFrame(rows, self.schema)

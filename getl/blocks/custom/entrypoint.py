@@ -10,7 +10,7 @@ from types import FunctionType, ModuleType
 from pyspark.sql import DataFrame
 
 from getl.block import BlockConfig
-from getl.common.utils import fetch_s3_file
+from getl.common.s3path import S3Path
 
 
 def resolve(func: FunctionType, bconf: BlockConfig) -> DataFrame:
@@ -126,7 +126,7 @@ def _get_custom_function(conf: BlockConfig, tmpdirname):
     if conf.exists("CustomFunction"):
         return conf.get("CustomFunction")
 
-    file_content = fetch_s3_file(conf.get("CustomCodePath"))
+    file_content = S3Path(conf.get("CustomCodePath")).read_text()
     custom_module = _import_custom_code(file_content, tmpdirname)
 
     return custom_module.resolve
