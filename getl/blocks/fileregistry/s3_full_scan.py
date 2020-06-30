@@ -32,7 +32,7 @@ class S3FullScan(FileRegistry):
         self.hive_database_name = bconf.get("HiveDatabaseName")
         self.hive_table_name = bconf.get("HiveTableName")
         self.spark = bconf.spark
-        self.delta_table = self._get_or_create(self.file_registry_path)
+        self._get_or_create()
 
     def update(self) -> None:
         """Update file registry column date_lifted to current date."""
@@ -41,26 +41,20 @@ class S3FullScan(FileRegistry):
     def load(self, s3_path: str, suffix: str) -> List[str]:
         """Fetch new filepaths that have not been lifted from s3."""
 
-        # Get files from S3
         list_of_rows = self._get_new_s3_files(s3_path, suffix)
-
-        # Update the metadata store with the new keys
         updated_dataframe = self._update_file_registry(list_of_rows)
-
-        # Make sure that we do not lift the same files twice
         list_of_rows = self._get_files_to_lift(updated_dataframe)
 
-        # Log how many new files we found
         LOGGER.info("Found %s new keys in s3", len(list_of_rows))
 
-        return [row.file_path for row in list_of_rows]
+        return list_of_rows
 
     ###########
     # PRIVATE #
     ###########
-    def _get_or_create(self, file_registry_path: str) -> "DeltaTable":
+    def _get_or_create(self):
         """Get or create a delta table instance for a file registry."""
-        dataframe = fr_utils.fetch_file_registry(file_registry_path, self.spark)
+        dataframe = fr_utils.fetch_file_registry(self.file_registry_path, self.spark)
 
         # If file registry is found
         if not dataframe:
@@ -69,18 +63,16 @@ class S3FullScan(FileRegistry):
         else:
             LOGGER.info("File registry found at %s", self.file_registry_path)
 
-        return DeltaTable(file_registry_path, self.spark)
+        self.delta_table = DeltaTable(file_registry_path, self.spark)
 
     @staticmethod
     def _get_files_to_lift(dataframe: DataFrame) -> List[str]:
         """Get a list of S3 paths from the file registry that needs to be lifted."""
         data = (
-            dataframe.where(F.col("date_lifted").isNull())
-            .select("file_path", "date_lifted")
-            .collect()
+            dataframe.where(F.col("date_lifted").isNull()).select("file_path").collect()
         )
 
-        return [FileRegistryRow(row.file_path, row.date_lifted) for row in data]
+        return [row.file_path for row in data]
 
     def _update_file_registry(self, list_of_rows: List[FileRegistryRow]) -> DataFrame:
         """Update the file registry and do not insert duplicates."""
