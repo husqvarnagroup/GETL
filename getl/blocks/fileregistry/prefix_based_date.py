@@ -112,7 +112,7 @@ class PrefixBasedDate(FileRegistry):
             base_s3path = S3Path(s3_path) / date.strftime(self.partition_format)
 
             keys = list(base_s3path.glob(suffix))
-            LOGGER.info("Search prefix %s for files found: %s", prefix, len(keys))
+            LOGGER.info("Search prefix %s for files found: %s", base_s3path, len(keys))
 
             list_of_rows.extend(FileRegistryRow(str(key), date, None) for key in keys)
 
@@ -170,5 +170,5 @@ class PrefixBasedDate(FileRegistry):
 
     def _rows_to_dataframe(self, rows: List[FileRegistryRow]) -> DataFrame:
         """Create a dataframe from a list of paths with the file registry schema."""
-        data = [(row.file_path, row.prefix_date, row.date_lifted) for row in rows]
+        # data = [(row.file_path, row.prefix_date, row.date_lifted) for row in rows]
         return self.spark.createDataFrame(rows, self.schema)

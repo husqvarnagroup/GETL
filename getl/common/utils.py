@@ -9,10 +9,8 @@ Utilities supported:
 
 
 """
-from typing import Any, Dict, List, Tuple, TypeVar
+from typing import Dict, List, Tuple, TypeVar
 
-import boto3
-from botocore.exceptions import ClientError
 from pyspark.sql.types import StructType
 
 from getl.logging import get_logger

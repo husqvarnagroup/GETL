@@ -9,6 +9,7 @@ from getl.block import BlockConfig
 from getl.blocks.fileregistry.base import FileRegistry
 from getl.common.delta_table import DeltaTable
 from getl.common.hive_table import HiveTable
+from getl.common.s3path import S3Path
 from getl.logging import get_logger
 
 # pylint: disable=E1101,W0221
@@ -25,12 +26,18 @@ class S3FullScan(FileRegistry):
             T.StructField("date_lifted", T.TimestampType(), True),
         ]
     )
+    db_schema = """
+        file_path STRING,
+        date_lifted TIMESTAMP
+    """
 
     def __init__(self, bconf: BlockConfig) -> None:
         self.file_registry_path = bconf.get("BasePath")
+
         self.update_after = bconf.get("UpdateAfter")
         self.hive_database_name = bconf.get("HiveDatabaseName")
         self.hive_table_name = bconf.get("HiveTableName")
+
         self.spark = bconf.spark
         self._get_or_create()
 
@@ -59,11 +66,11 @@ class S3FullScan(FileRegistry):
         # If file registry is found
         if not dataframe:
             LOGGER.info("No registry found create one at %s", self.file_registry_path)
-            self._create_file_registry(self.file_registry_path, [])
+            self._create_file_registry()
         else:
             LOGGER.info("File registry found at %s", self.file_registry_path)
 
-        self.delta_table = DeltaTable(file_registry_path, self.spark)
+        self.delta_table = DeltaTable(self.file_registry_path, self.spark)
 
     @staticmethod
     def _get_files_to_lift(dataframe: DataFrame) -> List[str]:
@@ -93,31 +100,27 @@ class S3FullScan(FileRegistry):
         LOGGER.info("Search %s for files. Found: %s files", s3_path, len(keys))
 
         # Convert keys into a file registry row
-        list_of_rows = [FileRegistryRow(key, None) for key in keys]
+        list_of_rows = [FileRegistryRow(str(key), None) for key in keys]
 
         return list_of_rows
 
-    def _create_file_registry(
-        self, file_registry_path: str, rows_of_paths: List[str]
-    ) -> DataFrame:
+    def _create_file_registry(self):
         """When there is now existing file registry create one."""
-        dataframe = self._rows_to_dataframe(rows_of_paths)
+        dataframe = self.spark.createDataFrame([], self.schema)
 
         # Create hive table
-        dataframe.write.save(path=file_registry_path, format="delta", mode="overwrite")
-        self._create_hive_table(file_registry_path)
+        dataframe.write.save(
+            path=self.file_registry_path, format="delta", mode="overwrite"
+        )
+        self._create_hive_table(self.file_registry_path)
 
     def _create_hive_table(self, file_registry_path: str):
         hive = HiveTable(self.spark, self.hive_database_name, self.hive_table_name)
         hive.create(
-            file_registry_path,
-            db_schema="""
-            file_path STRING,
-            date_lifted TIMESTAMP
-        """,
+            file_registry_path, db_schema=self.db_schema,
         )
 
     def _rows_to_dataframe(self, rows: List[FileRegistryRow]) -> DataFrame:
         """Create a dataframe from a list of paths with the file registry schema."""
-        data = [(row.file_path, row.date_lifted) for row in rows]
-        return self.spark.createDataFrame(data, self.schema)
+        # data = [(row.file_path, row.date_lifted) for row in rows]
+        return self.spark.createDataFrame(rows, self.schema)

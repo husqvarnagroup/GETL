@@ -8,6 +8,7 @@ from pyspark.sql.utils import AnalysisException
 
 from getl.block import BlockConfig
 from getl.common.errors import NoDataToProcess
+from getl.common.s3path import S3Path
 from getl.common.utils import json_to_spark_schema
 
 

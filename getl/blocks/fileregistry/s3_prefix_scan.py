@@ -25,6 +25,11 @@ class S3PrefixScan(FileRegistry):
             T.StructField("date_lifted", T.TimestampType(), True),
         ]
     )
+    db_schema = """
+        file_path STRING,
+        prefix_date DATE NOT NULL,
+        date_lifted TIMESTAMP
+    """
 
     def __init__(self, bconf: BlockConfig):
         self.file_registry_path = None  # Will be set at a later point
@@ -32,6 +37,7 @@ class S3PrefixScan(FileRegistry):
         self.update_after = bconf.props["UpdateAfter"]
         self.hive_database_name = bconf.props["HiveDatabaseName"]
         self.hive_table_name = bconf.props["HiveTableName"]
+
         self.default_start = datetime.strptime(
             bconf.props["DefaultStartDate"], "%Y-%m-%d"
         ).date()
@@ -60,7 +66,7 @@ class S3PrefixScan(FileRegistry):
 
         if not dataframe:
             LOGGER.info("No registry found create one at %s", self.file_registry_path)
-            self._create_file_registry(self.file_registry_path, [])
+            self._create_file_registry()
         else:
             LOGGER.info("File registry found at %s", self.file_registry_path)
 
@@ -117,7 +123,7 @@ class S3PrefixScan(FileRegistry):
 
         return date
 
-    def _create_file_registry(self) -> DataFrame:
+    def _create_file_registry(self):
         """When there is now existing file registry create one."""
         dataframe = self.spark.createDataFrame([], self.schema)
         dataframe.write.save(
@@ -128,17 +134,13 @@ class S3PrefixScan(FileRegistry):
     def _create_hive_table(self):
         hive = HiveTable(self.spark, self.hive_database_name, self.hive_table_name)
         hive.create(
-            self.file_registry_path,
-            db_schema="""
-            file_path STRING,
-            date_lifted TIMESTAMP
-        """,
+            self.file_registry_path, db_schema=self.db_schema,
         )
 
     def _rows_to_dataframe(self, rows: List[FileRegistryRow]) -> DataFrame:
         """Create a dataframe from a list of paths with the file registry schema."""
-        data = [(row.file_path, row.date_lifted) for row in rows]
-        return self.spark.createDataFrame(data, self.schema)
+        # data = [(row.file_path, row.prefix_date, row.date_lifted) for row in rows]
+        return self.spark.createDataFrame(rows, self.schema)
 
 
 def _create_file_registry_path(file_registry_prefix, s3_path: str) -> str:

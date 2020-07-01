@@ -1,6 +1,8 @@
-from typing import Optional, Iterator, Union
-from contextlib import contextmanager
+from typing import Iterator, Optional, Union
+
 import boto3
+
+from .errors import handle_client_error
 
 
 class S3Path:
@@ -52,21 +54,24 @@ class S3Path:
         return False
 
     def read_bytes(self) -> bytes:
-        with handle_client_error():
-            s3_object = self._s3_client.get_object(Bucket=self.bucket, Key=self.key)
-            return s3_object["Body"].read()
+        try:
+            with handle_client_error():
+                s3_object = self._s3_client.get_object(Bucket=self.bucket, Key=self.key)
+                return s3_object["Body"].read()
+        except FileNotFoundError:
+            pass
 
     def read_text(self, encoding="utf-8") -> str:
         return self.read_bytes().decode(encoding)
 
     def write_bytes(self, data: bytes):
         with handle_client_error():
-            s3_object = self._s3_client.put_object(
+            self._s3_client.put_object(
                 Bucket=self.bucket, Key=self.key, Body=data,
             )
 
     def write_text(self, data: str, encoding="utf-8"):
-        self.write_bytes(data.decode(encoding))
+        self.write_bytes(data.encode(encoding))
 
     def glob(self, suffix: str = "") -> Iterator["S3Path"]:
         """Retrieve the keys from an s3 path with suffix
@@ -89,7 +94,7 @@ class S3Path:
                 for obj in resp["Contents"]:
                     key = obj["Key"]
                     if not suffix or key.endswith(suffix):
-                        yield S3Path(s3path.bucket) / key
+                        yield S3Path(self.bucket) / key
 
             try:
                 kwargs["ContinuationToken"] = resp["NextContinuationToken"]
@@ -102,8 +107,8 @@ class S3Path:
 
         # Copy the file from the source key to the target key
         with handle_client_error():
-            self._s3_client.copy_object(
-                {"Bucket": source.bucket, "Key": source.key}, target.bucket, target.key,
+            self._s3_client.copy(
+                {"Bucket": self.bucket, "Key": self.key}, target.bucket, target.key,
             )
 
     def delete(self) -> None:
@@ -114,27 +119,3 @@ class S3Path:
             )
         with handle_client_error():
             self._s3_client.delete_object(Bucket=self.bucket, Key=self.key)
-
-
-@contextmanager
-def handle_client_error():
-    """Raises other exceptions depending on the error code.
-
-    Converts the following codes to a different exception:
-    - NoSuchBucket: FileNotFoundError
-    - NoSuchKey: FileNotFoundError
-    """
-    try:
-        yield
-    except ClientError as client_error:
-        # LOGGER.error(str(client_error))
-        error = client_error.response["Error"]
-        if error["Code"] == "NoSuchBucket":
-            raise FileNotFoundError(
-                "The specified bucket {} does not exist".format(error["BucketName"])
-            )
-
-        if error["Code"] == "NoSuchKey":
-            raise FileNotFoundError(error["Message"])
-
-        raise client_error
