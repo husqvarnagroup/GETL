@@ -6,7 +6,7 @@ from mock import Mock, patch
 from pyspark.sql import functions as F
 
 from getl.block import BlockConfig, BlockLog
-from getl.blocks.fileregistry.entrypoint import PrefixBasedDate, prefix_based_date
+from getl.blocks.fileregistry.entrypoint import S3PrefixScan, s3_prefix_scan
 
 
 # HELPERS
@@ -56,13 +56,13 @@ def setup_bconf(base_prefix, start_date, spark_session):
 
 def create_file_registry(helpers, spark, files, file_registry_path):
     data = helpers.convert_events_to_datetime(files, "%Y/%m/%d")
-    current_df = spark.createDataFrame(data, PrefixBasedDate.schema)
+    current_df = spark.createDataFrame(data, S3PrefixScan.schema)
     current_df = current_df.where(~F.col("file_path").contains("f4.parquet"))
     current_df.write.save(path=file_registry_path, format="delta", mode="overwrite")
 
 
 # TESTS
-def test_creates_prefix_based_date_obj():
+def test_creates_s3_prefix_scan_obj():
     """Function should return a prefix based date object."""
     # Arrange
     props = {
@@ -76,16 +76,15 @@ def test_creates_prefix_based_date_obj():
     conf = BlockConfig("CurrentSection", None, None, props)
 
     # Act
-    res = prefix_based_date(conf)
+    res = s3_prefix_scan(conf)
 
     # Assert
-    assert isinstance(res, PrefixBasedDate)
     assert res.file_registry_prefix == "s3/prefix"
     assert res.update_after == "OtherSection"
 
 
-@patch.object(PrefixBasedDate, "_create_hive_table")
-@patch.object(PrefixBasedDate, "_create_file_registry_path")
+@patch.object(S3PrefixScan, "_create_hive_table")
+@patch.object(S3PrefixScan, "_create_file_registry_path")
 def test_pbd_load_no_previous_data(
     m_file_registry, m_hive_table, spark_session, helpers, tmp_dir
 ):
@@ -109,7 +108,7 @@ def test_pbd_load_no_previous_data(
     )
 
     # Act
-    filepaths = prefix_based_date(conf).load(
+    filepaths = s3_prefix_scan(conf).load(
         "s3://tmp-bucket/plantlib/live", ".parquet.crc"
     )
 
@@ -132,7 +131,7 @@ def test_pbd_load_no_previous_data(
     assert m_file_registry.called
 
 
-@patch.object(PrefixBasedDate, "_create_file_registry_path")
+@patch.object(S3PrefixScan, "_create_file_registry_path")
 def test_previous_data_with_only_null_values(
     m_file_registry, s3_mock, spark_session, tmp_dir, helpers
 ):
@@ -161,7 +160,7 @@ def test_previous_data_with_only_null_values(
     )
 
     # ACT
-    filepaths = prefix_based_date(conf).load(params["s3_path"], suffix=".parquet.crc")
+    filepaths = s3_prefix_scan(conf).load(params["s3_path"], suffix=".parquet.crc")
 
     # ASSERT
     base = "s3://tmp-bucket/plantlib/live"
@@ -173,7 +172,7 @@ def test_previous_data_with_only_null_values(
     assert all(elem in check_list for elem in filepaths)
 
 
-@patch.object(PrefixBasedDate, "_create_file_registry_path")
+@patch.object(S3PrefixScan, "_create_file_registry_path")
 def test_pbd_load_with_previous_data(
     m_file_registry, spark_session, s3_mock, tmp_dir, helpers
 ):
@@ -209,7 +208,7 @@ def test_pbd_load_with_previous_data(
     )
 
     # ACT
-    filepaths = prefix_based_date(conf).load(params["s3_path"], suffix=".parquet.crc")
+    filepaths = s3_prefix_scan(conf).load(params["s3_path"], suffix=".parquet.crc")
 
     # ASSERT
     base = "s3://tmp-bucket/plantlib/live"
@@ -241,7 +240,7 @@ def test_create_file_registry_path(s3_path, result):
         "PartitionFormat": "%Y/%m/%d",
     }
     conf = BlockConfig("CurrentSection", None, None, props, BlockLog())
-    pbd = PrefixBasedDate(conf)
+    pbd = S3PrefixScan(conf)
 
     assert pbd._create_file_registry_path(s3_path) == result
 
@@ -265,10 +264,11 @@ def test_create_hive_table(path, table):
         "PartitionFormat": "%Y/%m/%d",
     }
     conf = BlockConfig("CurrentSection", spark, None, props, BlockLog())
-    pbd = PrefixBasedDate(conf)
+    pbd = S3PrefixScan(conf)
 
     # Act
-    pbd._create_hive_table(path)
+    pbd.file_registry_path = path
+    pbd._create_hive_table()
 
     # Assert
     assert path in str(spark.sql.call_args[0])

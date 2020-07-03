@@ -48,9 +48,7 @@ class S3PrefixScan(FileRegistry):
         fr_utils.update_date_lifted(self.delta_table)
 
     def load(self, s3_path: str, suffix: str) -> List[str]:
-        self.file_registry_path = self._create_file_registry_path(
-            self.file_registry_prefix, s3_path
-        )
+        self.file_registry_path = self._create_file_registry_path(s3_path)
         self._get_or_create()
 
         list_of_rows = self._get_new_s3_files(s3_path, suffix)
@@ -67,10 +65,11 @@ class S3PrefixScan(FileRegistry):
         if not dataframe:
             LOGGER.info("No registry found create one at %s", self.file_registry_path)
             self._create_file_registry()
+            self.last_date = self.default_start
         else:
             LOGGER.info("File registry found at %s", self.file_registry_path)
+            self.last_date = self._get_last_prefix_date(dataframe)
 
-        self.last_date = self._get_last_prefix_date(dataframe)
         self.delta_table = DeltaTable(self.file_registry_path, self.spark)
 
     @staticmethod
@@ -129,7 +128,7 @@ class S3PrefixScan(FileRegistry):
         dataframe.write.save(
             path=self.file_registry_path, format="delta", mode="overwrite"
         )
-        self._create_hive_table(self.file_registry_path)
+        self._create_hive_table()
 
     def _create_hive_table(self):
         hive = HiveTable(self.spark, self.hive_database_name, self.hive_table_name)
@@ -142,12 +141,13 @@ class S3PrefixScan(FileRegistry):
         # data = [(row.file_path, row.prefix_date, row.date_lifted) for row in rows]
         return self.spark.createDataFrame(rows, self.schema)
 
+    def _create_file_registry_path(self, s3_path: str) -> str:
+        LOGGER.info(
+            "Combining base prefix: %s with read path: %s",
+            self.file_registry_prefix,
+            s3_path,
+        )
+        file_registry_s3_path = S3Path(self.file_registry_prefix)
+        s3_prefix = S3Path(s3_path).key
 
-def _create_file_registry_path(file_registry_prefix, s3_path: str) -> str:
-    LOGGER.info(
-        "Combining base prefix: %s with read path: %s", file_registry_prefix, s3_path,
-    )
-    file_registry_s3_path = S3Path(file_registry_prefix)
-    s3_prefix = S3Path(s3_path).key
-
-    return str(file_registry_s3_path / s3_prefix)
+        return str(file_registry_s3_path / s3_prefix)
