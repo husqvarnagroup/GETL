@@ -32,8 +32,7 @@ class S3PrefixScan(FileRegistry):
     """
 
     def __init__(self, bconf: BlockConfig):
-        self.file_registry_path = None  # Will be set at a later point
-        self.file_registry_prefix = bconf.props["BasePrefix"]
+        self.file_registry_path = bconf.props["BasePath"]
         self.update_after = bconf.props["UpdateAfter"]
         self.hive_database_name = bconf.props["HiveDatabaseName"]
         self.hive_table_name = bconf.props["HiveTableName"]
@@ -48,7 +47,6 @@ class S3PrefixScan(FileRegistry):
         fr_utils.update_date_lifted(self.delta_table)
 
     def load(self, s3_path: str, suffix: str) -> List[str]:
-        self.file_registry_path = self._create_file_registry_path(s3_path)
         self._get_or_create()
 
         list_of_rows = self._get_new_s3_files(s3_path, suffix)
@@ -140,14 +138,3 @@ class S3PrefixScan(FileRegistry):
         """Create a dataframe from a list of paths with the file registry schema."""
         # data = [(row.file_path, row.prefix_date, row.date_lifted) for row in rows]
         return self.spark.createDataFrame(rows, self.schema)
-
-    def _create_file_registry_path(self, s3_path: str) -> str:
-        LOGGER.info(
-            "Combining base prefix: %s with read path: %s",
-            self.file_registry_prefix,
-            s3_path,
-        )
-        file_registry_s3_path = S3Path(self.file_registry_prefix)
-        s3_prefix = S3Path(s3_path).key
-
-        return str(file_registry_s3_path / s3_prefix)

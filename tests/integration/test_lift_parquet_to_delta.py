@@ -63,16 +63,8 @@ def get_file_names(path, suffix="parquet"):
 
 @patch("getl.blocks.load.entrypoint._batch_read")
 @patch.object(S3PrefixScan, "_create_hive_table")
-@patch.object(S3PrefixScan, "_create_file_registry_path")
 def test_lift_parquet_to_delta(
-    m_file_registry,
-    m_hive_table,
-    m_batch_read,
-    spark_session,
-    s3_mock,
-    helpers,
-    generate_data,
-    tmp_dir,
+    m_hive_table, m_batch_read, spark_session, s3_mock, helpers, generate_data, tmp_dir,
 ):
     """Lift parquet files to delta, with no previus file registry."""
     # Arrange
@@ -80,7 +72,6 @@ def test_lift_parquet_to_delta(
     read_path = "s3://tmp-bucket{}".format(base_path_filesystem)
     write_path = "{}/files".format(tmp_dir)
     file_registry_path = "{}/file_registry/{}".format(tmp_dir, base_path_filesystem)
-    m_file_registry.return_value = file_registry_path
 
     # Mock spark load
     m_batch_read.return_value = spark_session.read.load(

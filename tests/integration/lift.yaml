@@ -11,7 +11,7 @@ FileRegistry:
   S3PrefixScan:
     Type: fileregistry::s3_prefix_scan
     Properties:
-      BasePrefix: ${FileRegistryBasePrefix}
+      BasePath: ${FileRegistryBasePrefix}
       UpdateAfter: WriteToS3
       HiveDatabaseName: file_registry_dev
       HiveTableName: example

@@ -1,5 +1,4 @@
 """Entry point for the metadata blocks."""
-import warnings
 from types import FunctionType
 
 from getl.block import BlockConfig
@@ -13,21 +12,13 @@ def resolve(func: FunctionType, bconf: BlockConfig) -> FileRegistry:
     return func(bconf)
 
 
-def prefix_based_date(bconf: BlockConfig) -> FileRegistry:
-    warnings.warn(
-        "prefix_based_date is deprecated, replace with s3_prefix_scan",
-        DeprecationWarning,
-    )
-    return S3PrefixScan(bconf)
-
-
 def s3_prefix_scan(bconf: BlockConfig) -> FileRegistry:
     """Find all new files based on date format YYYY/MM/DD
 
     S3PrefixScan:
-        Type: fileregistry::prefix_based_date
+        Type: fileregistry::s3_prefix_scan
         Properties:
-            BasePrefix: s3://datalake/file-registry
+            BasePath: s3://datalake/file-registry
             UpdateAfter: WriteToDatabase
             HiveDatabaseName: file_registry
             HiveTableName: dataset-a
