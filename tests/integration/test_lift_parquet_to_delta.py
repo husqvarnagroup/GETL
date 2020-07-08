@@ -8,7 +8,7 @@ import pytest
 from mock import patch
 from pyspark.sql import functions as F
 
-from getl.blocks.fileregistry.s3_prefix_scan import S3PrefixScan
+from getl.blocks.fileregistry.s3_date_prefix_scan import S3DatePrefixScan
 from getl.lift import lift
 
 # CONSTANTS
@@ -62,7 +62,7 @@ def get_file_names(path, suffix="parquet"):
 
 
 @patch("getl.blocks.load.entrypoint._batch_read")
-@patch.object(S3PrefixScan, "_create_hive_table")
+@patch.object(S3DatePrefixScan, "_create_hive_table")
 def test_lift_parquet_to_delta(
     m_hive_table, m_batch_read, spark_session, s3_mock, helpers, generate_data, tmp_dir,
 ):
@@ -100,7 +100,7 @@ def test_lift_parquet_to_delta(
 
 
 @patch("getl.blocks.load.entrypoint._batch_read")
-@patch.object(S3PrefixScan, "load")
+@patch.object(S3DatePrefixScan, "load")
 def test_no_new_data_to_lift(
     m_load, m_batch_read, spark_session, tmp_dir, helpers, generate_data
 ):

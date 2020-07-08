@@ -3,8 +3,8 @@ from types import FunctionType
 
 from getl.block import BlockConfig
 from getl.blocks.fileregistry.base import FileRegistry
+from getl.blocks.fileregistry.s3_date_prefix_scan import S3DatePrefixScan
 from getl.blocks.fileregistry.s3_full_scan import S3FullScan
-from getl.blocks.fileregistry.s3_prefix_scan import S3PrefixScan
 
 
 def resolve(func: FunctionType, bconf: BlockConfig) -> FileRegistry:
@@ -12,18 +12,18 @@ def resolve(func: FunctionType, bconf: BlockConfig) -> FileRegistry:
     return func(bconf)
 
 
-def s3_prefix_scan(bconf: BlockConfig) -> FileRegistry:
+def s3_date_prefix_scan(bconf: BlockConfig) -> FileRegistry:
     """Find all new files based on date format YYYY/MM/DD
 
-    S3PrefixScan:
-        Type: fileregistry::s3_prefix_scan
+    S3DatePrefixScan:
+        Type: fileregistry::s3_date_prefix_scan
         Properties:
             BasePath: s3://datalake/file-registry
             UpdateAfter: WriteToDatabase
             HiveDatabaseName: file_registry
             HiveTableName: dataset-a
     """
-    return S3PrefixScan(bconf)
+    return S3DatePrefixScan(bconf)
 
 
 def s3_full_scan(bconf: BlockConfig) -> FileRegistry:

@@ -17,7 +17,7 @@ LOGGER = get_logger(__name__)
 FileRegistryRow = namedtuple("FileRegistryRow", "file_path, prefix_date, date_lifted")
 
 
-class S3PrefixScan(FileRegistry):
+class S3DatePrefixScan(FileRegistry):
     schema = T.StructType(
         [
             T.StructField("file_path", T.StringType(), True),

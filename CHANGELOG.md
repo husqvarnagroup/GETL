@@ -7,7 +7,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 ### Added
-- s3_prefix_scan fileregistry, based upon prefix_based_date, see [migration](migrations/s3_prefix_scan.md).
+- s3_date_prefix_scan fileregistry, based upon prefix_based_date, see [migration](migrations/s3_date_prefix_scan.md).
 
 ### Removed
 - prefix_based_date fileregistry.

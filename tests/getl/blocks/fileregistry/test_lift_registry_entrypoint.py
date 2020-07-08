@@ -6,7 +6,7 @@ from mock import Mock, patch
 from pyspark.sql import functions as F
 
 from getl.block import BlockConfig, BlockLog
-from getl.blocks.fileregistry.entrypoint import S3PrefixScan, s3_prefix_scan
+from getl.blocks.fileregistry.entrypoint import S3DatePrefixScan, s3_date_prefix_scan
 
 
 # HELPERS
@@ -55,12 +55,12 @@ def setup_bconf(base_prefix, start_date, spark_session):
 
 def create_file_registry(helpers, spark, files, file_registry_path):
     data = helpers.convert_events_to_datetime(files, "%Y/%m/%d")
-    current_df = spark.createDataFrame(data, S3PrefixScan.schema)
+    current_df = spark.createDataFrame(data, S3DatePrefixScan.schema)
     current_df = current_df.where(~F.col("file_path").contains("f4.parquet"))
     current_df.write.save(path=file_registry_path, format="delta", mode="overwrite")
 
 
-@patch.object(S3PrefixScan, "_create_hive_table")
+@patch.object(S3DatePrefixScan, "_create_hive_table")
 def test_pbd_load_no_previous_data(m_hive_table, spark_session, helpers, tmp_dir):
     """Test the load method for prefixed based date when there is no prev data."""
     # Arrange
@@ -82,7 +82,7 @@ def test_pbd_load_no_previous_data(m_hive_table, spark_session, helpers, tmp_dir
     )
 
     # Act
-    filepaths = s3_prefix_scan(conf).load(
+    filepaths = s3_date_prefix_scan(conf).load(
         "s3://tmp-bucket/plantlib/live", ".parquet.crc"
     )
 
@@ -130,7 +130,7 @@ def test_previous_data_with_only_null_values(s3_mock, spark_session, tmp_dir, he
     )
 
     # ACT
-    filepaths = s3_prefix_scan(conf).load(params["s3_path"], suffix=".parquet.crc")
+    filepaths = s3_date_prefix_scan(conf).load(params["s3_path"], suffix=".parquet.crc")
 
     # ASSERT
     base = "s3://tmp-bucket/plantlib/live"
@@ -175,7 +175,7 @@ def test_pbd_load_with_previous_data(spark_session, s3_mock, tmp_dir, helpers):
     )
 
     # ACT
-    filepaths = s3_prefix_scan(conf).load(params["s3_path"], suffix=".parquet.crc")
+    filepaths = s3_date_prefix_scan(conf).load(params["s3_path"], suffix=".parquet.crc")
 
     # ASSERT
     base = "s3://tmp-bucket/plantlib/live"
@@ -205,7 +205,7 @@ def test_create_hive_table(path, table):
         "PartitionFormat": "%Y/%m/%d",
     }
     conf = BlockConfig("CurrentSection", spark, None, props, BlockLog())
-    pbd = S3PrefixScan(conf)
+    pbd = S3DatePrefixScan(conf)
 
     # Act
     pbd._create_hive_table()

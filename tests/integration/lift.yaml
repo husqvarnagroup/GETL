@@ -8,8 +8,8 @@ Parameters:
     Description: The prefix to where to save the metadata regarding file sources
 
 FileRegistry:
-  S3PrefixScan:
-    Type: fileregistry::s3_prefix_scan
+  S3DatePrefixScan:
+    Type: fileregistry::s3_date_prefix_scan
     Properties:
       BasePath: ${FileRegistryBasePrefix}
       UpdateAfter: WriteToS3
@@ -22,7 +22,7 @@ LiftJob:
   TrustedFiles:
     Type: load::batch_parquet
     Properties:
-      FileRegistry: S3PrefixScan
+      FileRegistry: S3DatePrefixScan
       Path: ${ReadPath}
 
   WriteToS3:

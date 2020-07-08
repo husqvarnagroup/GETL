@@ -35,7 +35,7 @@ def batch_parquet(conf: BlockConfig) -> DataFrame:
         Type: load::batch_parquet
         Properties:
             Path: s3://husvarna-datalake/trusted/amc/live
-            FileRegistry: S3PrefixScan
+            FileRegistry: S3DatePrefixScan
             Alias: settings
     ```
 
@@ -59,7 +59,7 @@ def batch_json(conf: BlockConfig) -> DataFrame:
         Type: load::batch_json
         Properties:
             Path: s3://husvarna-datalake/trusted/amc/live
-            FileRegistry: S3PrefixScan
+            FileRegistry: S3DatePrefixScan
             Alias: settings
             Suffix: .json
     ```
@@ -90,7 +90,7 @@ def batch_xml(conf: BlockConfig) -> DataFrame:
         Type: load::batch_xml
         Properties:
             Path: s3://husvarna-datalake/trusted/amc/live
-            FileRegistry: S3PrefixScan
+            FileRegistry: S3DatePrefixScan
             Alias: settings
             RowTag: employee
             Suffix: .xml # Default .xml

@@ -34,7 +34,7 @@ def test_process_yaml_from_string():
         TrustedFiles:
             Type: load::batch_parquet
             Properties:
-                FileRegistry: S3PrefixScan
+                FileRegistry: S3DatePrefixScan
                 Path: ${ReadPath}
     """
 
@@ -61,7 +61,7 @@ def test_resolve_yaml_parameters():
     # Act
     resolved_lift_def = liftdef._replace_variables(lift_def, params)
     lift_job = resolved_lift_def["LiftJob"]
-    file_sources = resolved_lift_def["FileSources"]["S3PrefixScan"]
+    file_sources = resolved_lift_def["FileSources"]["S3DatePrefixScan"]
 
     # Assert
     assert lift_job["RawFiles"]["Path"] == "path1"
