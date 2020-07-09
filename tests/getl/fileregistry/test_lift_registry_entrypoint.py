@@ -6,11 +6,8 @@ from mock import Mock, patch
 from pyspark.sql import functions as F
 
 from getl.block import BlockConfig, BlockLog
-from getl.blocks.fileregistry.entrypoint import s3_date_prefix_scan
-from getl.blocks.fileregistry.s3_date_prefix_scan import (
-    S3DatePrefixScan,
-    get_dates_in_format,
-)
+from getl.fileregistry.entrypoint import s3_date_prefix_scan
+from getl.fileregistry.s3_date_prefix_scan import S3DatePrefixScan, get_dates_in_format
 
 
 # HELPERS

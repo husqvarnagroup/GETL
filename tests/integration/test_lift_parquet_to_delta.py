@@ -8,7 +8,7 @@ import pytest
 from mock import patch
 from pyspark.sql import functions as F
 
-from getl.blocks.fileregistry.s3_date_prefix_scan import S3DatePrefixScan
+from getl.fileregistry.s3_date_prefix_scan import S3DatePrefixScan
 from getl.lift import lift
 
 # CONSTANTS

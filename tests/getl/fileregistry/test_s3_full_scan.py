@@ -4,7 +4,7 @@ from mock import Mock, patch
 from pyspark.sql import functions as F
 
 from getl.block import BlockConfig, BlockLog
-from getl.blocks.fileregistry.entrypoint import S3FullScan, s3_full_scan
+from getl.fileregistry.entrypoint import S3FullScan, s3_full_scan
 
 
 # HELPERS
