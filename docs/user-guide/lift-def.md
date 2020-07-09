@@ -1,7 +1,16 @@
-# Lift definitions - base
+# Lift definition
+A lift definition is a yaml file that describes how the lift job should execute.
+
+As of now it contains the following main blocks:
+
+* [Parameters](#parameters): The params that can be passed in the definition.
+* [FileRegistry](#fileregistry): Define a file registry to keep track of what files have been processed.
+* [LiftJob](#liftjob): The lift job itself that contains blocks that are executed in a sequential order.
+
 
 
 ## Parameters
+All parameters that are going to be used in the lift definition needs to be defined in the `Parameters` section.
 
 - field: `Parameters`  
   type: dict  
@@ -28,21 +37,16 @@ LiftJob:
       Path: ${Path}
 ```
 
+## FileRegistry
+
+TODO
+
 
 ## LiftJob
+The lift job section contains multiple blocks that are executed sequentialy.
 
-List of jobs to do.
+See [lift job blocks](lift-job-blocks.md) for more details.
 
-- field: `LiftJob`  
-  type: dict  
-  properties:
-    - field: `{string}`  
-      type: dict  
-      properties:
-        - field: `Type`  
-          type: string, see [lift job types](lift-job-types.md)
-        - field: `Properties`  
-          type: dict, see [lift job types](lift-job-types.md)
 
 Example:
 
@@ -75,7 +79,4 @@ LiftJob:
 ```
 
 
-## FileRegistry
-
-TODO
   
