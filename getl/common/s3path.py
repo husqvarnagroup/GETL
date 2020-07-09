@@ -34,7 +34,6 @@ class S3Path:
         if not other:
             return S3Path(str(self))
         if other.startswith("/"):
-            raise ValueError("This shouldn't happen!!!")
             other = other[1:]
         if self_path.endswith("/"):
             return S3Path(f"{self_path}{other}")
