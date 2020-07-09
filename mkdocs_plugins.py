@@ -48,7 +48,7 @@ class LiftBlock(BasePlugin):
 
     def get_blocks_path(self, config):
         project_path = Path(config["config_file_path"]).parent
-        return project_path / "getl" / "blocks"
+        return project_path / "getl"
 
     def on_serve(self, server, config, builder=None):
         server.watch(str(self.get_blocks_path(config)), builder)
@@ -57,20 +57,32 @@ class LiftBlock(BasePlugin):
     def on_page_markdown(self, markdown, page, config, files):
         if "<lift-blocks>" in markdown:
             doc = generate_docs(
-                entrypoint_files(self.get_blocks_path(config)), delimiter="::"
+                entrypoint_files(self.get_blocks_path(config) / "blocks"),
+                delimiter="::",
             )
             return markdown.replace("<lift-blocks>", doc)
 
         if "<transform-functions>" in markdown:
             doc = generate_docs(
-                transform_files(self.get_blocks_path(config) / "transform"),
+                transform_files(self.get_blocks_path(config) / "blocks" / "transform"),
                 delimiter=".",
             )
             return markdown.replace("<transform-functions>", doc)
+
+        if "<file-registry>" in markdown:
+            doc = generate_docs(
+                entrypoint_files(self.get_blocks_path(config)),
+                delimiter="::",
+                add_header=False,
+            )
+            return markdown.replace("<file-registry>", doc)
+
         return markdown
 
 
-def generate_docs(modules: Iterable[Tuple[str, ast.Module]], delimiter: str) -> str:
+def generate_docs(
+    modules: Iterable[Tuple[str, ast.Module]], delimiter: str, add_header: bool = True
+) -> str:
     dest_file = StringIO()
 
     for module_name, module in sorted(modules, key=itemgetter(0)):
@@ -82,7 +94,8 @@ def generate_docs(modules: Iterable[Tuple[str, ast.Module]], delimiter: str) -> 
 
         module_doc = ast.get_docstring(module)
 
-        dest_file.write(f"## {module_name}\n\n{module_doc}\n\n")
+        if add_header:
+            dest_file.write(f"## {module_name}\n\n{module_doc}\n\n")
 
         for node in function_nodes:
             func_name = node.name
