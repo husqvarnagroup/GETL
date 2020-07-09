@@ -39,7 +39,7 @@ LiftJob:
 
 ## FileRegistry
 
-TODO
+<file-registry>
 
 
 ## LiftJob
