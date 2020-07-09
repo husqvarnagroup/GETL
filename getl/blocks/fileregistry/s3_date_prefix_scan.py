@@ -23,13 +23,13 @@ class S3DatePrefixScan(FileRegistry):
     schema = T.StructType(
         [
             T.StructField("file_path", T.StringType(), True),
-            T.StructField("prefix_date", T.DateType(), True),
+            T.StructField("prefix_date", T.TimestampType(), True),
             T.StructField("date_lifted", T.TimestampType(), True),
         ]
     )
     db_schema = """
         file_path STRING,
-        prefix_date DATE NOT NULL,
+        prefix_date TIMESTAMP NOT NULL,
         date_lifted TIMESTAMP
     """
 
@@ -41,7 +41,7 @@ class S3DatePrefixScan(FileRegistry):
 
         self.default_start = datetime.strptime(
             bconf.props["DefaultStartDate"], "%Y-%m-%d"
-        ).date()
+        )
         self.partition_format = bconf.props["PartitionFormat"]
         self.spark = bconf.spark
 
@@ -102,7 +102,12 @@ class S3DatePrefixScan(FileRegistry):
             keys = list(base_s3path.glob(suffix))
             LOGGER.info("Search prefix %s for files. Found: %s", base_s3path, len(keys))
 
-            list_of_rows.extend(FileRegistryRow(str(key), date, None) for key in keys)
+            list_of_rows.extend(
+                FileRegistryRow(
+                    str(key), datetime.strptime(date, self.partition_format), None
+                )
+                for key in keys
+            )
 
         return list_of_rows
 
@@ -164,12 +169,12 @@ def get_dates_in_format(start: datetime, stop: datetime, fmt: str) -> Iterator[s
         (
             "%Y",
             timedelta(days=1),
-            {"month": 0, "hour": 0, "minute": 0, "second": 0, "microsecond": 0},
+            {"month": 1, "hour": 0, "minute": 0, "second": 0, "microsecond": 0},
         ),
         (
             "%y",
             timedelta(days=1),
-            {"month": 0, "hour": 0, "minute": 0, "second": 0, "microsecond": 0},
+            {"month": 1, "hour": 0, "minute": 0, "second": 0, "microsecond": 0},
         ),
     ]
     for fmt_part, dt, replace in lookup_table:

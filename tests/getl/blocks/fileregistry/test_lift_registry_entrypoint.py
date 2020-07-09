@@ -17,7 +17,7 @@ from getl.blocks.fileregistry.s3_date_prefix_scan import (
 def create_fr_row(filename, date, params, lift_date=None):
     return (
         f'{params["s3_path"]}/{date.strftime("%Y/%m/%d")}/{filename}',
-        date.date(),
+        date,
         lift_date,
     )
 
@@ -103,7 +103,7 @@ def test_pbd_load_no_previous_data(m_hive_table, spark_session, helpers, tmp_dir
     assert data[0][0] == "{}/{}/f2.parquet.crc".format(
         params["s3_path"], params["two_days_ago"].strftime("%Y/%m/%d")
     )
-    assert data[0][1] == params["two_days_ago"].date()
+    assert data[0][1].date() == params["two_days_ago"].date()
     assert data[0][2] is None
     assert m_hive_table.called
 
@@ -223,6 +223,7 @@ def test_create_hive_table(path, table):
 @pytest.mark.parametrize(
     "start,stop,fmt,result",
     [
+        (datetime(2020, 8, 31), datetime(2021, 1, 1), "%Y", ["2020", "2021"]),
         (
             datetime(2020, 8, 31),
             datetime(2020, 12, 1),
