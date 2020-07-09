@@ -24,13 +24,13 @@ class Manager:
 
     def init_file_registry(self, file_registry: OrderedDict) -> None:
         """Initiate the file registrys defined in the lift definition."""
-        for bconf, res in self._process_blocks(file_registry):
+        for bconf, res in self._process_blocks(file_registry, "getl.fileregistry"):
             self.file_registry.add(bconf, res)
 
     def execute_lift_job(self, lift_job: OrderedDict) -> None:
         """Execute the lift definition."""
         try:
-            for bconf, dataframe in self._process_blocks(lift_job):
+            for bconf, dataframe in self._process_blocks(lift_job, "getl.blocks"):
                 # Check if output from block is a dataframe
                 if not isinstance(dataframe, DataFrame):
                     raise TypeError(
@@ -54,15 +54,16 @@ class Manager:
         except NoDataToProcess:
             LOGGER.info("No new data to process now exiting lift job.")
 
-    def _process_blocks(self, blocks: OrderedDict) -> Any:
+    def _process_blocks(self, blocks: OrderedDict, base_import_path: str) -> Any:
         """Process each block and yield its result"""
         for section_name, params in blocks.items():
             LOGGER.info("Process block %s with params %s", section_name, params)
 
             # Fetch functions
             module, function_name = params["Type"].split("::")
-            wrapper_function = self._get_function(module, "resolve")
-            function = self._get_function(module, function_name)
+            import_path = f"{base_import_path}.{module}"
+            wrapper_function = self._get_function(import_path, "resolve")
+            function = self._get_function(import_path, function_name)
 
             # Setup the block config
             bconf = BlockConfig(
@@ -85,6 +86,4 @@ class Manager:
     @staticmethod
     def _load_module(module_dir: str) -> ModuleType:
         """Load the module responsible for resolving the block."""
-        return import_module(
-            "getl.blocks.{module_dir}.entrypoint".format(module_dir=module_dir)
-        )
+        return import_module("{module_dir}.entrypoint".format(module_dir=module_dir))

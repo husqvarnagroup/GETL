@@ -4,12 +4,12 @@ from typing import List
 
 from pyspark.sql import DataFrame, functions as F, types as T
 
-import getl.blocks.fileregistry.fileregistry_utils as fr_utils
+import getl.fileregistry.fileregistry_utils as fr_utils
 from getl.block import BlockConfig
-from getl.blocks.fileregistry.base import FileRegistry
 from getl.common.delta_table import DeltaTable
 from getl.common.hive_table import HiveTable
 from getl.common.s3path import S3Path
+from getl.fileregistry.base import FileRegistry
 from getl.logging import get_logger
 
 # pylint: disable=E1101,W0221

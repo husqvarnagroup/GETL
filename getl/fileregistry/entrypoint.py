@@ -2,9 +2,9 @@
 from types import FunctionType
 
 from getl.block import BlockConfig
-from getl.blocks.fileregistry.base import FileRegistry
-from getl.blocks.fileregistry.s3_date_prefix_scan import S3DatePrefixScan
-from getl.blocks.fileregistry.s3_full_scan import S3FullScan
+from getl.fileregistry.base import FileRegistry
+from getl.fileregistry.s3_date_prefix_scan import S3DatePrefixScan
+from getl.fileregistry.s3_full_scan import S3FullScan
 
 
 def resolve(func: FunctionType, bconf: BlockConfig) -> FileRegistry:
