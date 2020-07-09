@@ -8,7 +8,7 @@ import pytest
 from mock import patch
 from pyspark.sql import functions as F
 
-from getl.blocks.fileregistry.prefix_based_date import PrefixBasedDate
+from getl.blocks.fileregistry.s3_date_prefix_scan import S3DatePrefixScan
 from getl.lift import lift
 
 # CONSTANTS
@@ -62,25 +62,16 @@ def get_file_names(path, suffix="parquet"):
 
 
 @patch("getl.blocks.load.entrypoint._batch_read")
-@patch.object(PrefixBasedDate, "_create_hive_table")
-@patch.object(PrefixBasedDate, "_create_file_registry_path")
+@patch.object(S3DatePrefixScan, "_create_hive_table")
 def test_lift_parquet_to_delta(
-    m_file_registry,
-    m_hive_table,
-    m_batch_read,
-    spark_session,
-    s3_mock,
-    helpers,
-    generate_data,
-    tmp_dir,
+    m_hive_table, m_batch_read, spark_session, s3_mock, helpers, generate_data, tmp_dir,
 ):
     """Lift parquet files to delta, with no previus file registry."""
     # Arrange
     base_path_filesystem = generate_data
-    read_path = "s3://tmp-bucket/{}".format(base_path_filesystem)
+    read_path = "s3://tmp-bucket{}".format(base_path_filesystem)
     write_path = "{}/files".format(tmp_dir)
     file_registry_path = "{}/file_registry/{}".format(tmp_dir, base_path_filesystem)
-    m_file_registry.return_value = file_registry_path
 
     # Mock spark load
     m_batch_read.return_value = spark_session.read.load(
@@ -109,7 +100,7 @@ def test_lift_parquet_to_delta(
 
 
 @patch("getl.blocks.load.entrypoint._batch_read")
-@patch.object(PrefixBasedDate, "load")
+@patch.object(S3DatePrefixScan, "load")
 def test_no_new_data_to_lift(
     m_load, m_batch_read, spark_session, tmp_dir, helpers, generate_data
 ):

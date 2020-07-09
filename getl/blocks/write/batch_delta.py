@@ -5,7 +5,7 @@ from pyspark.sql import DataFrame, SparkSession
 from pyspark.sql.utils import AnalysisException, ParseException
 
 from getl.common.delta_table import DeltaTable
-from getl.common.utils import delete_files, fetch_filepaths_from_prefix
+from getl.common.s3path import S3Path
 from getl.logging import get_logger
 
 LOGGER = get_logger(__name__)
@@ -33,9 +33,8 @@ class BatchDelta:
 
     def clean_write(self, path: str) -> None:
         """Write to delta files to a clean location."""
-        kill_files = list(fetch_filepaths_from_prefix(path, prepend_bucket=True))
-        if len(kill_files) > 0:
-            delete_files(kill_files)
+        for s3path in S3Path(path).glob():
+            s3path.delete()
         self.write(path, "overwrite")
 
     def _dataset_exists(self, path: str) -> bool:

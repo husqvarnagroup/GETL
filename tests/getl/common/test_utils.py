@@ -5,6 +5,7 @@ import pytest
 from botocore.exceptions import ClientError
 from pyspark.sql.types import StructType
 
+from getl.common.s3path import S3Path
 from getl.common.utils import (
     copy_and_cleanup,
     copy_keys,
@@ -136,25 +137,22 @@ def test_delete_files_success_nofile(s3_mock, paths, bucket):
     assert delete_files(paths) is None
 
 
-@mock.patch("getl.common.utils.boto3")
-def test_copy_keys_passes_correct_parameters(m_boto3):
+def test_copy_keys_passes_correct_parameters(s3_mock):
     """copy_keys is called with right parameters and in right order."""
-    # Arrange
-    m_s3 = m_boto3.client
-    m_s3.return_value.get_paginator.return_value.paginate.return_value = [
-        {"Contents": [{"Key": "fake/key"}]}
-    ]
-    copy_source = {"Bucket": "landingzone", "Key": "amc-connect/fake/key.json"}
+    s3_mock.create_bucket(Bucket="landingzone")
+    s3_mock.create_bucket(Bucket="datalake")
+    S3Path("s3://landingzone/amc-connect/fake/key.json").write_text(
+        '{"hello": "world"}'
+    )
 
     # Act
     copy_keys(
         [("landingzone/amc-connect/fake/key.json", "datalake/amc/raw/fake/key.json")]
     )
 
-    # Assert
-    m_s3.assert_called_with("s3")
-    m_s3.return_value.copy.assert_called_with(
-        copy_source, "datalake", "amc/raw/fake/key.json"
+    assert (
+        S3Path("s3://datalake/amc/raw/fake/key.json").read_text()
+        == '{"hello": "world"}'
     )
 
 
@@ -220,7 +218,7 @@ def test_copy_keys_successful(
             [("landingzone/amc-connect/file.json", "datalake/amc/raw/file.json")],
             "landingzone",
             "datalake",
-            "File not found with bucket: landingzone key: amc-connect/file.json",
+            "Not Found",
         ),
         (
             [("landingzone/amc-connect/file.json", "datalake/amc/raw/file.json")],
@@ -243,22 +241,6 @@ def test_copy_keys_throws_exceptions(
         copy_keys(transactions)
 
     assert error_msg in str(file_not_found)
-
-
-@mock.patch("getl.common.utils.boto3")
-def test_copy_keys_throws_client_error(m_boto3):
-    """copy_keys raises the original client error if we cannot map it."""
-    # Arrange
-    error = ClientError({"Error": {"Code": "mocked error"}}, "asd")
-    m_s3 = m_boto3.client
-    m_s3.return_value.copy.side_effect = error
-
-    # Act
-    with pytest.raises(ClientError) as error:
-        copy_keys(("bucket/file.json", "bucket/file.json"))
-
-    # Assert
-    assert "mocked error" in str(error.value)
 
 
 @mock.patch("getl.common.utils.delete_files")

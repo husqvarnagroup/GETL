@@ -10,8 +10,8 @@ Parameters:
     Description: The path to the trusted search dataset
 
 FileSources:
-  PrefixBasedDate:
-    Type: metadata::prefix_based_date
+  S3DatePrefixScan:
+    Type: metadata::s3_prefix_scan
     Properties:
       FileSourceBasePrefix: ${TrustedSearchPath}
       UpdateAfter: WriteToDatabase

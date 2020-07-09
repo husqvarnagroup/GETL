@@ -8,7 +8,8 @@ from pyspark.sql.utils import AnalysisException
 
 from getl.block import BlockConfig
 from getl.common.errors import NoDataToProcess
-from getl.common.utils import fetch_s3_file, json_to_spark_schema
+from getl.common.s3path import S3Path
+from getl.common.utils import json_to_spark_schema
 
 
 def resolve(func, conf: BlockConfig) -> DataFrame:
@@ -34,7 +35,7 @@ def batch_parquet(conf: BlockConfig) -> DataFrame:
         Type: load::batch_parquet
         Properties:
             Path: s3://husvarna-datalake/trusted/amc/live
-            FileRegistry: PrefixBasedDate
+            FileRegistry: S3DatePrefixScan
             Alias: settings
     ```
 
@@ -58,14 +59,14 @@ def batch_json(conf: BlockConfig) -> DataFrame:
         Type: load::batch_json
         Properties:
             Path: s3://husvarna-datalake/trusted/amc/live
-            FileRegistry: PrefixBasedDate
+            FileRegistry: S3DatePrefixScan
             Alias: settings
             Suffix: .json
     ```
 
     """
     paths = _process_path(conf, suffix=conf.get("Suffix", ".json"))
-    schema = json.loads(fetch_s3_file(conf.get("JsonSchemaPath")))
+    schema = json.loads(S3Path(conf.get("JsonSchemaPath")).read_text())
 
     return _batch_read(
         conf.spark,
@@ -89,7 +90,7 @@ def batch_xml(conf: BlockConfig) -> DataFrame:
         Type: load::batch_xml
         Properties:
             Path: s3://husvarna-datalake/trusted/amc/live
-            FileRegistry: PrefixBasedDate
+            FileRegistry: S3DatePrefixScan
             Alias: settings
             RowTag: employee
             Suffix: .xml # Default .xml
@@ -116,7 +117,7 @@ def batch_xml(conf: BlockConfig) -> DataFrame:
 
     # Get the paths to process and the schema
     path = _process_path(conf, suffix=conf.get("Suffix", ".xml"))
-    schema = json.loads(fetch_s3_file(conf.get("JsonSchemaPath")))
+    schema = json.loads(S3Path(conf.get("JsonSchemaPath")).read_text())
     batch_size = conf.get("BatchSize", 200)
 
     # If we have a list of files transform it into batches of comma seperated strings
@@ -181,7 +182,7 @@ def stream_json(bconf: BlockConfig) -> DataFrame:
     ```
 
     """
-    json_schema = json.loads(fetch_s3_file(bconf.props["SchemaPath"]))
+    json_schema = json.loads(S3Path(bconf.props["SchemaPath"]).read_text())
 
     dataframe = bconf.spark.readStream.schema(json_to_spark_schema(json_schema)).json(
         bconf.props["Path"]

@@ -8,10 +8,10 @@ Parameters:
     Description: The prefix to where to save the metadata regarding file sources
 
 FileRegistry:
-  PrefixBasedDate:
-    Type: fileregistry::prefix_based_date
+  S3DatePrefixScan:
+    Type: fileregistry::s3_date_prefix_scan
     Properties:
-      BasePrefix: ${FileRegistryBasePrefix}
+      BasePath: ${FileRegistryBasePrefix}
       UpdateAfter: WriteToS3
       HiveDatabaseName: file_registry_dev
       HiveTableName: example
@@ -22,7 +22,7 @@ LiftJob:
   TrustedFiles:
     Type: load::batch_parquet
     Properties:
-      FileRegistry: PrefixBasedDate
+      FileRegistry: S3DatePrefixScan
       Path: ${ReadPath}
 
   WriteToS3:
