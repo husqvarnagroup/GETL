@@ -122,5 +122,4 @@ class S3FullScan(FileRegistry):
 
     def _rows_to_dataframe(self, rows: List[FileRegistryRow]) -> DataFrame:
         """Create a dataframe from a list of paths with the file registry schema."""
-        # data = [(row.file_path, row.date_lifted) for row in rows]
         return self.spark.createDataFrame(rows, self.schema)
