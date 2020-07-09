@@ -1,7 +1,9 @@
 """File registry that works with YYYY/MM/DD prefixed files in s3."""
 from collections import namedtuple
 from datetime import datetime, timedelta
-from typing import List
+from itertools import groupby
+from operator import itemgetter
+from typing import Iterator, List
 
 from pyspark.sql import DataFrame, functions as F, types as T
 
@@ -92,8 +94,10 @@ class S3DatePrefixScan(FileRegistry):
         """Get all new files in s3 from start to now as a dataframe."""
         list_of_rows = []
 
-        for date in self._get_dates_from(self.last_date):
-            base_s3path = S3Path(s3_path) / date.strftime(self.partition_format)
+        for date in get_dates_in_format(
+            self.last_date, datetime.now(), self.partition_format
+        ):
+            base_s3path = S3Path(s3_path) / date
 
             keys = list(base_s3path.glob(suffix))
             LOGGER.info("Search prefix %s for files. Found: %s", base_s3path, len(keys))
@@ -101,15 +105,6 @@ class S3DatePrefixScan(FileRegistry):
             list_of_rows.extend(FileRegistryRow(str(key), date, None) for key in keys)
 
         return list_of_rows
-
-    def _get_dates_from(self, start: datetime) -> List[datetime]:
-        """Get prefixes between the given dates."""
-        end = datetime.now().date()
-        step = timedelta(days=1)
-
-        while start <= end:
-            yield start
-            start += step
 
     def _get_last_prefix_date(self, dataframe: DataFrame) -> str:
         """Return the latest date_lifted column from the dataframe."""
@@ -138,3 +133,59 @@ class S3DatePrefixScan(FileRegistry):
         """Create a dataframe from a list of paths with the file registry schema."""
         # data = [(row.file_path, row.prefix_date, row.date_lifted) for row in rows]
         return self.spark.createDataFrame(rows, self.schema)
+
+
+def get_dates_in_format(start: datetime, stop: datetime, fmt: str) -> Iterator[str]:
+    """Get prefixes between the given dates."""
+    lookup_table = [
+        ("%S", timedelta(seconds=1), {"microsecond": 0}),
+        ("%M", timedelta(minutes=1), {"second": 0, "microsecond": 0}),
+        ("%H", timedelta(hours=1), {"minute": 0, "second": 0, "microsecond": 0}),
+        ("%I", timedelta(hours=1), {"minute": 0, "second": 0, "microsecond": 0}),
+        (
+            "%d",
+            timedelta(days=1),
+            {"hour": 0, "minute": 0, "second": 0, "microsecond": 0},
+        ),
+        (
+            "%e",
+            timedelta(days=1),
+            {"hour": 0, "minute": 0, "second": 0, "microsecond": 0},
+        ),
+        (
+            "%j",
+            timedelta(days=1),
+            {"hour": 0, "minute": 0, "second": 0, "microsecond": 0},
+        ),
+        (
+            "%m",
+            timedelta(days=1),
+            {"hour": 0, "minute": 0, "second": 0, "microsecond": 0},
+        ),
+        (
+            "%Y",
+            timedelta(days=1),
+            {"month": 0, "hour": 0, "minute": 0, "second": 0, "microsecond": 0},
+        ),
+        (
+            "%y",
+            timedelta(days=1),
+            {"month": 0, "hour": 0, "minute": 0, "second": 0, "microsecond": 0},
+        ),
+    ]
+    for fmt_part, dt, replace in lookup_table:
+        if fmt_part in fmt:
+            step = dt
+            resetted_start = start.replace(**replace)
+            break
+    else:
+        options = ", ".join(map(itemgetter(0), lookup_table))
+        raise ValueError(f"Format {fmt!r} is missing one of {options}")
+
+    def _inner():
+        begin = resetted_start
+        while begin <= stop:
+            yield begin.strftime(fmt)
+            begin += step
+
+    return map(itemgetter(0), groupby(_inner()))

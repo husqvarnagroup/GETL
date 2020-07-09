@@ -6,7 +6,11 @@ from mock import Mock, patch
 from pyspark.sql import functions as F
 
 from getl.block import BlockConfig, BlockLog
-from getl.blocks.fileregistry.entrypoint import S3DatePrefixScan, s3_date_prefix_scan
+from getl.blocks.fileregistry.entrypoint import s3_date_prefix_scan
+from getl.blocks.fileregistry.s3_date_prefix_scan import (
+    S3DatePrefixScan,
+    get_dates_in_format,
+)
 
 
 # HELPERS
@@ -214,3 +218,46 @@ def test_create_hive_table(path, table):
     assert path in str(spark.sql.call_args[0])
     assert "file_registry_dev" in str(spark.sql.call_args_list[0][0])
     assert table in str(spark.sql.call_args_list[2][0])
+
+
+@pytest.mark.parametrize(
+    "start,stop,fmt,result",
+    [
+        (
+            datetime(2020, 8, 31),
+            datetime(2020, 12, 1),
+            "%Y-%m",
+            ["2020-08", "2020-09", "2020-10", "2020-11", "2020-12"],
+        ),
+        (
+            datetime(2020, 9, 29, 23, 59),
+            datetime(2020, 10, 3),
+            "%Y-%m-%d",
+            ["2020-09-29", "2020-09-30", "2020-10-01", "2020-10-02", "2020-10-03"],
+        ),
+        (
+            datetime(2020, 9, 15, 8, 59),
+            datetime(2020, 9, 15, 13),
+            "%Y-%m-%d %H",
+            [
+                "2020-09-15 08",
+                "2020-09-15 09",
+                "2020-09-15 10",
+                "2020-09-15 11",
+                "2020-09-15 12",
+                "2020-09-15 13",
+            ],
+        ),
+    ],
+)
+def test_dates_in_format(start, stop, fmt, result):
+    assert list(get_dates_in_format(start, stop, fmt)) == result
+
+
+def test_dates_in_format_invalid():
+    with pytest.raises(ValueError):
+        assert list(
+            get_dates_in_format(
+                datetime(2020, 9, 15), datetime(2020, 9, 25), "same output"
+            )
+        )
