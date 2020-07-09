@@ -24,7 +24,7 @@ class Manager:
 
     def init_file_registry(self, file_registry: OrderedDict) -> None:
         """Initiate the file registrys defined in the lift definition."""
-        for bconf, res in self._process_blocks(file_registry, "getl.fileregistry"):
+        for bconf, res in self._process_blocks(file_registry, "getl"):
             self.file_registry.add(bconf, res)
 
     def execute_lift_job(self, lift_job: OrderedDict) -> None:

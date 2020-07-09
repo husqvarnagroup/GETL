@@ -5,7 +5,7 @@ nav:
     - 'User Guide':
       - 'user-guide/intro.md'
       - 'user-guide/lift-def.md'
-      - 'user-guide/lift-job-types.md'
+      - 'user-guide/lift-job-blocks.md'
       - 'user-guide/transform-functions.md'
     - 'About':
       - 'CONTRIBUTING.md'
@@ -25,3 +25,4 @@ plugins:
           - 'CHANGELOG.md'
           - 'CONTRIBUTING.md'
           - 'LICENSE.md'
+

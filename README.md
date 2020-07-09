@@ -12,7 +12,8 @@ An elegant way to ETL'ing.
 Features
 --------
 
-- TODO: A list of features will come here
+- Lift definition validation
+- Upsert to postgres
 
 Installation
 ------------
