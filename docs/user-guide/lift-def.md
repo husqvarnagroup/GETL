@@ -39,7 +39,9 @@ LiftJob:
 
 ## FileRegistry
 
-<file-registry>
+A file registry keeps track of what files have been processed, producing a delta of files that have not been processed yet.
+
+See [file registry](file-registry.md) for more details.
 
 
 ## LiftJob
@@ -53,12 +55,12 @@ Example:
 ```yml
 LiftJob:
 
-  TrustedFiles:
+  RawFiles:
     Type: load::batch_parquet
     Properties:
       Path: s3://bucket/path/to/data
 
-  PerformOperation:
+  OperationBlock:
     Type: transform::generic
     Input: TrustedFiles
     Properties:
@@ -67,7 +69,7 @@ LiftJob:
             from_column: timestamp
             to_column: date
 
-  FilterOperation:
+  FilterBlock:
     Type: transform::generic
     Input: PerformOperation
     Properties:
