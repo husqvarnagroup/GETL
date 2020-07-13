@@ -149,14 +149,17 @@ def function_nodes_in_module(module: ast.Module) -> List[ast.FunctionDef]:
 
 
 def format_function_docstring(docstring: str) -> str:
+    word_match = "([a-zA-Z0-9_. -]+)"
+    start_string = rf":param (\w+) {word_match}"
+
     regex_list = [
         (r"\n\n:param", "\n\nParameters\n:   \n:param"),
-        (r":param (\w+) (\w+):\s*(.*)$", r"- **\2** (*\1*) – \3"),
+        (rf"{start_string}:\s*(.*)$", r"- **\2** (*\1*) – \3"),
         (
-            r":param (\w+) (\w+)=(\w+):\s*(.*)$",
+            rf"{start_string}={word_match}:\s*(.*)$",
             r"- **\2** (*\1, optional, default: \3*) – \4",
         ),
-        (r":param (\w+) (\w+)(=):\s*(.*)$", r"- **\2** (*\1, optional*) – \4"),
+        (rf"{start_string}(=):\s*(.*)$", r"- **\2** (*\1, optional*) – \4"),
     ]
 
     for search, replace in regex_list:
