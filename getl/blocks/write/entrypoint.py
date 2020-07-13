@@ -19,6 +19,14 @@ def resolve(func, conf: BlockConfig) -> DataFrame:
 def batch_jdbc(conf: BlockConfig) -> DataFrame:
     """Batch save data with jdbc driver.
 
+    :param str Mode: the mode to write with such as append or overwrite
+    :param str Driver: the driver
+    :param str ConnUrl: the connection url
+    :param str Table: table to write to
+    :param str User: username to database
+    :param str Password: password to database
+    :param str NumPartitions: number of partitions to write with
+
     ```
     SectionName:
         Type: write::batch_jdbc
@@ -55,6 +63,18 @@ def batch_jdbc(conf: BlockConfig) -> DataFrame:
 def batch_delta(conf: BlockConfig) -> DataFrame:
     """Write delta data down to some location.
 
+    :param str Path: location to write to
+    :param str Mode: the mode to write with such as append or overwrite
+    :param str Optimize.Enabled=False: Enable optimze on delta table (Only works on databricks)
+    :param str Optimize.ZorderBy=None: What column names to optimize on
+    :param str Vacuum.Enabled=False: Enable vacuum on delta table (Only works on databricks)
+    :param int Vacuum.RetainHours=168: Number of days we keep version, default is 7 days, cannot be set lower
+    :param str Upsert.MergeStatement=: How to merge the new data `updates.{col}` with the old data `source.{col}`.
+    This option only have an effect if the `Mode: upsert` have been chosen.
+    :param str HiveTable.DatabaseName=: Name of hive table
+    :param str HiveTable.TableName=: Name of the hive table
+    :param str HiveTable.Schema=: The schema of the hive table
+
     ```
     SectionName:
         Type: write::batch_delta
@@ -63,14 +83,13 @@ def batch_delta(conf: BlockConfig) -> DataFrame:
             Path: s3://path/to/files
             Mode: upsert
             Optimize:
-                Enabled: False # Default
-                ZorderBy: column_name
+                Enabled: False
+                ZorderBy: column_name, column_name_2
             Vacuum:
-                Enabled: False # Default
-                RetainHours: 168 # Default 7 days, cannot be set lower
+                Enabled: False
+                RetainHours: 168
             Upsert:
-                SourceColumn: eventId
-                UpdateColumn: eventId
+                MergeStatement: source.eventId == updates.eventId
             HiveTable:
                 DatabaseName: dbname
                 TableName: dbtable
@@ -115,6 +134,9 @@ def batch_delta(conf: BlockConfig) -> DataFrame:
 
 def stream_delta(conf: BlockConfig) -> DataFrame:
     """Write data as a stream to delta files.
+
+    :param str Path: Where to write the data
+    :param str OutputMode: How to write the data
 
     ```
     SectionName:

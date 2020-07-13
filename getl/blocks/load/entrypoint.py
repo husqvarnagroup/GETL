@@ -27,8 +27,8 @@ def batch_parquet(conf: BlockConfig) -> DataFrame:
     """Load parquet data in batch.
 
     :param str Path: path to the data files
-    :param str FileRegistry: optional, name of the fileregistry to use
-    :param str Alias: alias of some sort?
+    :param str FileRegistry=: name of the fileregistry to use
+    :param str Alias=: an alias for the dataframe that is loaded
 
     ```
     SectionName:
@@ -49,9 +49,9 @@ def batch_json(conf: BlockConfig) -> DataFrame:
     """Load json data in batch.
 
     :param str Path: path to the data files
-    :param str FileRegistry: optional, name of the fileregistry to use
-    :param str Alias: alias of some sort?
-    :param str Suffix: the suffix of the file, default .json
+    :param str FileRegistry=: name of the fileregistry to use
+    :param str Alias=: an alias for the dataframe that is loaded
+    :param str Suffix=.json: the suffix of the file
 
 
     ```
@@ -80,10 +80,10 @@ def batch_xml(conf: BlockConfig) -> DataFrame:
     """Load xml data in batch.
 
     :param str Path: path to the data files
-    :param str FileRegistry: optional, name of the fileregistry to use
-    :param str Alias: alias of some sort?
-    :param str Suffix: the suffix of the file, default .xml
-    :param int BatchSize: the amount of data to process in 1 go
+    :param str FileRegistry=: name of the fileregistry to use
+    :param str Alias=: an alias for the dataframe that is loaded
+    :param str Suffix=.xml: the suffix of the file
+    :param int BatchSize=200: the amount of data to process in one go
 
     ```
     SectionName:
@@ -93,8 +93,8 @@ def batch_xml(conf: BlockConfig) -> DataFrame:
             FileRegistry: S3DatePrefixScan
             Alias: settings
             RowTag: employee
-            Suffix: .xml # Default .xml
-            BatchSize: 200 # Default 200
+            Suffix: .xml
+            BatchSize: 200
     ```
 
     """
@@ -199,8 +199,8 @@ def jdbc(bconf: BlockConfig) -> DataFrame:
     :param str Table: table name with the data
     :param str User: database user
     :param str Password: database password
-    :param str Alias: alias of some sort?
     :param str Query: SQL query to access the data
+    :param str Alias=: an alias for the dataframe that is loaded
 
     ```
     SectionName:
