@@ -65,9 +65,9 @@ def batch_delta(conf: BlockConfig) -> DataFrame:
 
     :param str Path: location to write to
     :param str Mode: the mode to write with such as append or overwrite
-    :param str Optimize.Enabled=False: Enable optimze on delta table (Only works on databricks)
+    :param bool Optimize.Enabled=False: Enable optimze on delta table (Only works on databricks)
     :param str Optimize.ZorderBy=None: What column names to optimize on
-    :param str Vacuum.Enabled=False: Enable vacuum on delta table (Only works on databricks)
+    :param bool Vacuum.Enabled=False: Enable vacuum on delta table (Only works on databricks)
     :param int Vacuum.RetainHours=168: Number of days we keep version, default is 7 days, cannot be set lower
     :param str Upsert.MergeStatement=: How to merge the new data `updates.{col}` with the old data `source.{col}`.
     This option only have an effect if the `Mode: upsert` have been chosen.

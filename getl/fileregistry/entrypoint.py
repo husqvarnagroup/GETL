@@ -13,7 +13,7 @@ def resolve(func: FunctionType, bconf: BlockConfig) -> FileRegistry:
 
 
 def s3_date_prefix_scan(bconf: BlockConfig) -> FileRegistry:
-    """Find all new files in S3 based with a date partition format e.i. YYYY/MM/DD
+    """Find all new files in S3 based with a date partition format i.e. YYYY/MM/DD
 
     With the parameter *PartitionFormat* you can specify multiple different date formats that
     will be used to scan an S3 prefix.
@@ -32,7 +32,6 @@ def s3_date_prefix_scan(bconf: BlockConfig) -> FileRegistry:
     :param str HiveDatabaseName: The hive database name for the file registry
     :param str HiveTableName: The hive table name for the file registry
 
-    **Example**
 
     ```
     S3DatePrefixScan:
@@ -57,7 +56,6 @@ def s3_full_scan(bconf: BlockConfig) -> FileRegistry:
     :param str HiveDatabaseName: The hive database name for the file registry
     :param str HiveTableName: The hive table name for the file registry
 
-    **Example**
     ```
     S3FullScan:
         Type: fileregistry::s3_full_scan
