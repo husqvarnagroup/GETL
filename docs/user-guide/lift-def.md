@@ -39,7 +39,7 @@ LiftJob:
 
 ## FileRegistry
 
-A file registry keeps track of what files have been processed, producing a delta of files that have not been processed yet.
+A file registry keeps track of what files have been processed, returning files that have not been processed yet.
 
 See [file registry](file-registry.md) for more details.
 
@@ -50,35 +50,3 @@ The lift job section contains multiple blocks that are executed sequentialy.
 See [lift job blocks](lift-job-blocks.md) for more details.
 
 
-Example:
-
-```yml
-LiftJob:
-
-  RawFiles:
-    Type: load::batch_parquet
-    Properties:
-      Path: s3://bucket/path/to/data
-
-  OperationBlock:
-    Type: transform::generic
-    Input: TrustedFiles
-    Properties:
-      Functions:
-        - add_column.date.unixtime_to_utc:
-            from_column: timestamp
-            to_column: date
-
-  FilterBlock:
-    Type: transform::generic
-    Input: PerformOperation
-    Properties:
-      Functions:
-        - where:
-            predicate: [date, '>=', '2020-01-01']
-        - where:
-            predicate: [company, '==', 'Husqvarna']
-```
-
-
-  

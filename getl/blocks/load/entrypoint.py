@@ -136,8 +136,7 @@ def batch_delta(conf: BlockConfig) -> DataFrame:
     """Load delta data in batch.
 
     :param str Path: path to the data files
-    :param str FileRegistry: optional, name of the fileregistry to use
-    :param str Alias: alias of some sort?
+    :param str Alias=: an alias for the dataframe that is loaded
 
     ```
     SectionName:
@@ -169,8 +168,7 @@ def stream_json(bconf: BlockConfig) -> DataFrame:
 
     :param str Path: path to the data files
     :param str SchemaPath: path to the schema
-    :param str FileRegistry: optional, name of the fileregistry to use
-    :param str Alias: alias of some sort?
+    :param str Alias=: an alias for the dataframe that is loaded
 
     ```
     SectionName:

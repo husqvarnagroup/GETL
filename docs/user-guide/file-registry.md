@@ -1,6 +1,6 @@
 # File registry 
 
-A file registry keeps track of what files have been processed, producing a delta of files that have not been processed yet.
+A file registry keeps track of what files have been processed, returning files that have not been processed yet.
 
 This is true for each file registry:
 
@@ -13,7 +13,6 @@ This is true for each file registry:
 FileRegistry:
   {BlockName}
     Type: {block::sub-block}
-    Input: {BlockInput}
     Properties:
       {Prop}: {Prop}
 
@@ -50,6 +49,6 @@ LiftJob:
 
 ## AWS S3 
 
-The following file registrys can only be used with AWS S3 service.
+The following file registrys can only be used with the AWS S3 service.
 
 <file-registry>
