@@ -23,4 +23,27 @@ LiftJob:
 
 ```
 
+Example:
+
+```yml
+LiftJob:
+
+  RawFiles:
+    Type: load::batch_parquet
+    Properties:
+      Path: s3://bucket/path/to/data
+
+  TransformBlock:
+    Type: transform::generic
+    Input: PerformOperation
+    Properties:
+      Functions:
+        - where:
+            predicate: [date, '>=', '2020-01-01']
+        - select:
+          - { col: name, alias: firstName, cast: string }
+          - { col: age, cast: integer }
+          - { col: gender }
+```
+  
 <lift-blocks>

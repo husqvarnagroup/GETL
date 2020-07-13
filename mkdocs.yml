@@ -5,6 +5,7 @@ nav:
     - 'User Guide':
       - 'user-guide/intro.md'
       - 'user-guide/lift-def.md'
+      - 'user-guide/file-registry.md'
       - 'user-guide/lift-job-blocks.md'
       - 'user-guide/transform-functions.md'
     - 'About':

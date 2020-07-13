@@ -13,7 +13,26 @@ def resolve(func: FunctionType, bconf: BlockConfig) -> FileRegistry:
 
 
 def s3_date_prefix_scan(bconf: BlockConfig) -> FileRegistry:
-    """Find all new files based on date format YYYY/MM/DD
+    """Find all new files in S3 based with a date partition format e.i. YYYY/MM/DD
+
+    With the parameter *PartitionFormat* you can specify multiple different date formats that
+    will be used to scan an S3 prefix.
+
+    Take the following example, you can have files stored in the following way on S3 YYYY/MM/DD/HH.
+    If we give the *PartitionFormat* parameter the value `%Y/%m`, we use
+    [python strftime codes](https://docs.python.org/3/library/datetime.html#strftime-and-strptime-format-codes),
+    then it will scan files on a month by month basis. Set it to `%Y/%m/%d/%H` and it
+    will scan files on a hour basis instead.
+
+    :param str BasePath: s3 prefix to where you want the file registry
+    :param str UpdateAfter: After what lift block should the new files be marked as processed
+    :param str DefaultStartDate: At what date should the file registry start to search for new files
+    :param str PartitionFormat: Describe how are the files partitioned and how the file registry
+    will search for new files.
+    :param str HiveDatabaseName: The hive database name for the file registry
+    :param str HiveTableName: The hive table name for the file registry
+
+    **Example**
 
     ```
     S3DatePrefixScan:
@@ -21,6 +40,8 @@ def s3_date_prefix_scan(bconf: BlockConfig) -> FileRegistry:
         Properties:
             BasePath: s3://datalake/file-registry
             UpdateAfter: WriteToDatabase
+            DefaultStartDate: 2019-01-01
+            PartitionFormat: %Y/%m/d
             HiveDatabaseName: file_registry
             HiveTableName: dataset-a
     ```
@@ -31,6 +52,12 @@ def s3_date_prefix_scan(bconf: BlockConfig) -> FileRegistry:
 def s3_full_scan(bconf: BlockConfig) -> FileRegistry:
     """Do a full scan for new files under a prefix in s3
 
+    :param str BasePath: s3 prefix to where you want the file registry
+    :param str UpdateAfter: After what lift block should the new files be marked as processed
+    :param str HiveDatabaseName: The hive database name for the file registry
+    :param str HiveTableName: The hive table name for the file registry
+
+    **Example**
     ```
     S3FullScan:
         Type: fileregistry::s3_full_scan

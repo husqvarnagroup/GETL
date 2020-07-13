@@ -149,13 +149,19 @@ def function_nodes_in_module(module: ast.Module) -> List[ast.FunctionDef]:
 
 
 def format_function_docstring(docstring: str) -> str:
-    docstring = re.sub(r"\n\n:param", "\n\nParameters\n:   \n:param", docstring)
-    docstring = re.sub(
-        r":param (\w+) (\w+):\s*(.*)$",
-        r"- **\2** (*\1*) – \3",
-        docstring,
-        flags=re.MULTILINE,
-    )
+    regex_list = [
+        (r"\n\n:param", "\n\nParameters\n:   \n:param"),
+        (r":param (\w+) (\w+):\s*(.*)$", r"- **\2** (*\1*) – \3"),
+        (
+            r":param (\w+) (\w+)=(\w+):\s*(.*)$",
+            r"- **\2** (*\1, optional, default: \3*) – \4",
+        ),
+        (r":param (\w+) (\w+)(=):\s*(.*)$", r"- **\2** (*\1, optional*) – \4"),
+    ]
+
+    for search, replace in regex_list:
+        docstring = re.sub(search, replace, docstring, flags=re.MULTILINE)
+
     return docstring
 
 
