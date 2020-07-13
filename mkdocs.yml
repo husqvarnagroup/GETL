@@ -2,6 +2,7 @@ site_name: GETL
 nav:
     - Home: 'README.md'
     - installation.md
+    - tutorial.md
     - 'User Guide':
       - 'user-guide/intro.md'
       - 'user-guide/lift-def.md'
