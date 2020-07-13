@@ -153,13 +153,17 @@ def format_function_docstring(docstring: str) -> str:
     start_string = rf":param (\w+) {word_match}"
 
     regex_list = [
+        # Add parameter heading over each paramter group
         (r"\n\n:param", "\n\nParameters\n:   \n:param"),
+        # Format parameters with no optional or default tag
         (rf"{start_string}:\s*(.*)$", r"- **\2** (*\1*) – \3"),
+        # Format paramters with optional and default tag
         (
             rf"{start_string}={word_match}:\s*(.*)$",
             r"- **\2** (*\1, optional, default: \3*) – \4",
         ),
-        (rf"{start_string}(=):\s*(.*)$", r"- **\2** (*\1, optional*) – \4"),
+        # Format the rest of the paramters that only have a optional tag
+        (rf"{start_string}=:\s*(.*)$", r"- **\2** (*\1, optional*) – \3"),
     ]
 
     for search, replace in regex_list:
