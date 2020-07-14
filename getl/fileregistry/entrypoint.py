@@ -21,8 +21,8 @@ def s3_date_prefix_scan(bconf: BlockConfig) -> FileRegistry:
     Take the following example, you can have files stored in the following way on S3 YYYY/MM/DD/HH.
     If we give the *PartitionFormat* parameter the value `%Y/%m`, we use
     [python strftime codes](https://docs.python.org/3/library/datetime.html#strftime-and-strptime-format-codes),
-    then it will scan files on a month by month basis. Set it to `%Y/%m/%d/%H` and it
-    will scan files on a hour basis instead.
+    then it will scan files on a monthly basis. Set it to `%Y/%m/%d/%H` and it
+    will scan files on a hourly basis instead.
 
     :param str BasePath: s3 prefix to where you want the file registry
     :param str UpdateAfter: After what lift block should the new files be marked as processed
