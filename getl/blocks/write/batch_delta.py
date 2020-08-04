@@ -42,7 +42,11 @@ class BatchDelta:
         try:
             return self.spark.read.load(path, format=self._format).count() > 0
         except AnalysisException as spark_exception:
-            exceptions = ["Incompatible format detected", "doesn't exist"]
+            exceptions = [
+                "Incompatible format detected",
+                "doesn't exist",
+                "is not a Delta table",
+            ]
 
             if not any([e in str(spark_exception) for e in exceptions]):
                 raise spark_exception
