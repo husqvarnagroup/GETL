@@ -5,6 +5,7 @@ from datetime import datetime
 from pathlib import Path
 
 import boto3
+import pyspark
 import pytest
 from moto import mock_s3
 from pyspark.sql import SparkSession
@@ -27,19 +28,34 @@ def set_timezone():
 @pytest.fixture(scope="session")
 def spark_session():
     """Return a sparksession fixture."""
-    delta_jar = "./tests/testing-jars/delta-core_2.11-0.4.0.jar"
-
-    spark = (
+    spark_builder = (
         SparkSession.builder.master("local[*]")
         .appName("pysparktest")
         .config("spark.sql.session.timeZone", "UTC")
         .config("spark.sql.shuffle.partitions", "12")
         .config("spark.driver.memory", "2g")
-        .config("spark.jars", delta_jar)
-        .getOrCreate()
     )
+    spark_jars = []
 
-    spark.sparkContext.addPyFile(delta_jar)
+    if pyspark.__version__ < "3.0":
+        spark_jars.append("./tests/testing-jars/delta-core_2.11-0.6.1.jar")
+    else:
+        spark_jars.append("./tests/testing-jars/delta-core_2.12-0.7.0.jar")
+        spark_jars.append("./tests/testing-jars/spark-xml_2.12-0.9.0.jar")
+
+        spark_builder = (
+            spark_builder.config("spark.sql.legacy.timeParserPolicy", "LEGACY")
+            .config("spark.sql.extensions", "io.delta.sql.DeltaSparkSessionExtension")
+            .config(
+                "spark.sql.catalog.spark_catalog",
+                "org.apache.spark.sql.delta.catalog.DeltaCatalog",
+            )
+        )
+
+    spark = spark_builder.config("spark.jars", ",".join(spark_jars)).getOrCreate()
+    for jar in spark_jars:
+        spark.sparkContext.addPyFile(jar)
+
     quiet_py4j()
 
     yield spark

@@ -11,62 +11,90 @@ trigger:
     include:
       - '*'
 
-pool:
-  vmImage: 'ubuntu-latest'
-strategy:
-  matrix:
-    Python37:
-      python.version: '3.7'
+jobs:
+- job: Test
+  pool:
+    vmImage: 'ubuntu-latest'
+  strategy:
+    matrix:
+      Python37-spark2:
+        python.version: '3.7'
+        TOXENV: py37-spark2
+      Python37-spark3:
+        python.version: '3.7'
+        TOXENV: py37-spark3
+      Python38-spark3:
+        python.version: '3.8'
+        TOXENV: py38-spark3
 
-steps:
-- task: UsePythonVersion@0
-  inputs:
-    versionSpec: '$(python.version)'
-  displayName: 'Use Python $(python.version)'
+  steps:
+  - task: UsePythonVersion@0
+    inputs:
+      versionSpec: '$(python.version)'
+    displayName: 'Use Python $(python.version)'
 
-- script: |
-    python -m pip install --upgrade pip poetry
-    poetry install
-  displayName: 'Install dependencies'
+  - script: |
+      python -m pip install --upgrade pip poetry tox
+      poetry install
+    displayName: 'Install dependencies'
 
-- script: |
-    poetry run flake8
-  displayName: 'Check flake8'
+  - script: |
+      poetry run flake8
+    displayName: 'Check flake8'
 
-- script: |
-    poetry run isort --check-only --diff --quiet
-  displayName: 'Check isort'
+  - script: |
+      poetry run isort --check-only --diff --quiet
+    displayName: 'Check isort'
 
-- script: |
-    poetry run black --check --fast .
-  displayName: 'Check black'
+  - script: |
+      poetry run black --check --fast .
+    displayName: 'Check black'
 
-- script: |
-    poetry run pytest --cov=getl
-  displayName: 'Test the code'
+  - script: tox
+    displayName: 'Test the code'
 
-- script: |
-    poetry run coverage xml
-  displayName: 'Generate coverage xml file'
+  - script: |
+      poetry run coverage xml
+    displayName: 'Generate coverage xml file'
 
-- script: |
-    export SONAR_SCANNER_VERSION=4.2.0.1873
-    export SONAR_SCANNER_HOME=$HOME/.sonar/sonar-scanner-$SONAR_SCANNER_VERSION-linux
-    curl --create-dirs -sSLo $HOME/.sonar/sonar-scanner.zip https://binaries.sonarsource.com/Distribution/sonar-scanner-cli/sonar-scanner-cli-$SONAR_SCANNER_VERSION-linux.zip
-    unzip -o $HOME/.sonar/sonar-scanner.zip -d $HOME/.sonar/
-    export PATH=$SONAR_SCANNER_HOME/bin:$PATH
-    export SONAR_SCANNER_OPTS="-server"
-    sonar-scanner \
-      -Dsonar.organization=ailab \
-      -Dsonar.projectKey=GETL \
-      -Dsonar.sources=. \
-      -Dsonar.host.url=https://sonarcloud.io \
-      -Dsonar.login=7bf2abdc8e22bfee58b54dec413240aa516d7ee4 
-  displayName: 'Sonar scanner'
+  - script: |
+      export SONAR_SCANNER_VERSION=4.2.0.1873
+      export SONAR_SCANNER_HOME=$HOME/.sonar/sonar-scanner-$SONAR_SCANNER_VERSION-linux
+      curl --create-dirs -sSLo $HOME/.sonar/sonar-scanner.zip https://binaries.sonarsource.com/Distribution/sonar-scanner-cli/sonar-scanner-cli-$SONAR_SCANNER_VERSION-linux.zip
+      unzip -o $HOME/.sonar/sonar-scanner.zip -d $HOME/.sonar/
+      export PATH=$SONAR_SCANNER_HOME/bin:$PATH
+      export SONAR_SCANNER_OPTS="-server"
+      sonar-scanner \
+        -Dsonar.organization=ailab \
+        -Dsonar.projectKey=GETL \
+        -Dsonar.sources=. \
+        -Dsonar.host.url=https://sonarcloud.io \
+        -Dsonar.login=7bf2abdc8e22bfee58b54dec413240aa516d7ee4
+    displayName: 'Sonar scanner'
 
-- script: |
-    poetry config pypi-token.pypi $(PYPI_TOKEN)
-    poetry build
-    poetry publish
-  displayName: 'Publish to pypi'
+- job: Publish
+  dependsOn: Test
   condition: "and(succeeded(), startsWith(variables['Build.SourceBranch'], 'refs/tags/v'))"
+  pool:
+    vmImage: 'ubuntu-latest'
+  strategy:
+    matrix:
+      Python38:
+        python.version: '3.8'
+
+  steps:
+  - task: UsePythonVersion@0
+    inputs:
+      versionSpec: '$(python.version)'
+    displayName: 'Use Python $(python.version)'
+
+  - script: |
+      python -m pip install --upgrade pip poetry
+      poetry install
+    displayName: 'Install dependencies'
+
+  - script: |
+      poetry config pypi-token.pypi $(PYPI_TOKEN)
+      poetry build
+      poetry publish
+    displayName: 'Publish to pypi'

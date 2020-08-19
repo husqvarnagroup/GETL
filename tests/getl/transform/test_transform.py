@@ -67,9 +67,7 @@ def test_where_success_nested_df(spark_session):
 def test_where_throws_col_not_found(predicate, col_name, spark_session):
     """Spark throws column not found exception."""
     # Arrange
-    error_message = "cannot resolve '`{}`' given input columns: [name, age, happy, items]".format(
-        col_name
-    )
+    error_message = f"cannot resolve '`{col_name}`' given input columns: ["
     # Act
     with pytest.raises(ValueError) as col_not_found:
         tr.where(create_princess_df(spark_session), predicate)
@@ -272,7 +270,7 @@ def test_filter_success(predicate, princess_names, spark_session):
                 {"col": "age"},
                 {"col": "new_col", "add_new_column": True},
             ],
-            "DataFrame[name: string, age: bigint, new_col: null]",
+            ["DataFrame[name: string, age: bigint, new_col: null]"],
         ),
         (
             [
@@ -284,20 +282,23 @@ def test_filter_success(predicate, princess_names, spark_session):
                     "alias": "test",
                 },
             ],
-            "DataFrame[device: array<string>, test: array<string>]",
+            [
+                "DataFrame[device: array<string>, test: array<string>]",
+                "DataFrame[device: array<null>, test: array<null>]",
+            ],
         ),
         (
             [{"col": "age", "alias": "years", "cast": "string"}],
-            "DataFrame[years: string]",
+            ["DataFrame[years: string]"],
         ),
         (
             [{"col": "name", "alias": "id"}, {"col": "name", "alias": "firstname"}],
-            "DataFrame[id: string, firstname: string]",
+            ["DataFrame[id: string, firstname: string]"],
         ),
         ([{"col": "items.weakness", "alias": "hello"}], "DataFrame[hello: string]"),
         (
             [{"col": "items.created", "alias": "created", "cast": "date"}],
-            "DataFrame[created: date]",
+            ["DataFrame[created: date]"],
         ),
     ],
 )
@@ -307,7 +308,7 @@ def test_select_success(cols, col_count, spark_session):
     result = tr.select(create_princess_df(spark_session), cols)
 
     # Assert
-    assert str(result) == col_count
+    assert str(result) in col_count
 
 
 @pytest.mark.spark
