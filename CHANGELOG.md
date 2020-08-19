@@ -6,6 +6,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 
 ## [Unreleased]
+
+## [1.0.0] - 2020-08-19
 ### Added
 - s3_date_prefix_scan fileregistry, based upon prefix_based_date, see [migration](migrations/s3_date_prefix_scan.md).
 - pyspark 3.0 support including backwards compatibility support for pyspark 2.4
@@ -14,4 +16,4 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Removed
 - prefix_based_date fileregistry.
 
-[Unreleased]: https://github.com/husqvarnagroup/GETL/
+
