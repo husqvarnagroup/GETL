@@ -12,6 +12,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 - Links to versions in CHANGELOG.md
+- Fix the fileregistry type in docs/migrations/s3_date_prefix_scan.md to fileregistry::s3_date_prefix_scan
 
 ## [1.0.0] - 2020-08-19
 ### Added

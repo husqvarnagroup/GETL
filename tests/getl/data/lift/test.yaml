@@ -11,7 +11,7 @@ Parameters:
 
 FileSources:
   S3DatePrefixScan:
-    Type: metadata::s3_prefix_scan
+    Type: metadata::s3_date_prefix_scan
     Properties:
       FileSourceBasePrefix: ${TrustedSearchPath}
       UpdateAfter: WriteToDatabase

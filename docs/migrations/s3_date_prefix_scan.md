@@ -1,6 +1,6 @@
-# Migrate from prefix_based_date to s3_prefix_scan
+# Migrate from prefix_based_date to s3_date_prefix_scan
 
-Before, `prefix_based_date` uses a `BasePrefix`, now `s3_prefix_scan` uses the attribute `BasePath`.
+Before, `prefix_based_date` uses a `BasePrefix`, now `s3_date_prefix_scan` uses the attribute `BasePath`.
 
 Before lift.yml:
 
@@ -23,7 +23,7 @@ Now lift.yaml:
 ```yml
 FileRegistry:
   DateFileReg:
-    Type: fileregistry::s3_prefix_scan
+    Type: fileregistry::s3_date_prefix_scan
     Properties:
       BasePath: ${FileRegistryBasePrefix}
       UpdateAfter: WriteToS3
