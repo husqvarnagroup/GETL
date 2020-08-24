@@ -6,6 +6,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 
 ## [Unreleased]
+### Fixed
+- Links to versions in CHANGELOG.md
 
 ## [1.0.0] - 2020-08-19
 ### Added
@@ -17,3 +19,5 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - prefix_based_date fileregistry.
 
 
+[Unreleased]: https://github.com/husqvarnagroup/GETL/compare/v1.0.0...HEAD
+[1.0.0]: https://github.com/husqvarnagroup/GETL/compare/v0.2.0...v1.0.0
