@@ -6,6 +6,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 
 ## [Unreleased]
+
+## [1.0.1] - 2020-08-24
 ### Added
 - python -m bin bumpversion changes the CHANGELOG.md for a release changelog
 - Documentation on how to release a new version
@@ -24,5 +26,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - prefix_based_date fileregistry.
 
 
-[Unreleased]: https://github.com/husqvarnagroup/GETL/compare/v1.0.0...HEAD
+[Unreleased]: https://github.com/husqvarnagroup/GETL/compare/v1.0.1...HEAD
+[1.0.1]: https://github.com/husqvarnagroup/GETL/compare/v1.0.0...v1.0.1
 [1.0.0]: https://github.com/husqvarnagroup/GETL/compare/v0.2.0...v1.0.0
