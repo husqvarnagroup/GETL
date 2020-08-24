@@ -1,4 +1,5 @@
 import re
+from datetime import datetime
 from enum import Enum
 from pathlib import Path
 from subprocess import call
@@ -6,6 +7,7 @@ from subprocess import call
 import click
 
 RE_VERSION = re.compile(r'version = "(?P<version>\d+\.\d+(\.\d+)?)"')
+RE_REPOSITORY = re.compile(r'^repository = "(?P<repository>.*)"$', re.MULTILINE)
 PROJECT_DIR = Path(__file__).parent.parent.parent
 
 
@@ -24,6 +26,38 @@ def set_version(version_number: str):
     pyproject_toml.write_text(new_file_text)
 
 
+def get_repository():
+    pyproject_toml = PROJECT_DIR / "pyproject.toml"
+    match = RE_REPOSITORY.search(pyproject_toml.read_text())
+    if not match:
+        raise ValueError(f"Could not find repository in {pyproject_toml}")
+    return match.group("repository")
+
+
+def update_changelog(old_version_number: str, version_number: str):
+    changelog_md = PROJECT_DIR / "CHANGELOG.md"
+    file_text = changelog_md.read_text()
+    file_text = file_text.replace(
+        "## [Unreleased]",
+        f"## [Unreleased]\n\n## [{version_number}] - {datetime.now():%Y-%m-%d}",
+    )
+    repository = get_repository()
+
+    file_text = re.sub(
+        r"^\[Unreleased\]:.*$",
+        "\n".join(
+            [
+                f"[Unreleased]: {repository}compare/v{version_number}...HEAD",
+                f"[{version_number}]: {repository}compare/v{old_version_number}...v{version_number}",
+            ]
+        ),
+        file_text,
+        flags=re.MULTILINE,
+    )
+
+    changelog_md.write_text(file_text)
+
+
 @click.command(help="Bumps version and creates a git commit + tag")
 @click.argument("version_part", default="patch")
 @click.option("--dry-run", is_flag=True)
@@ -35,6 +69,7 @@ def cli(version_part, dry_run):
     click.echo(f"Bumping version from v{old_version} to v{version}")
     if not dry_run:
         set_version(version)
+        update_changelog(old_version, version)
 
     if not dry_run:
         run_command(
