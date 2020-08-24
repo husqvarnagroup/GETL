@@ -11,12 +11,15 @@ class S3Path:
 
         Examples for path values:
         - s3://bucket/path/to/file
+        - s3a://bucket/path/to/file
         - /bucket/path/to/file
         - bucket/path/to/file
         """
         # Cleanup path
         if path.startswith("s3://"):
             path = path[5:]  # Remove "s3://"
+        elif path.startswith("s3a://"):
+            path = path[6:]  # Remove "s3a://"
         elif path.startswith("/"):
             path = path[1:]  # Remove "/"
 

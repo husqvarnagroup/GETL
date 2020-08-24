@@ -93,7 +93,7 @@ def test_delete_files_not_possible_from_raw(paths):
         (
             [
                 "s3://landingzone/amc-connect/file.json",
-                "s3://landingzone/amc-connect/test/file.json",
+                "s3a://landingzone/amc-connect/test/file.json",
             ],
             "landingzone",
             ["amc-connect/test/file.json", "amc-connect/test/file.json"],
@@ -122,7 +122,7 @@ def test_delete_files_success(s3_mock, paths, bucket, files, helpers):
         (
             [
                 "s3://landingzone/amc-connect/file.json",
-                "s3://landingzone/amc-connect/test/file.json",
+                "s3a://landingzone/amc-connect/test/file.json",
             ],
             "landingzone",
         ),
