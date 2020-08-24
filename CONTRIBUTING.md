@@ -2,8 +2,7 @@
 
 ## Prerequisites
 
-- [Python 3.7](https://www.python.org/downloads/) (Python 3.8 support comming soon with spark 3.0)
-- [Apache Spark 2.4](https://spark.apache.org/downloads.html)
+- [Python 3.7+](https://www.python.org/downloads/)
 - [Poetry](https://python-poetry.org/)
 
 ## Install for development
