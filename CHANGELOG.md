@@ -8,6 +8,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 ### Added
 - python -m bin bumpversion changes the CHANGELOG.md for a release changelog
+- Documentation on how to release a new version
 
 ### Fixed
 - Links to versions in CHANGELOG.md
