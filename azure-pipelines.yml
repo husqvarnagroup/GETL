@@ -35,7 +35,7 @@ jobs:
 
   - script: |
       python -m pip install --upgrade pip poetry tox
-      poetry install
+      poetry install --extras "postgres"
     displayName: 'Install dependencies'
 
   - script: |
@@ -50,7 +50,9 @@ jobs:
       poetry run black --check --fast .
     displayName: 'Check black'
 
-  - script: tox
+  - script: |
+      docker-compose up -d
+      tox
     displayName: 'Test the code'
 
   - script: |
