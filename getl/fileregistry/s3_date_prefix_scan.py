@@ -29,7 +29,7 @@ class S3DatePrefixScan(FileRegistry):
     )
     db_schema = """
         file_path STRING,
-        prefix_date TIMESTAMP NOT NULL,
+        prefix_date TIMESTAMP,
         date_lifted TIMESTAMP
     """
 
