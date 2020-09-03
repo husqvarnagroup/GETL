@@ -1,8 +1,6 @@
 """Unit tests for the write entrypoint."""
 
-from contextlib import ExitStack, contextmanager
-
-import psycopg2
+import pytest
 from pyspark.sql import types as T
 
 from getl.blocks.write.entrypoint import batch_postgres_upsert
@@ -19,21 +17,11 @@ def create_dataframe(spark_session, data):
     return spark_session.createDataFrame(data, schema)
 
 
-@contextmanager
-def postgres_query(props):
-    with ExitStack() as stack:
-        conn = stack.enter_context(
-            psycopg2.connect(
-                dsn=props["ConnUrl"], user=props["User"], password=props["Password"]
-            )
-        )
-        yield stack.enter_context(conn.cursor())
-
-
-def create_db_table(props):
-    with postgres_query(props) as cursor:
-        cursor.execute("DROP TABLE IF EXISTS filetable")
-        cursor.execute(
+@pytest.fixture
+def create_table(postgres_cursor, postgres_connection):
+    def inner():
+        postgres_cursor.execute("DROP TABLE IF EXISTS filetable")
+        postgres_cursor.execute(
             """
         CREATE TABLE filetable (
             id serial PRIMARY KEY,
@@ -43,25 +31,33 @@ def create_db_table(props):
         )
         """
         )
+        postgres_connection.commit()
+
+    return inner
 
 
-def select_data(props):
-    with postgres_query(props) as cursor:
-        cursor.execute("select file_path, count from filetable")
-        return cursor.fetchall()
+@pytest.fixture(scope="function")
+def select_data(postgres_cursor):
+    def inner():
+        postgres_cursor.execute("select file_path, count from filetable")
+        return postgres_cursor.fetchall()
+
+    return inner
 
 
-def test_batch_postgres_upsert_no_update_columns(helpers, spark_session):
+def test_batch_postgres_upsert_no_update_columns(
+    helpers, spark_session, postgres_connection_details, create_table, select_data
+):
     props = {
-        "ConnUrl": "postgres://localhost:5432/testdb",
-        "User": "dbadmin",
-        "Password": "mintkaka2010",
+        "ConnUrl": postgres_connection_details["dsn"],
+        "User": postgres_connection_details["user"],
+        "Password": postgres_connection_details["password"],
         "Table": "filetable",
         "Columns": ["file_path", "count"],
         "ConflictColumns": ["file_path"],
     }
 
-    create_db_table(props)
+    create_table()
 
     first_df = create_dataframe(
         spark_session, [("path/to/file1", 1), ("path/to/file2", 4)]
@@ -70,7 +66,7 @@ def test_batch_postgres_upsert_no_update_columns(helpers, spark_session):
 
     bconf = helpers.create_block_conf(first_df, props)
     batch_postgres_upsert(bconf)
-    data = select_data(props)
+    data = select_data()
     assert set(data) == {("path/to/file1", 1), ("path/to/file2", 4)}
 
     second_df = create_dataframe(
@@ -80,7 +76,7 @@ def test_batch_postgres_upsert_no_update_columns(helpers, spark_session):
 
     bconf = helpers.create_block_conf(second_df, props)
     batch_postgres_upsert(bconf)
-    data = select_data(props)
+    data = select_data()
     assert set(data) == {
         ("path/to/file1", 5),
         ("path/to/file2", 4),
@@ -88,18 +84,20 @@ def test_batch_postgres_upsert_no_update_columns(helpers, spark_session):
     }
 
 
-def test_batch_postgres_upsert_chunked(helpers, spark_session):
+def test_batch_postgres_upsert_chunked(
+    helpers, spark_session, postgres_connection_details, create_table, select_data
+):
     props = {
-        "ConnUrl": "postgres://localhost:5432/testdb",
-        "User": "dbadmin",
-        "Password": "mintkaka2010",
+        "ConnUrl": postgres_connection_details["dsn"],
+        "User": postgres_connection_details["user"],
+        "Password": postgres_connection_details["password"],
         "Table": "filetable",
         "Columns": ["file_path", "count"],
         "ConflictColumns": ["file_path"],
         "UpdateColumns": ["count"],
     }
 
-    create_db_table(props)
+    create_table()
 
     df_data = [(f"path/to/file{i}", i) for i in range(3000)]
     df = create_dataframe(spark_session, df_data).repartition(2)
@@ -107,7 +105,7 @@ def test_batch_postgres_upsert_chunked(helpers, spark_session):
 
     bconf = helpers.create_block_conf(df, props)
     batch_postgres_upsert(bconf)
-    data = select_data(props)
+    data = select_data()
     assert set(data) == set(df_data)
 
     # Update the data
@@ -117,5 +115,5 @@ def test_batch_postgres_upsert_chunked(helpers, spark_session):
 
     bconf = helpers.create_block_conf(df, props)
     batch_postgres_upsert(bconf)
-    data = select_data(props)
+    data = select_data()
     assert set(data) == set(df_data)

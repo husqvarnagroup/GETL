@@ -5,6 +5,7 @@ from datetime import datetime
 from pathlib import Path
 
 import boto3
+import psycopg2
 import pyspark
 import pytest
 from moto import mock_s3
@@ -157,3 +158,24 @@ class Helpers:
 @pytest.fixture(scope="function")
 def helpers(s3_mock, spark_session):
     return Helpers(s3_mock, spark_session)
+
+
+@pytest.fixture
+def postgres_connection_details():
+    return {
+        "dsn": "postgres://localhost:5432/testdb",
+        "user": "dbadmin",
+        "password": "mintkaka2010",
+    }
+
+
+@pytest.fixture(scope="function")
+def postgres_connection(postgres_connection_details):
+    with psycopg2.connect(**postgres_connection_details) as conn:
+        yield conn
+
+
+@pytest.fixture
+def postgres_cursor(postgres_connection):
+    with postgres_connection.cursor() as cursor:
+        yield cursor
