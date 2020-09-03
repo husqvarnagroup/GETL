@@ -34,7 +34,7 @@ def batch_parquet(conf: BlockConfig) -> DataFrame:
     SectionName:
         Type: load::batch_parquet
         Properties:
-            Path: s3://husvarna-datalake/trusted/amc/live
+            Path: s3://bucket-name/trusted/live
             FileRegistry: S3DatePrefixScan
             Alias: settings
     ```
@@ -52,28 +52,30 @@ def batch_json(conf: BlockConfig) -> DataFrame:
     :param str FileRegistry=: name of the fileregistry to use
     :param str Alias=: an alias for the dataframe that is loaded
     :param str Suffix=.json: the suffix of the file
+    :param str JsonSchemaPath=: the file schema in json format
 
 
     ```
     SectionName:
         Type: load::batch_json
         Properties:
-            Path: s3://husvarna-datalake/trusted/amc/live
+            Path: s3://bucket-name/trusted/live
             FileRegistry: S3DatePrefixScan
             Alias: settings
             Suffix: .json
+            JsonSchemaPath: s3://bucket-name/schema.json
     ```
 
     """
     paths = _process_path(conf, suffix=conf.get("Suffix", ".json"))
-    schema = json.loads(S3Path(conf.get("JsonSchemaPath")).read_text())
+    schema_path = conf.get("JsonSchemaPath", None)
+    if schema_path:
+        schema = json.loads(S3Path(schema_path).read_text())
+        options = {"schema": json_to_spark_schema(schema)}
+    else:
+        options = {"inferSchema": "true"}
 
-    return _batch_read(
-        conf.spark,
-        paths,
-        file_format="json",
-        options={"schema": json_to_spark_schema(schema)},
-    )
+    return _batch_read(conf.spark, paths, file_format="json", options=options)
 
 
 def batch_xml(conf: BlockConfig) -> DataFrame:
@@ -84,17 +86,19 @@ def batch_xml(conf: BlockConfig) -> DataFrame:
     :param str Alias=: an alias for the dataframe that is loaded
     :param str Suffix=.xml: the suffix of the file
     :param int BatchSize=200: the amount of data to process in one go
+    :param str JsonSchemaPath=: the file schema in json format
 
     ```
     SectionName:
         Type: load::batch_xml
         Properties:
-            Path: s3://husvarna-datalake/trusted/amc/live
+            Path: s3://bucket-name/trusted/live
             FileRegistry: S3DatePrefixScan
             Alias: settings
             RowTag: employee
             Suffix: .xml
             BatchSize: 200
+            JsonSchemaPath: s3://bucket-name/schema.json
     ```
 
     """
@@ -104,32 +108,32 @@ def batch_xml(conf: BlockConfig) -> DataFrame:
         for i in range(0, len(file_paths), batch_size):
             yield file_paths[i : i + batch_size]
 
-    def xml_batch_read(path: str, schema: dict) -> DataFrame:
-        return _batch_read(
-            conf.spark,
-            path,
-            file_format="xml",
-            options={
-                "rowTag": conf.get("RowTag"),
-                "schema": json_to_spark_schema(schema),
-            },
-        )
+    def xml_batch_read(path: str, options: dict) -> DataFrame:
+        return _batch_read(conf.spark, path, file_format="xml", options=options,)
 
-    # Get the paths to process and the schema
+    # Get the paths to process
     path = _process_path(conf, suffix=conf.get("Suffix", ".xml"))
-    schema = json.loads(S3Path(conf.get("JsonSchemaPath")).read_text())
     batch_size = conf.get("BatchSize", 200)
 
+    options = {"rowTag": conf.get("RowTag")}
+    # Get the file schema
+    schema_path = conf.get("JsonSchemaPath", None)
+    if schema_path:
+        schema = json.loads(S3Path(schema_path).read_text())
+        options["schema"] = json_to_spark_schema(schema)
+    else:
+        options["inferSchema"] = "true"
+
     # If we have a list of files transform it into batches of comma seperated strings
-    # The XML modules can only take multiple fiels in the following way file1,file2,file3
+    # The XML modules can only take multiple files in the following way file1,file2,file3
     if isinstance(path, list):
         dfs = [
-            xml_batch_read(",".join(batch), schema)
+            xml_batch_read(",".join(batch), options)
             for batch in get_batches(path, batch_size)
         ]
         return functools.reduce(DataFrame.unionByName, dfs)
 
-    return xml_batch_read(path, schema)
+    return xml_batch_read(path, options)
 
 
 def batch_delta(conf: BlockConfig) -> DataFrame:
@@ -142,7 +146,7 @@ def batch_delta(conf: BlockConfig) -> DataFrame:
     SectionName:
         Type: load::batch_delta
         Properties:
-            Path: s3://husvarna-datalake/trusted/amc/live
+            Path: s3://bucket-name/trusted/live
             Alias: settings
     ```
 
