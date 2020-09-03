@@ -9,6 +9,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 - Postgres upsert support
 
+### Changed
+- Schema for batch_json and batch_xml is now optional
+
 ## [1.0.1] - 2020-08-24
 ### Added
 - Support for s3a:// paths
