@@ -73,6 +73,27 @@ def test_batch_json_fileregistry(spark_session, helpers):
     file_registry_mock.get.return_value.load.assert_called_with("base_path", ".json")
 
 
+def test_batch_json_no_schema(spark_session, helpers):
+    """batch_json should be able to load json files and inferSchema."""
+    # Arrange
+    conf = helpers.create_block_conf(
+        "",
+        {
+            "Path": helpers.relative_path(__file__, "./data/sample.json"),
+            "Alias": "alias",
+        },
+    )
+
+    # Act
+    result_df = resolve(batch_json, conf)
+
+    # Assert
+    assert result_df.collect()[0][0] == 9
+    assert result_df.collect()[1][3] == "Mark Two"
+    assert not result_df.collect()[2][2]
+    assert result_df.count() == 3
+
+
 def test_batch_xml(spark_session, helpers):
     """Check if the batch_xml loader can load XML documents."""
     helpers.create_s3_files({"schema.xml": SCHEMA.json()})
@@ -91,6 +112,26 @@ def test_batch_xml(spark_session, helpers):
 
     # Assert
     assert result_df.collect()[0][0] == "name1"
+    assert result_df.count() == 3
+
+
+def test_batch_xml_no_schema(spark_session, helpers):
+    """Test batch_xml can load XML doc without a given schema."""
+    conf = helpers.create_block_conf(
+        "",
+        {
+            "Path": helpers.relative_path(__file__, "./data/employee.xml"),
+            "RowTag": "employee",
+        },
+    )
+
+    # Act
+    result_df = resolve(batch_xml, conf)
+
+    # Assert
+    assert result_df.collect()[0][0] == 123
+    assert result_df.collect()[1][2] == "name2"
+    assert result_df.collect()[2][1] == "false"
     assert result_df.count() == 3
 
 
