@@ -9,11 +9,6 @@ An elegant way to ETL'ing.
 
 - View the [GETL documentation](https://getl.readthedocs.io)
 
-Features
---------
-
-- Lift definition validation
-- Upsert to postgres
 
 Installation
 ------------
@@ -24,6 +19,11 @@ Install GETL by running:
 # This will be the preferred way but until the code is deployed on PyPI, this is not possible
 pip install husqvarna-getl
 ```
+
+Upcoming features
+--------
+
+- Lift definition validation
 
 
 Contribute
