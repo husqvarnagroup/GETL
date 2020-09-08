@@ -1,6 +1,7 @@
 """Unit test for GETL transform function."""
 # pylint: disable=W0212
 
+import json
 from unittest import mock
 
 import pytest
@@ -431,6 +432,35 @@ def test_rename_returns_df_successfully(col, new_name, spark_session):
     assert isinstance(result, DataFrame)
     assert new_name in result.columns
     assert col not in result.columns
+
+
+#################
+# EXPLODE tests #
+#################
+
+
+@pytest.mark.spark
+@pytest.mark.parametrize(
+    "col, new_col, res_col",
+    [("items.Princess", "princess", "princess"), ("items.Princess", None, "items")],
+)
+def test_explode_cell(col, new_col, res_col, spark_session):
+    """Explode cell to many rows."""
+    # Arrange
+    princesses = [{"items": [{"Princess": "Cinderella"}, {"Princess": "Snow"}]}]
+
+    df = (
+        spark_session.read.option("multiline", "true")
+        .json(spark_session.sparkContext.parallelize([json.dumps(princesses)]))
+        .select("items")
+    )
+
+    # Act
+    result = tr.explode(df, col, new_col).collect()
+
+    # Assert
+    result[0][res_col] == "Cinderella"
+    result[1][res_col] == "Snow"
 
 
 ################

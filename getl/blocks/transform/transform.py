@@ -36,6 +36,17 @@ def select(dataframe: DataFrame, cols: List[Dict[str, str]]) -> DataFrame:
     return dataframe.select(*list_of_columns)
 
 
+def explode(dataframe: DataFrame, col: str, new_col: str = None) -> DataFrame:
+    """Explode a list in a cell to many rows in the dataframe
+
+    :param str col: name of the column to explode
+    :param str new_col: name of the new column to explode to, could be exploded column
+    """
+    tmp_new_col = new_col if new_col else col
+
+    return dataframe.withColumn(tmp_new_col, F.explode(col))
+
+
 def rename_column(dataframe: DataFrame, col: str, new_name: str) -> DataFrame:
     """Return DF with the column renamed and with the columns in the same order.
 
