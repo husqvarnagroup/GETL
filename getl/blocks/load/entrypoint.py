@@ -82,6 +82,7 @@ def batch_xml(conf: BlockConfig) -> DataFrame:
     """Load xml data in batch.
 
     :param str Path: path to the data files
+    :param str RowTag: the row tag that indicates a new item in the xml structure
     :param str FileRegistry=: name of the fileregistry to use
     :param str Alias=: an alias for the dataframe that is loaded
     :param str Suffix=.xml: the suffix of the file
