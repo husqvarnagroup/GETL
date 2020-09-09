@@ -1,9 +1,17 @@
 """Unit tests for the write entrypoint."""
 
+from functools import partial
+
 import pytest
 from pyspark.sql import types as T
 
 from getl.blocks.write.entrypoint import batch_postgres_upsert
+from getl.common.upsert import (
+    chunked,
+    flatten_rows_dict,
+    handle_partition,
+    postgres_connection_cursor,
+)
 
 
 def create_dataframe(spark_session, data):
@@ -117,3 +125,64 @@ def test_batch_postgres_upsert_chunked(
     batch_postgres_upsert(bconf)
     data = select_data()
     assert set(data) == set(df_data)
+
+
+def test_handle_partition(
+    helpers, spark_session, postgres_connection_details, create_table, select_data
+):
+    create_table()
+
+    handle_partition_factory = partial(
+        handle_partition,
+        postgres_connection_cursor_factory=partial(
+            postgres_connection_cursor, **postgres_connection_details
+        ),
+        table="filetable",
+        columns=["file_path", "count"],
+        conflict_columns=["file_path"],
+        update_columns=["count"],
+    )
+
+    iterator = iter(
+        [
+            {"file_path": "path/to/file1", "count": 1},
+            {"file_path": "path/to/file2", "count": 4},
+        ]
+    )
+    handle_partition_factory(iterator)
+    data = select_data()
+    assert set(data) == {("path/to/file1", 1), ("path/to/file2", 4)}
+
+    iterator = iter(
+        [
+            {"file_path": "path/to/file1", "count": 5},
+            {"file_path": "path/to/file6", "count": 6},
+        ]
+    )
+    handle_partition_factory(iterator)
+    data = select_data()
+    assert set(data) == {
+        ("path/to/file1", 5),
+        ("path/to/file2", 4),
+        ("path/to/file6", 6),
+    }
+
+
+def test_flatten_rows_dict():
+    input_array = [
+        {"file_path": "path/to/file1", "count": 1, "extra": "nothing"},
+        {"file_path": "path/to/file2", "count": 4, "extra": "something"},
+    ]
+    result_array = ["path/to/file1", 1, "path/to/file2", 4]
+    assert flatten_rows_dict(input_array, ["file_path", "count"]) == result_array
+
+
+def test_chunked():
+    input_array = ["lorem", "ipsum", "dolor", "sit", "amet"]
+    result_array = [
+        ["lorem", "ipsum"],
+        ["dolor", "sit"],
+        ["amet"],
+    ]
+
+    assert list(chunked(input_array, 2)) == result_array
