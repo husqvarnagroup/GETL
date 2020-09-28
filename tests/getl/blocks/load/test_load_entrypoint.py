@@ -4,7 +4,7 @@ from os import environ
 from mock import Mock
 from pyspark.sql import types as T
 
-from getl.blocks.load.entrypoint import batch_json, batch_xml, resolve
+from getl.blocks.load.entrypoint import batch_csv, batch_json, batch_xml, resolve
 
 environ[
     "PYSPARK_SUBMIT_ARGS"
@@ -210,3 +210,27 @@ def test_batch_xml_fileregistry(spark_session, helpers):
     assert result_df.count() == 3
     file_registry_mock.get.assert_called_with("SuperReg")
     file_registry_mock.get.return_value.load.assert_called_with("base_path", ".xml")
+
+
+def test_batch_csv(spark_session, helpers):
+    conf = helpers.create_block_conf(
+        "",
+        {
+            "Path": helpers.relative_path(__file__, "./data/sample.csv"),
+            "Options": {"inferSchema": True, "header": True},
+        },
+    )
+
+    # Act
+    result_df = resolve(batch_csv, conf)
+
+    # Assert
+    data = result_df.collect()
+
+    assert data[0]["name"] == "Mark Steelspitter"
+    assert data[0]["empid"] == 9
+    assert data[0]["happy"] is True
+    assert data[2]["name"] == "Mark Second"
+    assert data[2]["empid"] == 11
+    assert data[2]["happy"] is False
+    assert result_df.count() == 3
