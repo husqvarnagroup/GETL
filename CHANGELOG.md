@@ -6,6 +6,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 
 ## [Unreleased]
+### Added
+- Support for loading csv files with batch_csv
 
 ## [1.2.0] - 2020-09-09
 
