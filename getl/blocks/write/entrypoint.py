@@ -112,6 +112,7 @@ def batch_delta(conf: BlockConfig) -> DataFrame:
 
     :param str Path: location to write to
     :param str Mode: the mode to write with such as append or overwrite
+    :param str PartitionBy.Columns=: Partition the delta table on one or multiple columns
     :param bool Optimize.Enabled=False: Enable optimze on delta table (Only works on databricks)
     :param str Optimize.ZorderBy=None: What column names to optimize on
     :param bool Vacuum.Enabled=False: Enable vacuum on delta table (Only works on databricks)
@@ -129,6 +130,8 @@ def batch_delta(conf: BlockConfig) -> DataFrame:
         Properties:
             Path: s3://path/to/files
             Mode: upsert
+            PartitionBy:
+                Columns: [year, month, day]
             Optimize:
                 Enabled: False
                 ZorderBy: column_name, column_name_2
@@ -147,6 +150,7 @@ def batch_delta(conf: BlockConfig) -> DataFrame:
     """
     path = conf.get("Path")
     mode = conf.get("Mode")
+    columns = conf.get("PartitionBy.Columns", None)
     dataframe = conf.history.get(conf.input)
     batch = BatchDelta(dataframe, conf.spark)
     htable = None
@@ -162,11 +166,11 @@ def batch_delta(conf: BlockConfig) -> DataFrame:
 
     # Chose one of the batch delta modes
     if mode == UPSERT_MODE:
-        batch.upsert(path, conf.get("Upsert.MergeStatement"))
+        batch.upsert(path, conf.get("Upsert.MergeStatement"), columns)
     elif mode == CLEAN_WRITE_MODE:
-        batch.clean_write(path)
+        batch.clean_write(path, columns)
     else:
-        batch.write(path, mode)
+        batch.write(path, mode, columns)
 
     # Optimize the delta files
     if conf.get("Optimize.Enabled", False):

@@ -4,6 +4,7 @@
 
 - [Python 3.7+](https://www.python.org/downloads/)
 - [Poetry](https://python-poetry.org/)
+- [Docker-compose 1.27.4+](https://docs.docker.com/compose/install/)
 
 ## Install for development
 
@@ -11,7 +12,7 @@ Install GETL by running:
 
 ```sh
 # Install dependencies and dev dependencies
-poetry install
+poetry install --extras postgres
 
 # Install the git pre-commit hooks
 poetry run pre-commit install
@@ -20,6 +21,7 @@ poetry run pre-commit install
 ## Running tests
 
 ```sh
+docker-compose up -d db
 poetry run pytest
 ```
 

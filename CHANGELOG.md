@@ -6,6 +6,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 
 ## [Unreleased]
+### Added
+- Support for PartitionBy columns in write::batch_delta
 
 ## [1.3.0] - 2020-09-28
 ### Added

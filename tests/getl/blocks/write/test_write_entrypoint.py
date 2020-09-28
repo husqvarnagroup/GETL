@@ -13,6 +13,8 @@ def create_dataframe(spark_session, data):
         [
             T.StructField("file_path", T.StringType(), True),
             T.StructField("count", T.IntegerType(), True),
+            T.StructField("year", T.IntegerType(), True),
+            T.StructField("month", T.IntegerType(), True),
         ]
     )
 
@@ -26,7 +28,8 @@ def test_batch_delta_overwrite(m_hive_table, helpers, spark_session, tmp_dir):
     # Arrange
     props = {"Path": tmp_dir, "Mode": "overwrite"}
     bconf = helpers.create_block_conf(
-        create_dataframe(spark_session, [("abc", 1), ("qwe", 2)]), props
+        create_dataframe(spark_session, [("abc", 1, 2020, 10), ("qwe", 2, 2020, 10)]),
+        props,
     )
 
     # Act
@@ -34,6 +37,34 @@ def test_batch_delta_overwrite(m_hive_table, helpers, spark_session, tmp_dir):
 
     # Assert
     assert spark_session.read.load(tmp_dir, format="delta").count() == 2
+    assert not m_hive_table.called
+
+
+@patch("getl.blocks.write.entrypoint.HiveTable")
+@patch.object(BatchDelta, "write")
+def test_batch_delta_partitionby(
+    m_write, m_hive_table, helpers, spark_session, tmp_dir
+):
+    """Batch write delta files with partitionBy."""
+    # Arrange
+    props = {
+        "Path": tmp_dir,
+        "Mode": "overwrite",
+        "PartitionBy": {"Columns": ["year", "month"]},
+    }
+    bconf = helpers.create_block_conf(
+        create_dataframe(
+            spark_session,
+            [("abc", 1, 2020, 10), ("qwe", 2, 2021, 11), ("asd", 3, 2021, 12)],
+        ),
+        props,
+    )
+
+    # Act
+    batch_delta(bconf)
+
+    # Assert
+    m_write.assert_called_once_with(tmp_dir, "overwrite", ["year", "month"])
     assert not m_hive_table.called
 
 
@@ -56,7 +87,7 @@ def test_batch_delta_optimize(
     props = {"Path": tmp_dir, "Mode": "overwrite", **params}
     spark_session.sql = Mock()
     bconf = helpers.create_block_conf(
-        create_dataframe(spark_session, [("abc", 1)]), props
+        create_dataframe(spark_session, [("abc", 1, 2020, 10)]), props
     )
 
     # Act
@@ -88,7 +119,7 @@ def test_batch_delta_vacuum(
     props = {"Path": tmp_dir, "Mode": "overwrite", **params}
     spark_session.sql = Mock()
     bconf = helpers.create_block_conf(
-        create_dataframe(spark_session, [("abc", 1)]), props
+        create_dataframe(spark_session, [("abc", 1, 2020, 10)]), props
     )
 
     # Act
@@ -110,10 +141,10 @@ def test_batch_delta_upsert(tmp_dir, helpers, spark_session):
         "Upsert": {"MergeStatement": "source.file_path = updates.file_path"},
     }
     first_df = create_dataframe(
-        spark_session, [("path/to/file1", 1), ("path/to/file2", 4)]
+        spark_session, [("path/to/file1", 1, 2020, 10), ("path/to/file2", 4, 2020, 10)]
     )
     second_df = create_dataframe(
-        spark_session, [("path/to/file1", 5), ("path/to/file6", 6)]
+        spark_session, [("path/to/file1", 5, 2020, 10), ("path/to/file6", 6, 2020, 10)]
     )
 
     # Act & Assert: First time we need to create a delta table
@@ -145,7 +176,7 @@ def test_batch_clean_write(m_write, s3_mock, helpers):
     # Act & Assert: Second time we  do an upsert when files exist
     bconf = helpers.create_block_conf(None, props)
     batch_delta(bconf)
-    m_write.assert_called_once_with("s3://tmp-bucket/", "overwrite")
+    m_write.assert_called_once_with("s3://tmp-bucket/", "overwrite", None)
     assert (
         s3_mock.list_objects_v2(Bucket="tmp-bucket", Prefix="prefix")["KeyCount"] == 0
     )

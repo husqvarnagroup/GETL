@@ -19,23 +19,28 @@ class BatchDelta:
     spark: SparkSession
     _format: str = "delta"
 
-    def write(self, path: str, mode: str) -> None:
+    def write(self, path: str, mode: str, columns: list = None) -> None:
         """Write to delta files to a location."""
-        self.dataframe.write.save(path=path, format=self._format, mode=mode)
+        if columns:
+            self.dataframe.write.save(
+                path=path, format=self._format, mode=mode, partitionBy=columns
+            )
+        else:
+            self.dataframe.write.save(path=path, format=self._format, mode=mode)
 
-    def upsert(self, path: str, merge_statement: str) -> None:
+    def upsert(self, path: str, merge_statement: str, columns: list = None) -> None:
         """Write data to path if not exists otherwise do an upsert."""
         if not self._dataset_exists(path):
-            self.write(path, "overwrite")
+            self.write(path, "overwrite", columns)
         else:
             delta_table = DeltaTable(path, spark=self.spark)
             delta_table.upsert_all(self.dataframe, merge_statement)
 
-    def clean_write(self, path: str) -> None:
+    def clean_write(self, path: str, columns: list = None) -> None:
         """Write to delta files to a clean location."""
         for s3path in S3Path(path).glob():
             s3path.delete()
-        self.write(path, "overwrite")
+        self.write(path, "overwrite", columns)
 
     def _dataset_exists(self, path: str) -> bool:
         """Validate if the dataset exists."""
