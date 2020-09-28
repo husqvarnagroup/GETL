@@ -23,6 +23,33 @@ def resolve(func, conf: BlockConfig) -> DataFrame:
     return dataframe
 
 
+def batch_csv(conf: BlockConfig) -> DataFrame:
+    """Load csv data in batch.
+
+    :param str Path: path to the csv files
+    :param dict Options: [options](https://spark.apache.org/docs/latest/api/python/pyspark.sql.html#pyspark.sql.DataFrameReader.csv) to be passed to the csv reader
+    :param str Alias=: an alias for the dataframe that is loaded
+
+    ```
+    SectionName:
+        Type: load::batch_csv
+        Properties:
+            Path: s3://bucket-name/trusted/live
+            Options:
+                header: True
+                inferSchema: True
+            Alias: settings
+    ```
+
+    """
+    return _batch_read(
+        conf.spark,
+        _process_path(conf, suffix=".csv"),
+        file_format="csv",
+        options=conf.get("Options", {}),
+    )
+
+
 def batch_parquet(conf: BlockConfig) -> DataFrame:
     """Load parquet data in batch.
 
@@ -233,7 +260,9 @@ def jdbc(bconf: BlockConfig) -> DataFrame:
     return dataframe
 
 
-def _batch_read(spark: SparkSession, paths, file_format, options={}):
+def _batch_read(
+    spark: SparkSession, paths: List[str], file_format: str, options: dict = {}
+):
     """Retrives data on batch."""
     return spark.read.load(paths, format=file_format, **options)
 
