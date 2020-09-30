@@ -33,7 +33,7 @@ def test_create_hive_table(params, num_calls, schema):
         call("CREATE DATABASE IF NOT EXISTS db"),
         call("USE db"),
         call(
-            f"CREATE TABLE IF NOT EXISTS tableking{schema} USING DELTA LOCATION s3://bucket/prefix"
+            f"CREATE TABLE IF NOT EXISTS tableking{schema} USING DELTA LOCATION 's3://bucket/prefix'"
         ),
     ]
     spark_session.sql.assert_has_calls(calls)
@@ -71,7 +71,7 @@ def test_create_hive_table_partition_by(params, num_calls, schema):
         call("USE db"),
         call(
             f"CREATE TABLE IF NOT EXISTS tableking{schema} USING "
-            f"DELTA PARTITIONED BY (col) LOCATION s3://bucket/prefix"
+            f"DELTA PARTITIONED BY (col) LOCATION 's3://bucket/prefix'"
         ),
     ]
     spark_session.sql.assert_has_calls(calls)

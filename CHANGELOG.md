@@ -6,6 +6,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 
 ## [Unreleased]
+- Critical bugfix for Hive table creation.
 
 ## [1.4.1] - 2020-09-30
 - Support for PartitionBy columns for HiveTable
