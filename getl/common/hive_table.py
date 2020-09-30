@@ -31,7 +31,7 @@ class HiveTable:
             columns_as_string = ",".join(columns)
             self.spark.sql(
                 f"{create_table} USING DELTA PARTITIONED BY "
-                f"({columns_as_string}) LOCATION {location}"
+                f"({columns_as_string}) LOCATION '{location}'"
             )
         else:
-            self.spark.sql(f"{create_table} USING DELTA LOCATION {location}")
+            self.spark.sql(f"{create_table} USING DELTA LOCATION '{location}'")
