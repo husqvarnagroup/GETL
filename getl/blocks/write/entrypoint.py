@@ -162,7 +162,7 @@ def batch_delta(conf: BlockConfig) -> DataFrame:
         schema = conf.get("HiveTable.Schema", "")
 
         htable = HiveTable(spark=conf.spark, database_name=dbname, table_name=tablename)
-        htable.create(path, schema)
+        htable.create(path, schema, columns)
 
     # Chose one of the batch delta modes
     if mode == UPSERT_MODE:
