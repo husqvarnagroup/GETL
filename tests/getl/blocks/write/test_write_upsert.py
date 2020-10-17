@@ -6,12 +6,7 @@ import pytest
 from pyspark.sql import types as T
 
 from getl.blocks.write.entrypoint import batch_postgres_upsert
-from getl.common.upsert import (
-    chunked,
-    flatten_rows_dict,
-    handle_partition,
-    postgres_connection_cursor,
-)
+from getl.common.upsert import handle_partition, postgres_connection_cursor
 
 
 def create_dataframe(spark_session, data):
@@ -166,23 +161,3 @@ def test_handle_partition(
         ("path/to/file2", 4),
         ("path/to/file6", 6),
     }
-
-
-def test_flatten_rows_dict():
-    input_array = [
-        {"file_path": "path/to/file1", "count": 1, "extra": "nothing"},
-        {"file_path": "path/to/file2", "count": 4, "extra": "something"},
-    ]
-    result_array = ["path/to/file1", 1, "path/to/file2", 4]
-    assert flatten_rows_dict(input_array, ["file_path", "count"]) == result_array
-
-
-def test_chunked():
-    input_array = ["lorem", "ipsum", "dolor", "sit", "amet"]
-    result_array = [
-        ["lorem", "ipsum"],
-        ["dolor", "sit"],
-        ["amet"],
-    ]
-
-    assert list(chunked(input_array, 2)) == result_array

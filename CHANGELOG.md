@@ -6,6 +6,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 
 ## [Unreleased]
+### Changed
+- Use of psycopg2.extras.execute_values to remove and simplify code
+
+### Removed
+- Utils functions chunked and flatten_rows_dict in getl/common/upsert.py
 
 ## [1.4.2] - 2020-09-30
 - Critical bugfix for Hive table creation.
