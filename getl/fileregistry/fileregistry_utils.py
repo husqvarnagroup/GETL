@@ -16,11 +16,19 @@ def update_date_lifted(delta_table: "DeltaTable") -> None:
 
 
 def fetch_file_registry(path: str, spark: SparkSession) -> Union[DataFrame, None]:
-    """Retrun a dataframe if one can be found otherwise None."""
+    """Return a dataframe if one can be found otherwise None."""
     try:
-        return spark.read.load(path, format="delta")
+        dataframe = spark.read.load(path, format="delta")
+        if dataframe.rdd.isEmpty():
+            return None
+        return dataframe
     except AnalysisException as spark_exception:
-        exceptions = ["Incompatible format detected", "doesn't exist"]
+        exceptions = [
+            "Incompatible format detected",
+            "doesn't exist",
+            "is not a Delta table",
+        ]
 
-        if not any([e in str(spark_exception) for e in exceptions]):
+        if not any(e in str(spark_exception) for e in exceptions):
             raise spark_exception
+        return None
