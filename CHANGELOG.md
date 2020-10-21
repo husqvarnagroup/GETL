@@ -12,6 +12,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Removed
 - Utils functions chunked and flatten_rows_dict in getl/common/upsert.py
 
+### Fixed
+- When checking if a file registry exists in an empty directory or in a S3 prefix that doesn't exist, a different exception is raised
+
 ## [1.4.2] - 2020-09-30
 - Critical bugfix for Hive table creation.
 
