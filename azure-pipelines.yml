@@ -26,6 +26,9 @@ jobs:
       Python38-spark3:
         python.version: '3.8'
         TOXENV: py38-spark3
+      Python39-spark3:
+        python.version: '3.9'
+        TOXENV: py39-spark3
 
   steps:
   - task: UsePythonVersion@0
