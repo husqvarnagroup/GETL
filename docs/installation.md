@@ -2,8 +2,7 @@
 
 ## Prerequisites
 
-- [Python 3.7](https://www.python.org/downloads/) (Python 3.8 support comming soon with spark 3.0)
-- [Apache Spark 2.4](https://spark.apache.org/downloads.html)
+- [Python](https://www.python.org/downloads/) versions 3.7, 3.8 and 3.9 are supported
 
 ## Install the GETL
 
