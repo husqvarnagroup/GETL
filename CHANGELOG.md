@@ -6,6 +6,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 
 ## [Unreleased]
+### Added
+- Options parameter in load::batch_json to be able to submit more settings when loading json files (like multiLine: true)
 
 ## [1.4.3] - 2020-10-21
 ### Changed
