@@ -1,0 +1,5 @@
+[
+    {"name":"Mark Steelspitter","empid":9,"happy":false,"gear":{"helmet":"vikinghelmet","armor":"steelplate","shoulder-pads":"sturdyleather"}},
+    {"name":"Mark Two","empid":10,"happy":true,"gear":{"helmet":"helmet","armor":"steelplate","shoulder-pads":"sturdyleather"}},
+    {"name":"Mark Second","empid":11,"happy":false,"gear":{"helmet":"none","armor":"steelplate","shoulder-pads":"sturdyleather"}}
+]

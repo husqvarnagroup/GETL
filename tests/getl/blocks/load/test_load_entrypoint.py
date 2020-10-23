@@ -45,6 +45,29 @@ def test_batch_json(spark_session, helpers):
     assert result_df.count() == 3
 
 
+def test_batch_json_multiLine_options(spark_session, helpers):
+    helpers.create_s3_files({"schema.json": SCHEMA.json()})
+
+    conf = helpers.create_block_conf(
+        "",
+        {
+            "Path": helpers.relative_path(__file__, "./data/sample_multiline.json"),
+            "JsonSchemaPath": "s3://tmp-bucket/schema.json",
+            "Alias": "alias",
+            "Options": {"multiLine": True},
+        },
+    )
+
+    # Act
+    result_df = resolve(batch_json, conf)
+
+    # Assert
+    assert result_df.collect()[0][0] == "Mark Steelspitter"
+    assert result_df.collect()[1][0] == "Mark Two"
+    assert result_df.collect()[2][1] == 11
+    assert result_df.count() == 3
+
+
 def test_batch_json_fileregistry(spark_session, helpers):
     """batch_json should be able to load json files with file registry."""
     # Arrange
