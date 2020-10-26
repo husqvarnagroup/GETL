@@ -8,6 +8,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 ### Changed
 - Changed python version requirements to include python 3.9
+- Add Databricks optimize and vacuum of file-registry after updating
 
 ## [1.5.0] - 2020-10-23
 ### Added

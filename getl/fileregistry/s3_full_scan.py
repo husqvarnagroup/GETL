@@ -43,7 +43,9 @@ class S3FullScan(FileRegistry):
 
     def update(self) -> None:
         """Update file registry column date_lifted to current date."""
-        fr_utils.update_date_lifted(self.delta_table)
+        fr_utils.update_date_lifted(
+            self.delta_table, self.spark, self.hive_database_name, self.hive_table_name
+        )
 
     def load(self, s3_path: str, suffix: str) -> List[str]:
         """Fetch new filepaths that have not been lifted from s3."""
