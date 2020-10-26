@@ -46,7 +46,9 @@ class S3DatePrefixScan(FileRegistry):
         self.spark = bconf.spark
 
     def update(self) -> None:
-        fr_utils.update_date_lifted(self.delta_table)
+        fr_utils.update_date_lifted(
+            self.delta_table, self.spark, self.hive_database_name, self.hive_table_name
+        )
 
     def load(self, s3_path: str, suffix: str) -> List[str]:
         self._get_or_create()
