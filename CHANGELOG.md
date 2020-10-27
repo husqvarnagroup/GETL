@@ -6,6 +6,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 
 ## [Unreleased]
+
+## [1.6.0] - 2020-10-27
 ### Changed
 - Changed python version requirements to include python 3.9
 - Add Databricks optimize and vacuum of file-registry after updating
@@ -71,7 +73,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - prefix_based_date fileregistry.
 
 
-[Unreleased]: https://github.com/husqvarnagroup/GETL/compare/v1.5.0...HEAD
+[Unreleased]: https://github.com/husqvarnagroup/GETL/compare/v1.6.0...HEAD
+[1.6.0]: https://github.com/husqvarnagroup/GETL/compare/v1.5.0...v1.6.0
 [1.5.0]: https://github.com/husqvarnagroup/GETL/compare/v1.4.3...v1.5.0
 [1.4.3]: https://github.com/husqvarnagroup/GETL/compare/v1.4.2...v1.4.3
 [1.4.2]: https://github.com/husqvarnagroup/GETL/compare/v1.4.1...v1.4.2
