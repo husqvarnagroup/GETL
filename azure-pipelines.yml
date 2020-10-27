@@ -46,7 +46,7 @@ jobs:
     displayName: 'Check flake8'
 
   - script: |
-      poetry run isort --check-only --diff --quiet
+      poetry run isort --check --diff .
     displayName: 'Check isort'
 
   - script: |
