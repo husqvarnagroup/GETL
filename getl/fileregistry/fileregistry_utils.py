@@ -21,7 +21,7 @@ def update_date_lifted(
     # Optimze and vacuum Databricks tables
     try:
         LOGGER.info("Optimize file-registry")
-        spark.sql(f'OPTIMIZE "{database_name}.{table_name};"')
+        spark.sql(f"OPTIMIZE {database_name}.{table_name}")
     except ParseException:
         LOGGER.warning("Optimize command is not supported in this environmnet")
     try:

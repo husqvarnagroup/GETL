@@ -6,6 +6,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 
 ## [Unreleased]
+- Bugfix the Databricks optimize of file-registry after updating
 
 ## [1.6.0] - 2020-10-27
 ### Changed
