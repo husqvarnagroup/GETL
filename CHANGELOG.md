@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.6.3] - 2020-10-29
+
 ### Fixed
 - Bugfix: When creating empty arrays they looked like array<null>. That is not supported by spark 3 so instead we create empty array<string>
 
@@ -84,7 +86,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - prefix_based_date fileregistry.
 
 
-[Unreleased]: https://github.com/husqvarnagroup/GETL/compare/v1.6.2...HEAD
+[Unreleased]: https://github.com/husqvarnagroup/GETL/compare/v1.6.3...HEAD
+[1.6.3]: https://github.com/husqvarnagroup/GETL/compare/v1.6.2...v1.6.3
 [1.6.2]: https://github.com/husqvarnagroup/GETL/compare/v1.6.1...v1.6.2
 [1.6.1]: https://github.com/husqvarnagroup/GETL/compare/v1.6.0...v1.6.1
 [1.6.0]: https://github.com/husqvarnagroup/GETL/compare/v1.5.0...v1.6.0
