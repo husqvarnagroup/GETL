@@ -7,6 +7,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Fixed
+- Bugfix: When creating empty arrays they looked like array<null>. That is not supported by spark 3 so instead we create empty array<string>
+
 ## [1.6.2] - 2020-10-29
 ### Fixed
 - Bugfix for loading empty directories with batch_delta using spark 3.0

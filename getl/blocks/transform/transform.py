@@ -279,7 +279,7 @@ def _add_new_column(
 ) -> DataFrame:
     """Add a new column to the dataframe."""
     if default_value == "array()":
-        return dataframe.withColumn(column_name, F.array())
+        return dataframe.withColumn(column_name, F.array().cast("array<string>"))
 
     return dataframe.withColumn(column_name, F.lit(None))
 

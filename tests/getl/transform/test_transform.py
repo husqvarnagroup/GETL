@@ -283,10 +283,7 @@ def test_filter_success(predicate, princess_names, spark_session):
                     "alias": "test",
                 },
             ],
-            [
-                "DataFrame[device: array<string>, test: array<string>]",
-                "DataFrame[device: array<null>, test: array<null>]",
-            ],
+            ["DataFrame[device: array<string>, test: array<string>]"],
         ),
         (
             [{"col": "age", "alias": "years", "cast": "string"}],
