@@ -4,10 +4,9 @@ import json
 from typing import List
 
 from pyspark.sql import DataFrame, SparkSession, types as T
-from pyspark.sql.utils import AnalysisException
 
 from getl.block import BlockConfig
-from getl.common.errors import NoDataToProcess, delta_files_exists_exception
+from getl.common.errors import NoDataToProcess, handle_delta_files_dont_exist
 from getl.common.s3path import S3Path
 from getl.common.utils import json_to_spark_schema
 
@@ -181,18 +180,13 @@ def batch_delta(conf: BlockConfig) -> DataFrame:
     ```
 
     """
-    try:
+    with handle_delta_files_dont_exist():
         paths = conf.get("Path")
         return _batch_read(conf.spark, paths, file_format="delta")
 
-    except AnalysisException as spark_exception:
-        if not delta_files_exists_exception(spark_exception):
-            raise spark_exception
-
-        # Return empty dataframe if no one was found
-        return conf.spark.createDataFrame(
-            conf.spark.sparkContext.emptyRDD(), T.StructType([])
-        )
+    return conf.spark.createDataFrame(
+        conf.spark.sparkContext.emptyRDD(), T.StructType([])
+    )
 
 
 def stream_json(bconf: BlockConfig) -> DataFrame:

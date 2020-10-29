@@ -3,6 +3,7 @@ from contextlib import contextmanager
 from typing import Dict, Tuple, Type
 
 from botocore.exceptions import ClientError
+from pyspark.sql.utils import AnalysisException
 
 # Format: ExceptionClass, Message
 _ERROR_MAP: Dict[str, Tuple[Type[Exception], str]] = {
@@ -38,15 +39,20 @@ def handle_client_error():
         raise client_error
 
 
-def delta_files_exists_exception(spark_exception):
-    """Check if the spark exception indicates that the delta files does not exist."""
-    exceptions = [
-        "Incompatible format detected",
-        "doesn't exist",
-        "is not a Delta table",
-    ]
+@contextmanager
+def handle_delta_files_dont_exist():
+    try:
+        yield
+    except AnalysisException as spark_exception:
+        exceptions = [
+            "Incompatible format detected",
+            "doesn't exist",
+            "is not a Delta table",
+        ]
 
-    return any(e in str(spark_exception) for e in exceptions)
+        if any(e in str(spark_exception) for e in exceptions):
+            return
+        raise spark_exception
 
 
 class NoDataToProcess(Exception):
