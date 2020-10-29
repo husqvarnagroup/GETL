@@ -5,6 +5,7 @@ from pyspark.sql import DataFrame, SparkSession, functions as F
 from pyspark.sql.utils import AnalysisException, ParseException
 
 from getl.common.delta_table import DeltaTable
+from getl.common.errors import delta_files_exists_exception
 from getl.logging import get_logger
 
 LOGGER = get_logger(__name__)
@@ -40,12 +41,7 @@ def fetch_file_registry(path: str, spark: SparkSession) -> Union[DataFrame, None
             return None
         return dataframe
     except AnalysisException as spark_exception:
-        exceptions = [
-            "Incompatible format detected",
-            "doesn't exist",
-            "is not a Delta table",
-        ]
-
-        if not any(e in str(spark_exception) for e in exceptions):
+        if not delta_files_exists_exception(spark_exception):
             raise spark_exception
+
         return None

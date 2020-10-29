@@ -7,7 +7,7 @@ from pyspark.sql import DataFrame, SparkSession, types as T
 from pyspark.sql.utils import AnalysisException
 
 from getl.block import BlockConfig
-from getl.common.errors import NoDataToProcess
+from getl.common.errors import NoDataToProcess, delta_files_exists_exception
 from getl.common.s3path import S3Path
 from getl.common.utils import json_to_spark_schema
 
@@ -182,13 +182,11 @@ def batch_delta(conf: BlockConfig) -> DataFrame:
 
     """
     try:
-        paths = conf.props["Path"]
+        paths = conf.get("Path")
         return _batch_read(conf.spark, paths, file_format="delta")
 
     except AnalysisException as spark_exception:
-        exceptions = ["Incompatible format detected", "doesn't exist"]
-
-        if not any([e in str(spark_exception) for e in exceptions]):
+        if not delta_files_exists_exception(spark_exception):
             raise spark_exception
 
         # Return empty dataframe if no one was found

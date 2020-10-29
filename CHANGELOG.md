@@ -6,8 +6,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 
 ## [Unreleased]
+### Fixed
+- Bugfix for loading empty directories with batch_delta using spark 3.0
 
 ## [1.6.1] - 2020-10-27
+### Fixed
 - Bugfix the Databricks optimize of file-registry after updating
 
 ## [1.6.0] - 2020-10-27

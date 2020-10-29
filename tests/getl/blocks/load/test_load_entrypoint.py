@@ -4,8 +4,15 @@ from os import environ
 from mock import Mock
 from pyspark.sql import types as T
 
-from getl.blocks.load.entrypoint import batch_csv, batch_json, batch_xml, resolve
+from getl.blocks.load.entrypoint import (
+    batch_csv,
+    batch_delta,
+    batch_json,
+    batch_xml,
+    resolve,
+)
 
+# TODO: Need to adapt to different xml version depending on spark version
 environ[
     "PYSPARK_SUBMIT_ARGS"
 ] = "--packages com.databricks:spark-xml_2.11:0.9.0 pyspark-shell"
@@ -257,3 +264,44 @@ def test_batch_csv(spark_session, helpers):
     assert data[2]["empid"] == 11
     assert data[2]["happy"] is False
     assert result_df.count() == 3
+
+
+def test_batch_delta(spark_session, helpers):
+    conf = helpers.create_block_conf(
+        "",
+        {
+            "Path": helpers.relative_path(__file__, "./data/sample-delta"),
+            "Options": {"inferSchema": True, "header": True},
+        },
+    )
+
+    # Act
+    result_df = resolve(batch_delta, conf)
+
+    # Assert
+    data = result_df.collect()
+
+    assert data[0]["name"] == "Mark Steelspitter"
+    assert data[0]["empid"] == 9
+    assert data[0]["happy"] is True
+    assert data[2]["name"] == "Mark Second"
+    assert data[2]["empid"] == 11
+    assert data[2]["happy"] is False
+    assert result_df.count() == 3
+
+
+def test_batch_delta_no_files(spark_session, helpers):
+    conf = helpers.create_block_conf(
+        "",
+        {
+            "Path": helpers.relative_path(__file__, "./data/sample-delta-nofiles"),
+            "Options": {"inferSchema": True, "header": True},
+        },
+    )
+
+    # Act
+    result_df = resolve(batch_delta, conf)
+
+    # Assert
+    data = result_df.collect()
+    assert len(data) == 0

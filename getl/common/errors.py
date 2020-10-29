@@ -38,5 +38,16 @@ def handle_client_error():
         raise client_error
 
 
+def delta_files_exists_exception(spark_exception):
+    """Check if the spark exception indicates that the delta files does not exist."""
+    exceptions = [
+        "Incompatible format detected",
+        "doesn't exist",
+        "is not a Delta table",
+    ]
+
+    return any(e in str(spark_exception) for e in exceptions)
+
+
 class NoDataToProcess(Exception):
     """Should be thrown when there is not more data to process."""
