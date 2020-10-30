@@ -61,6 +61,38 @@ def batch_jdbc(conf: BlockConfig) -> DataFrame:
     return dataframe
 
 
+def batch_json(conf: BlockConfig) -> DataFrame:
+    """Write delta data down to some location.
+
+    :param str Path: location to write to
+    :param str Mode: the mode to write with such as append or overwrite
+    :param str PartitionBy.Columns=: Partition the delta table on one or multiple columns
+    ```
+    SectionName:
+        Type: write::batch_json
+        Input: OtherSectionName
+        Properties:
+            Path: s3://path/to/files
+            Mode: overwrite
+            PartitionBy:
+                Columns: [year, month, day]
+    ```
+    """
+    path = conf.get("Path")
+    mode = conf.get("Mode", None)
+    columns = conf.get("PartitionBy.Columns", None)
+    dataframe = conf.history.get(conf.input)
+
+    df = dataframe.write.mode(mode)
+
+    if columns:
+        df = df.partitionBy(columns)
+
+    df.json(path)
+
+    return dataframe
+
+
 def batch_postgres_upsert(conf: BlockConfig) -> DataFrame:
     """Batch upsert data with psycopg2-binary python package.
     This package can be installed with the *postgres* extra:
