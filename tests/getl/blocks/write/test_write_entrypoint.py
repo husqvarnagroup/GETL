@@ -5,19 +5,19 @@ from mock import Mock, patch
 from pyspark.sql import types as T
 
 from getl.blocks.write.batch_delta import BatchDelta
-from getl.blocks.write.entrypoint import batch_delta
+from getl.blocks.write.entrypoint import batch_delta, batch_json
+
+schema = T.StructType(
+    [
+        T.StructField("file_path", T.StringType(), True),
+        T.StructField("count", T.IntegerType(), True),
+        T.StructField("year", T.IntegerType(), True),
+        T.StructField("month", T.IntegerType(), True),
+    ]
+)
 
 
 def create_dataframe(spark_session, data):
-    schema = T.StructType(
-        [
-            T.StructField("file_path", T.StringType(), True),
-            T.StructField("count", T.IntegerType(), True),
-            T.StructField("year", T.IntegerType(), True),
-            T.StructField("month", T.IntegerType(), True),
-        ]
-    )
-
     return spark_session.createDataFrame(data, schema)
 
 
@@ -180,3 +180,53 @@ def test_batch_clean_write(m_write, s3_mock, helpers):
     assert (
         s3_mock.list_objects_v2(Bucket="tmp-bucket", Prefix="prefix")["KeyCount"] == 0
     )
+
+
+def test_write_batch_json(helpers, spark_session, tmp_path):
+    """Batch write json files with partitionBy."""
+    # Arrange
+    props = {
+        "Path": str(tmp_path),
+        "Mode": "overwrite",
+        # "PartitionBy": {"Columns": ["year", "month"]},
+    }
+    df = create_dataframe(
+        spark_session,
+        [("abc", 1, 2020, 10), ("qwe", 2, 2021, 11), ("asd", 3, 2021, 12)],
+    )
+
+    bconf = helpers.create_block_conf(df, props)
+
+    # Act
+    batch_json(bconf)
+
+    df_read = spark_session.read.load(str(tmp_path), format="json", schema=schema)
+
+    assert df.orderBy("file_path").collect() == df_read.orderBy("file_path").collect()
+
+
+def test_write_batch_json_partitionBy(helpers, spark_session, tmp_path):
+    """Batch write json files with partitionBy."""
+    # Arrange
+    props = {
+        "Path": str(tmp_path),
+        "Mode": "overwrite",
+        "PartitionBy": {"Columns": ["year", "month"]},
+    }
+    df = create_dataframe(
+        spark_session,
+        [("abc", 1, 2020, 10), ("qwe", 2, 2021, 11), ("asd", 3, 2021, 12)],
+    )
+
+    bconf = helpers.create_block_conf(df, props)
+
+    # Act
+    batch_json(bconf)
+
+    assert (tmp_path / "year=2021").exists()
+
+    df_read = spark_session.read.load(
+        str(tmp_path), format="json", recursivePath=True, schema=schema
+    )
+
+    assert df.orderBy("file_path").collect() == df_read.orderBy("file_path").collect()
