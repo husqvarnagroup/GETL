@@ -81,6 +81,16 @@ class BatchDelta:
         """Remove old versions of the delta table, by default retain the last 7 days of versions."""
         LOGGER.info(f"Vacuum the delta tables at: {path}")
         try:
+            if retain_hours < 168:
+                # Delta Lake has a safety check to prevent you from running a dangerous vacuum command.
+                # Turn off this safety check by setting the Apache Spark configuration
+                # property spark.databricks.delta.retentionDurationCheck.enabled to false
+                LOGGER.warning(
+                    "We do not recommend that you set a retention interval shorter than 7 days"
+                )
+                spark.sql(
+                    "set spark.databricks.delta.retentionDurationCheck.enabled = false"
+                )
             spark.sql(f'VACUUM "{path}" RETAIN {retain_hours} HOURS')
         except ParseException:
             LOGGER.warning("Vacuum command is not supported in this environmnet")
