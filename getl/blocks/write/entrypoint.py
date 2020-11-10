@@ -144,16 +144,16 @@ def batch_delta(conf: BlockConfig) -> DataFrame:
 
     :param str Path: location to write to
     :param str Mode: the mode to write with such as append or overwrite
-    :param str PartitionBy.Columns=: Partition the delta table on one or multiple columns
-    :param bool Optimize.Enabled=False: Enable optimze on delta table (Only works on databricks)
-    :param str Optimize.ZorderBy=None: What column names to optimize on
-    :param bool Vacuum.Enabled=False: Enable vacuum on delta table (Only works on databricks)
-    :param int Vacuum.RetainHours=168: Number of days we keep version, default is 7 days, cannot be set lower
-    :param str Upsert.MergeStatement=: How to merge the new data `updates.{col}` with the old data `source.{col}`.
-    This option only have an effect if the `Mode: upsert` have been chosen.
-    :param str HiveTable.DatabaseName=: Name of hive table
-    :param str HiveTable.TableName=: Name of the hive table
-    :param str HiveTable.Schema=: The schema of the hive table
+    :param list[str] PartitionBy.Columns=: partition the delta table on one or multiple columns
+    :param bool Optimize.Enabled=False: enable optimze on delta table (Only works on databricks)
+    :param str Optimize.ZorderBy=None: the column names to optimize on
+    :param bool Vacuum.Enabled=False: enable vacuum on delta table (Only works on databricks)
+    :param int Vacuum.RetainHours=168: number of days we keep version, default is 7 days, cannot be set lower
+    :param str Upsert.MergeStatement=: statement to merge the new data `updates.{col}` with the old data `source.{col}`,
+    this option only has an effect when the `Mode: upsert` has been set
+    :param str HiveTable.DatabaseName=: name of hive table
+    :param str HiveTable.TableName=: name of the hive table
+    :param str HiveTable.Schema=: schema of the hive table
 
     ```
     SectionName:
