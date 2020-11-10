@@ -1,6 +1,6 @@
 """Performs spark transformation operations."""
 import logging
-from typing import Dict, List, Tuple, TypeVar
+from typing import Dict, List, Optional, Tuple, TypeVar
 
 from pyspark.sql import DataFrame, functions as F, types as T
 from pyspark.sql.utils import AnalysisException
@@ -149,6 +149,19 @@ def concat(
 
     processed_list = add_delimiter(cast_list_items_to_string(from_columns), delimiter)
     return dataframe.withColumn(to_column, F.concat(*processed_list))
+
+
+def drop_duplicates(
+    dataframe: DataFrame, columns: Optional[List[str]] = None
+) -> DataFrame:
+    """Drop duplicates in the dataframe
+
+    :param list columns=: list of columns names to make unique, default takes all columns
+    """
+
+    if columns:
+        return dataframe.dropDuplicates(columns)
+    return dataframe.dropDuplicates()
 
 
 def _predicate_to_sql(predicate: PredicateType, sql: str = "") -> str:

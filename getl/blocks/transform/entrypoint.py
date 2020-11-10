@@ -48,9 +48,16 @@ def generic(conf: BlockConfig) -> DataFrame:
 
 def _get_function_meta(function: Dict) -> List[Union[None, str]]:
     """Get the metadata for the module, function_name and parameters."""
-    module_function = next(iter(function))
     module_path = None
-    function_parameters = next(iter(function.values()))
+
+    if isinstance(function, dict):
+        module_function = next(iter(function))
+        function_parameters = next(iter(function.values()))
+    elif isinstance(function, str):
+        module_function = function
+        function_parameters = {}
+    else:
+        raise ValueError(f"Could not process function {function}")
 
     if "." in module_function:
         module_path, module_function = module_function.rsplit(".", 1)
