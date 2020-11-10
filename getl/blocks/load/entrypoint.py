@@ -1,7 +1,7 @@
 """Entrypoint for the load block."""
 import functools
 import json
-from typing import List
+from typing import Iterator, List
 
 from pyspark.sql import DataFrame, SparkSession, types as T
 
@@ -132,7 +132,7 @@ def batch_xml(conf: BlockConfig) -> DataFrame:
 
     """
 
-    def get_batches(file_paths: List[str], batch_size: int) -> List[str]:
+    def get_batches(file_paths: List[str], batch_size: int) -> Iterator[str]:
         """Batches the file paths"""
         for i in range(0, len(file_paths), batch_size):
             yield file_paths[i : i + batch_size]

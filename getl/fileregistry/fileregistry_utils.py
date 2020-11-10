@@ -30,7 +30,6 @@ def update_date_lifted(
         delta_table.delta_table.vacuum()
     except ParseException:
         LOGGER.warning("Vacuum command is not supported in this environmnet")
-        pass
 
 
 def fetch_file_registry(path: str, spark: SparkSession) -> Union[DataFrame, None]:
