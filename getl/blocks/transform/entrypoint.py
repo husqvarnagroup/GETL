@@ -2,7 +2,7 @@
 Entrypoint for the generic transform block.
 """
 from importlib import import_module
-from typing import Callable, Dict, List, Optional, Union
+from typing import Callable, Dict, Optional, Tuple
 
 from pyspark.sql import DataFrame
 
@@ -46,7 +46,7 @@ def generic(conf: BlockConfig) -> DataFrame:
     return dataframe
 
 
-def _get_function_meta(function: Dict) -> List[Union[None, str]]:
+def _get_function_meta(function: Dict) -> Tuple[Optional[str], str, dict]:
     """Get the metadata for the module, function_name and parameters."""
     module_path = None
 
