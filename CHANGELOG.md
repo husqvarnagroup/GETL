@@ -6,6 +6,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 
 ## [Unreleased]
+### Added
+- Add drop_duplicates transform function
 
 ## [1.7.1] - 2020-11-10
  Allow a retention interval shorter than 7 days for delta tables
