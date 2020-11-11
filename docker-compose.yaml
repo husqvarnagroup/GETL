@@ -1,13 +1,37 @@
 version: '3.8'
 services:
-    db:
-        image: postgres:10.7-alpine
+    db10:
+        image: postgres:10-alpine
         environment:
             - POSTGRES_DB=testdb
             - POSTGRES_USER=dbadmin
             - POSTGRES_PASSWORD=mintkaka2010
         ports:
-            - 5432:5432
+            - 54010:5432
+    db11:
+        image: postgres:11-alpine
+        environment:
+            - POSTGRES_DB=testdb
+            - POSTGRES_USER=dbadmin
+            - POSTGRES_PASSWORD=mintkaka2010
+        ports:
+            - 54011:5432
+    db12:
+        image: postgres:12-alpine
+        environment:
+            - POSTGRES_DB=testdb
+            - POSTGRES_USER=dbadmin
+            - POSTGRES_PASSWORD=mintkaka2010
+        ports:
+            - 54012:5432
+    db13:
+        image: postgres:13-alpine
+        environment:
+            - POSTGRES_DB=testdb
+            - POSTGRES_USER=dbadmin
+            - POSTGRES_PASSWORD=mintkaka2010
+        ports:
+            - 54013:5432
 
 networks:
     default:
