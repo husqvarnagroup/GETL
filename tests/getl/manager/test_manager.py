@@ -11,9 +11,10 @@ def generate_test_data(path: Path):
     for i in range(10):
         json_file = path / f"{i}.json"
         with json_file.open("w") as f:
-            json.dump({"name": "Alfred number {i}"}, f)
+            json.dump({"name": "Alfred number {i}", "group": "Alfred"}, f)
             f.write("\n")
-            json.dump({"name": "Bobbette number {i}"}, f)
+            json.dump({"name": "Bobbette number {i}", "group": "Bobbette"}, f)
+            f.write("\n")
 
 
 def test_load_and_write(spark_session, tmp_path, helpers):
@@ -72,3 +73,85 @@ def test_load_and_write(spark_session, tmp_path, helpers):
     assert (
         spark_session.read.load(str(tmp_path / "delta"), format="delta").count() == 20
     )
+
+
+def split_ab(params: dict):
+    dataframe = params["dataframes"]["LoadFromRaw"]
+    return {
+        "Alfred": dataframe.where(dataframe.group == "Alfred"),
+        "Bobbette": dataframe.where(dataframe.group == "Bobbette"),
+    }
+
+
+def test_multi_output(spark_session, tmp_path, helpers):
+    """Load json file and write it to another location as parquet."""
+    # Arrange
+    json_path = tmp_path / "json"
+    generate_test_data(json_path)
+
+    manager = Manager(spark_session)
+    lift_definition = OrderedDict(
+        [
+            (
+                "LoadFromRaw",
+                {
+                    "Type": "load::batch_json",
+                    "Properties": {"Path": str(tmp_path / "json")},
+                },
+            ),
+            (
+                "Split",
+                {
+                    "Input": ["LoadFromRaw"],
+                    "Type": "custom::python_codeblock",
+                    "Properties": {
+                        "CustomFunction": split_ab,
+                        "Output": ["Alfred", "Bobbette"],
+                    },
+                },
+            ),
+            (
+                "WriteAToTrusted",
+                {
+                    "Input": "Split.Alfred",
+                    "Type": "write::batch_delta",
+                    "Properties": {
+                        "Path": str(tmp_path / "alfred_delta"),
+                        "Mode": "overwrite",
+                    },
+                },
+            ),
+            (
+                "WriteBToTrusted",
+                {
+                    "Input": "Split.Bobbette",
+                    "Type": "write::batch_delta",
+                    "Properties": {
+                        "Path": str(tmp_path / "bobbette_delta"),
+                        "Mode": "overwrite",
+                    },
+                },
+            ),
+        ]
+    )
+
+    # Act
+    manager.execute_lift_job(lift_definition)
+
+    # Assert
+    assert "Split.Alfred" in manager.history.log
+    assert "Split.Bobbette" in manager.history.log
+
+    df_alfred = spark_session.read.load(str(tmp_path / "alfred_delta"), format="delta")
+    assert df_alfred.count() == 10
+    assert list(map(tuple, df_alfred.select("group").distinct().collect())) == [
+        ("Alfred",)
+    ]
+
+    df_bobbette = spark_session.read.load(
+        str(tmp_path / "bobbette_delta"), format="delta"
+    )
+    assert df_bobbette.count() == 10
+    assert list(map(tuple, df_bobbette.select("group").distinct().collect())) == [
+        ("Bobbette",)
+    ]
