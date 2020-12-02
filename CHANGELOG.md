@@ -6,6 +6,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 
 ## [Unreleased]
+### Added
+- Multiple outputs in custom::python_codeblock
 
 ## [1.8.0] - 2020-11-11
 ### Added
