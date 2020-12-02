@@ -82,3 +82,21 @@ class BlockConfig:
             tmp_props = tmp_props[prop]
 
         return tmp_props
+
+    def copy(self, *args) -> "BlockConfig":
+        return self.__class__(
+            self.section_name,
+            self.spark,
+            self.input,
+            self.props,
+            self.history,
+            self.file_registry,
+        )
+
+
+class FileRegistryLog(BlockLog):
+    pass
+
+
+class LiftJobLog(BlockLog):
+    pass

@@ -21,10 +21,13 @@ def resolve(func: FunctionType, bconf: BlockConfig) -> DataFrame:
 def python_codeblock(conf: BlockConfig) -> DataFrame:
     '''Execute external python function.
 
+    Either CustomFunction or CustomCodePath must be set, not both.
+
     :param str CustomFunction: this will always be a parameter string
     :param str CustomCodePath: path to the python file with a `resolve` function
-    :param dict CustomProps: optional dictionary that will be send to the function
-    :param list Packages: optional list of extra packages that will be installed
+    :param dict CustomProps=: dictionary that will be send to the function
+    :param list Packages=: list of extra packages that will be installed
+    :param list Output=: list of names of dataframes that will be outputted
 
 
     The function requires 1 argument that is of type `dict`.
@@ -102,6 +105,53 @@ def python_codeblock(conf: BlockConfig) -> DataFrame:
         parameters={},
     )
     ```
+
+    **Multiple outputs**
+
+    When the custom python function returns a dictionary of outputs and the Output param is set, multiple outputs can be set.
+
+    **Example:**
+
+    ```python
+    yml_string = """
+    Parameters:
+        PyFunction:
+            Description: custom python function
+
+    LiftJob:
+        LoadInput:
+            Type: load::batch_json
+            Path: s3://bucket/folder/with/data
+
+        CustomPythonFunction:
+            Type: custom::python_codeblock
+            Input:
+                - LoadInput
+            Properties:
+                CustomFunction: ${PyFunction}
+                Output:
+                    - Pre2020
+                    - Post2020
+    """
+
+
+    def my_python_function(params:dict) -> DataFrame:
+        dataframe = params["dataframes"]["LoadInput"]
+        return {
+            "Pre2020": dataframe.where(F.col("date") < "2020-01-01"),
+            "Post2020": dataframe.where(F.col("date") >= "2020-01-01"),
+        }
+
+
+    lift(
+        spark,
+        lift_def=yml_string,
+        parameters={
+            "PyFunction": my_python_function,
+        },
+    )
+    ```
+
     '''
     with tempfile.TemporaryDirectory() as tmpdirname:
         # Add tmp path with libs
