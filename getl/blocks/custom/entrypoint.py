@@ -123,7 +123,7 @@ def python_codeblock(conf: BlockConfig) -> DataFrame:
             Type: load::batch_json
             Path: s3://bucket/folder/with/data
 
-        CustomPythonFunction:
+        DateSplit:
             Type: custom::python_codeblock
             Input:
                 - LoadInput
@@ -132,6 +132,20 @@ def python_codeblock(conf: BlockConfig) -> DataFrame:
                 Output:
                     - Pre2020
                     - Post2020
+
+        SavePre2020:
+            Type: write::batch_delta
+            Input: DateSplit.Pre2020
+            Properties:
+                Path: s3://bucket/folder/old-data/
+                Mode: overwrite
+
+        SavePost2020:
+            Type: write::batch_delta
+            Input: DateSplit.Post2020
+            Properties:
+                Path: s3://bucket/folder/new-data/
+                Mode: overwrite
     """
 
 
