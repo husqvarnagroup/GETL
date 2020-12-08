@@ -6,6 +6,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 
 ## [Unreleased]
+### Added
+- Add support for nested columns in drop_duplicates transform function
+
 
 ## [1.9.0] - 2020-12-02
 ### Added
