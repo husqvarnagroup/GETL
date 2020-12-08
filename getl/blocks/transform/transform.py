@@ -160,7 +160,11 @@ def drop_duplicates(
     """
 
     if columns:
-        return dataframe.dropDuplicates(columns)
+        return (
+            dataframe.select(F.concat_ws("-", *columns).alias("temp"), "*")
+            .dropDuplicates(["temp"])
+            .drop("temp")
+        )
     return dataframe.dropDuplicates()
 
 
