@@ -1,6 +1,4 @@
 """Unit tests helper functions for lift file."""
-import oyaml as yaml
-
 import getl.lift_definition as liftdef
 
 
@@ -56,16 +54,15 @@ def test_resolve_yaml_parameters():
         "TrustedSearchPath": "test",
     }
     with open("tests/getl/data/lift/test.yaml") as yaml_file:
-        lift_def = yaml.safe_load(yaml_file.read())
+        lift_def = yaml_file.read()
 
     # Act
-    resolved_lift_def = liftdef._replace_variables(lift_def, params)
+    resolved_lift_def = liftdef.resolve_lift_definition(lift_def, params)
     lift_job = resolved_lift_def["LiftJob"]
     file_sources = resolved_lift_def["FileSources"]["S3DatePrefixScan"]
 
     # Assert
     assert lift_job["RawFiles"]["Path"] == "path1"
     assert lift_job["WriteToShowPlant"]["Path"] is False
-    assert lift_job["WriteToSearch"]["Path"] == "test"
-    assert lift_job["WriteToSearch"]["Path"] == "test"
-    assert file_sources["Properties"]["FileSourceBasePrefix"] == "test"
+    assert lift_job["WriteToSearch"]["Path"] == "test/extra"
+    assert file_sources["Properties"]["FileSourceBasePrefix"] == "test/extra"
