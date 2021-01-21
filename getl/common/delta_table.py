@@ -38,7 +38,8 @@ class DeltaTable:
         merged_df.execute()
         return self.delta_table.toDF()
 
-    def _create_delta_table(self) -> "DeltaTable":
+    def _create_delta_table(self):
         """Create a delta table from a path"""
-        self.lib = __import__("delta.tables", fromlist=[""])
-        return self.lib.DeltaTable.forPath(self.spark, self.path)
+        import delta.tables
+
+        return delta.tables.DeltaTable.forPath(self.spark, self.path)

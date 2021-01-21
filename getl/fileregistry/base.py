@@ -9,8 +9,3 @@ class FileRegistry(ABC):
     def update(self):
         """Update the files that have been loaded."""
         pass
-
-    @abstractmethod
-    def load(self):
-        """Load the files that should be lifted."""
-        pass

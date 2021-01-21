@@ -1,7 +1,7 @@
 """Unit tests for the write entrypoint."""
 
 import pytest
-from mock import Mock, patch
+from mock import patch
 from pyspark.sql import types as T
 
 from getl.blocks.write.batch_delta import BatchDelta
@@ -85,7 +85,6 @@ def test_batch_delta_optimize(
     """While writing create a hive table with and without ZOPTIMIZE."""
     # Arrange
     props = {"Path": tmp_dir, "Mode": "overwrite", **params}
-    spark_session.sql = Mock()
     bconf = helpers.create_block_conf(
         create_dataframe(spark_session, [("abc", 1, 2020, 10)]), props
     )
@@ -117,7 +116,6 @@ def test_batch_delta_vacuum(
     """Test the batch delta vacuum proprety."""
     # Arrange
     props = {"Path": tmp_dir, "Mode": "overwrite", **params}
-    spark_session.sql = Mock()
     bconf = helpers.create_block_conf(
         create_dataframe(spark_session, [("abc", 1, 2020, 10)]), props
     )

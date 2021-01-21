@@ -14,16 +14,14 @@ from pyspark.sql import SparkSession
 from getl.block import BlockConfig, BlockLog
 from getl.blocks.custom.entrypoint import python_codeblock
 
+if os.environ.get("TZ") != "UTC":
+    raise ValueError("Environmental variable 'TZ' must be set to 'UTC'")
+
 
 def quiet_py4j():
     """Suppress spark logging for the test context."""
     logger = logging.getLogger("py4j")
     logger.setLevel(logging.WARN)
-
-
-@pytest.fixture(autouse=True)
-def set_timezone():
-    os.environ["TZ"] = "UTC"
 
 
 @pytest.fixture(scope="session")
@@ -62,12 +60,11 @@ def spark_session():
     yield spark
 
 
-@mock_s3
 @pytest.fixture(scope="function")
 def s3_mock():
     """Mock boto3 using moto library."""
-    mock_s3().start()
-    yield boto3.client("s3")
+    with mock_s3():
+        yield boto3.client("s3")
 
 
 @pytest.fixture(scope="function")

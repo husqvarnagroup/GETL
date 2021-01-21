@@ -181,8 +181,13 @@ def batch_delta(conf: BlockConfig) -> DataFrame:
 
     """
     with handle_delta_files_dont_exist():
-        paths = conf.get("Path")
-        return _batch_read(conf.spark, paths, file_format="delta")
+        path = conf.get("Path")
+        if conf.exists("FileRegistry"):
+            file_registry = conf.file_registry.get(conf.get("FileRegistry"))
+            return file_registry.load_new_rows_only(path)
+
+        df = conf.spark.read.load(path, format="delta")
+        return df
 
     return conf.spark.createDataFrame(
         conf.spark.sparkContext.emptyRDD(), T.StructType([])
