@@ -6,6 +6,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 
 ## [Unreleased]
+
+## [1.10.0] - 2021-01-22
 ### Added
 - The `fileregistry::delta_diff` fileregistry for delta files
 
@@ -115,7 +117,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - prefix_based_date fileregistry.
 
 
-[Unreleased]: https://github.com/husqvarnagroup/GETL/compare/v1.9.2...HEAD
+[Unreleased]: https://github.com/husqvarnagroup/GETL/compare/v1.10.0...HEAD
+[1.10.0]: https://github.com/husqvarnagroup/GETL/compare/v1.9.2...v1.10.0
 [1.9.2]: https://github.com/husqvarnagroup/GETL/compare/v1.9.1...v1.9.2
 [1.9.1]: https://github.com/husqvarnagroup/GETL/compare/v1.9.0...v1.9.1
 [1.9.0]: https://github.com/husqvarnagroup/GETL/compare/v1.8.0...v1.9.0
