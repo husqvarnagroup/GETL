@@ -3,6 +3,7 @@ from types import FunctionType
 
 from getl.block import BlockConfig
 from getl.fileregistry.base import FileRegistry
+from getl.fileregistry.delta_diff import DeltaDiff
 from getl.fileregistry.s3_date_prefix_scan import S3DatePrefixScan
 from getl.fileregistry.s3_full_scan import S3FullScan
 
@@ -67,3 +68,26 @@ def s3_full_scan(bconf: BlockConfig) -> FileRegistry:
     ```
     """
     return S3FullScan(bconf)
+
+
+def delta_diff(bconf: BlockConfig) -> FileRegistry:
+    """Retrieve a dataset with the new rows compared from the last time lifted.
+
+    :param str BasePath: s3 prefix to where you want the file registry
+    :param str UpdateAfter: After what lift block should the new files be marked as processed
+    :param str DefaultStartDate: At what date should the file registry start to search for new files (format %Y-%m-%d %H:%M:%S)
+    :param list JoinOnFields: Join on these fields to exclude the existing rows in a previous version
+
+    Only available for pyspark 3.0 and above!
+
+    ```
+    DeltaDiff:
+        Type: fileregistry::delta_diff
+        Properties:
+            BasePath: s3://datalake/file-registry/dateset-a
+            UpdateAfter: WriteToDatabase
+            DefaultStartDate: 2019-01-01
+            JoinOnFields: [id, timestamp]
+    ```
+    """
+    return DeltaDiff(bconf)
