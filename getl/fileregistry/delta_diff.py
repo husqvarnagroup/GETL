@@ -32,9 +32,14 @@ class DeltaDiff(FileRegistry):
         )
 
     def load_new_rows_only(self, path: str) -> DataFrame:
-        df_last = self.df_from_timestamp(path, self.start_date)
-        df_current = self.df_from_timestamp(path, self.current_date)
-        return df_current.join(df_last, self.join_on_fields, how="anti")
+        try:
+            df_last = self.df_from_timestamp(path, self.start_date)
+        except ValueError:
+            # Load all data instead
+            return self.spark.read.load(path, format="delta")
+        else:
+            df_current = self.df_from_timestamp(path, self.current_date)
+            return df_current.join(df_last, self.join_on_fields, how="anti")
 
     def df_from_timestamp(self, path, timestamp):
         version_to_load = self.get_version_at_timestamp(path, timestamp)

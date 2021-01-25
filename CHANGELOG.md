@@ -6,6 +6,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 
 ## [Unreleased]
+### Changed
+- The `fileregistry::delta_diff` fileregistry will read all data if the default start date is before the first version of the delta table
 
 ## [1.10.0] - 2021-01-22
 ### Added
