@@ -1,4 +1,3 @@
-import re
 from dataclasses import dataclass
 from datetime import datetime, timedelta
 from typing import List, Tuple
@@ -115,7 +114,7 @@ def test_delta_diff(spark_session, tmp_path):
 
 
 @minversion
-def test_start_date_before_first_commit(spark_session, tmp_path):
+def test_start_date_before_first_commit_loads_all_data(spark_session, tmp_path):
     delta_path = str(tmp_path / "delta_test")
     fr_path = str(tmp_path / "file_registry")
 
@@ -126,12 +125,13 @@ def test_start_date_before_first_commit(spark_session, tmp_path):
         "FileRegistryPath": fr_path,
         "DefaultStartDate": f"{start_date:%Y-%m-%d %H:%M:%S}",
     }
-    data_writer.write([(1, "A"), (2, "B")])
+    expected = [(1, "A"), (2, "B")]
+    data_writer.write(expected)
 
     # Act
-    with pytest.raises(ValueError) as exc_info:
-        lift(spark=spark_session, lift_def=LIFT_YAML, parameters=params)
-    assert re.match(
-        r"^Start date is earlier than first available timestamp: .*, start time is set to .*$",
-        str(exc_info.value),
-    )
+    history = lift(spark=spark_session, lift_def=LIFT_YAML, parameters=params)
+
+    # Assert
+    dataframe = history.get("Read")
+    data = sorted(map(tuple, dataframe.collect()))
+    assert data == expected
