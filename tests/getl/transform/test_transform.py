@@ -591,3 +591,38 @@ def test_join_called_in_right_order(m_df, col_list, join_type):
     """Join is called with right parameters and in right order."""
     tr.join(m_df, m_df, col_list, join_type)
     m_df.join.assert_called_with(m_df, col_list, join_type)
+
+
+##############
+# SUBSTRING tests #
+##############
+@pytest.mark.spark
+@pytest.mark.parametrize(
+    "col,new_col, pos, length, value_new_col",
+    [("name", "new_name", 1, 1, "C"), ("name", "new_name", 2, 2, "in")],
+)
+def test_substring_returns_df_successfully(
+    col, new_col, pos, length, spark_session, value_new_col
+):
+    """substring returns DF successfully after adding new substring col."""
+    # Act
+    result = tr.substring(create_princess_df(spark_session), col, new_col, pos, length)
+
+    # Assert
+    assert isinstance(result, DataFrame)
+    assert col in result.columns
+    assert new_col in result.columns
+
+    collect = result.collect()
+    assert collect[0][new_col] == value_new_col
+
+
+@pytest.mark.spark
+def test_substring_attribute_error(spark_session):
+    """substring returns attribute error when column not found."""
+    with pytest.raises(AttributeError) as column_not_found:
+        tr.substring(
+            create_princess_df(spark_session), "columnNotPresent", "newCol", 0, 1
+        )
+
+    assert "Column 'columnNotPresent' not found in df" in str(column_not_found)
