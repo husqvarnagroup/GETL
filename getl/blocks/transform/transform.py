@@ -59,6 +59,22 @@ def rename_column(dataframe: DataFrame, col: str, new_name: str) -> DataFrame:
     return dataframe.withColumnRenamed(col, new_name)
 
 
+def substring(
+    dataframe: DataFrame, col: str, new_col: str, pos: int, length: int
+) -> DataFrame:
+    """Return DF with a column that is an substring of given column and with columns in the same order.
+
+    :param str col: name of the column
+    :param str new_col: type of the new column
+    :param int pos: substring starts at pos
+    :param int length: length of substring
+    """
+    if not _column_present(dataframe, col):
+        raise AttributeError("Column '{}' not found in df".format(col))
+
+    return dataframe.withColumn(new_col, F.substring(col, pos, length))
+
+
 def cast_column(dataframe: DataFrame, col: str, new_type: T) -> DataFrame:
     """Return DF with the column cast to new type and with the columns in the same order.
 
