@@ -6,7 +6,6 @@ from pathlib import Path
 
 import boto3
 import psycopg2
-import pyspark
 import pytest
 from moto import mock_s3
 from pyspark.sql import SparkSession
@@ -36,20 +35,17 @@ def spark_session():
     )
     spark_jars = []
 
-    if pyspark.__version__ < "3.0":
-        spark_jars.append("./tests/testing-jars/delta-core_2.11-0.6.1.jar")
-    else:
-        spark_jars.append("./tests/testing-jars/delta-core_2.12-0.7.0.jar")
-        spark_jars.append("./tests/testing-jars/spark-xml_2.12-0.9.0.jar")
+    spark_jars.append("./tests/testing-jars/delta-core_2.12-0.7.0.jar")
+    spark_jars.append("./tests/testing-jars/spark-xml_2.12-0.9.0.jar")
 
-        spark_builder = (
-            spark_builder.config("spark.sql.legacy.timeParserPolicy", "LEGACY")
-            .config("spark.sql.extensions", "io.delta.sql.DeltaSparkSessionExtension")
-            .config(
-                "spark.sql.catalog.spark_catalog",
-                "org.apache.spark.sql.delta.catalog.DeltaCatalog",
-            )
+    spark_builder = (
+        spark_builder.config("spark.sql.legacy.timeParserPolicy", "LEGACY")
+        .config("spark.sql.extensions", "io.delta.sql.DeltaSparkSessionExtension")
+        .config(
+            "spark.sql.catalog.spark_catalog",
+            "org.apache.spark.sql.delta.catalog.DeltaCatalog",
         )
+    )
 
     spark = spark_builder.config("spark.jars", ",".join(spark_jars)).getOrCreate()
     for jar in spark_jars:
