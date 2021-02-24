@@ -17,9 +17,6 @@ jobs:
     vmImage: 'ubuntu-latest'
   strategy:
     matrix:
-      Python37-spark2:
-        python.version: '3.7'
-        TOXENV: py37-spark2
       Python37-spark3:
         python.version: '3.7'
         TOXENV: py37-spark3

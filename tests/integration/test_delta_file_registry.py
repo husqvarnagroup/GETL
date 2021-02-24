@@ -2,16 +2,9 @@ from dataclasses import dataclass
 from datetime import datetime, timedelta
 from typing import List, Tuple
 
-import pyspark
-import pytest
 from pyspark.sql import SparkSession, functions as F
 
 from getl.lift import lift
-
-minversion = pytest.mark.skipif(
-    pyspark.__version__ < "3.0",
-    reason="file_registry:::delta_diff not supported for pyspark 2.x",
-)
 
 LIFT_YAML = """
 Parameters:
@@ -54,7 +47,6 @@ class DataWriter:
         )
 
 
-@minversion
 def test_delta_diff(spark_session, tmp_path):
     delta_path = str(tmp_path / "delta_test")
     fr_path = str(tmp_path / "file_registry")
@@ -113,7 +105,6 @@ def test_delta_diff(spark_session, tmp_path):
     assert data == expected
 
 
-@minversion
 def test_start_date_before_first_commit_loads_all_data(spark_session, tmp_path):
     delta_path = str(tmp_path / "delta_test")
     fr_path = str(tmp_path / "file_registry")

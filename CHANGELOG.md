@@ -6,11 +6,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 
 ## [Unreleased]
+### Removed
+- Support for pyspark 2.4.5
 
 ## [1.11.0] - 2021-02-24
 ### Added
 - Add substring transform function
-
 
 ## [1.10.1] - 2021-01-25
 ### Changed
