@@ -6,6 +6,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 
 ## [Unreleased]
+
+## [1.11.0] - 2021-02-24
 ### Added
 - Add substring transform function
 
@@ -124,7 +126,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - prefix_based_date fileregistry.
 
 
-[Unreleased]: https://github.com/husqvarnagroup/GETL/compare/v1.10.1...HEAD
+[Unreleased]: https://github.com/husqvarnagroup/GETL/compare/v1.11.0...HEAD
+[1.11.0]: https://github.com/husqvarnagroup/GETL/compare/v1.10.1...v1.11.0
 [1.10.1]: https://github.com/husqvarnagroup/GETL/compare/v1.10.0...v1.10.1
 [1.10.0]: https://github.com/husqvarnagroup/GETL/compare/v1.9.2...v1.10.0
 [1.9.2]: https://github.com/husqvarnagroup/GETL/compare/v1.9.1...v1.9.2
