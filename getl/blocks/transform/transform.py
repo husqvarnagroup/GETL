@@ -75,6 +75,60 @@ def substring(
     return dataframe.withColumn(new_col, F.substring(col, pos, length))
 
 
+def split(dataframe: DataFrame, col: str, new_col: str, split_on: str) -> DataFrame:
+    """Return DF with a column that is the result of splitting a column on a given character
+
+    :param str col: name of the column
+    :param str new_col: type of the new column
+    :param int split_on: split the string on this char
+
+    Examples:
+
+    ```
+    SectionName:
+        Type: transform::generic
+        Input: InputBlock
+        Properties:
+        Functions:
+            - split:
+                col: name
+                new_col: firstname
+                split_on: ' '
+    ```
+    """
+    if not _column_present(dataframe, col):
+        raise AttributeError("Column '{}' not found in df".format(col))
+
+    return dataframe.withColumn(new_col, F.split(F.col(col), split_on))
+
+
+def get_item(dataframe: DataFrame, col: str, new_col: str, index: any) -> DataFrame:
+    """Return DF with a column that contains one item for an array
+
+    :param str col: name of the column
+    :param str new_col: type of the new column
+    :param any index: the index key
+
+    Examples:
+
+    ```
+    SectionName:
+        Type: transform::generic
+        Input: InputBlock
+        Properties:
+        Functions:
+            - get_item:
+                col: name
+                new_col: firstname
+                index: 2
+    ```
+    """
+    if not _column_present(dataframe, col):
+        raise AttributeError("Column '{}' not found in df".format(col))
+
+    return dataframe.withColumn(new_col, F.col(col).getItem(index))
+
+
 def cast_column(dataframe: DataFrame, col: str, new_type: T) -> DataFrame:
     """Return DF with the column cast to new type and with the columns in the same order.
 

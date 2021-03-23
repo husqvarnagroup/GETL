@@ -5,7 +5,7 @@ import json
 from unittest import mock
 
 import pytest
-from pyspark.sql import DataFrame, types as T
+from pyspark.sql import DataFrame, functions as F, types as T
 
 import getl.blocks.transform.transform as tr
 from tests.getl.data.samples import create_princess_age_null_df, create_princess_df
@@ -624,5 +624,78 @@ def test_substring_attribute_error(spark_session):
         tr.substring(
             create_princess_df(spark_session), "columnNotPresent", "newCol", 0, 1
         )
+
+    assert "Column 'columnNotPresent' not found in df" in str(column_not_found)
+
+
+##############
+# SPLIT tests #
+##############
+@pytest.mark.spark
+@pytest.mark.parametrize(
+    "col,new_col, split_on, value_new_col",
+    [
+        ("name", "new_name", " ", ["Snow", "white"]),
+        ("name", "new_name", "w", ["Sno", " ", "hite"]),
+    ],
+)
+def test_split_returns_df_successfully(
+    col, new_col, split_on, spark_session, value_new_col
+):
+    """split returns DF successfully after splitting a given col on char."""
+    # Act
+    result = tr.split(create_princess_df(spark_session), col, new_col, split_on)
+
+    # Assert
+    assert isinstance(result, DataFrame)
+    assert col in result.columns
+    assert new_col in result.columns
+
+    collect = result.collect()
+    assert collect[1][new_col] == value_new_col
+
+
+@pytest.mark.spark
+def test_split_attribute_error(spark_session):
+    """substring returns attribute error when column not found."""
+    with pytest.raises(AttributeError) as column_not_found:
+        tr.split(create_princess_df(spark_session), "columnNotPresent", "newCol", "#")
+
+    assert "Column 'columnNotPresent' not found in df" in str(column_not_found)
+
+
+###############
+# get_item tests #
+##############
+@pytest.mark.spark
+@pytest.mark.parametrize(
+    "col, new_col, index, value_new_col",
+    [("arraycol", "new_col", 0, "a"), ("items", "new_name", "weakness", "apple")],
+)
+def test_get_item_returns_df_successfully(
+    col, new_col, index, spark_session, value_new_col
+):
+    """."""
+    # Arrange
+    df = create_princess_df(spark_session)
+    df = df.withColumn("arraycol", F.array(F.lit("a"), F.lit("b"), F.lit("c")))
+
+    # Act
+    result = tr.get_item(df, col, new_col, index)
+
+    # Assert
+    assert isinstance(result, DataFrame)
+    assert col in result.columns
+    assert new_col in result.columns
+
+    collect = result.collect()
+    assert collect[1][new_col] == value_new_col
+
+
+@pytest.mark.spark
+def test_get_item_attribute_error(spark_session):
+    """substring returns attribute error when column not found."""
+    with pytest.raises(AttributeError) as column_not_found:
+        tr.get_item(create_princess_df(spark_session), "columnNotPresent", "newCol", 0)
 
     assert "Column 'columnNotPresent' not found in df" in str(column_not_found)
