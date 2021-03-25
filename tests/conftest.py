@@ -5,6 +5,7 @@ from datetime import datetime
 from pathlib import Path
 
 import boto3
+import oyaml
 import psycopg2
 import pytest
 from moto import mock_s3
@@ -15,6 +16,8 @@ from getl.blocks.custom.entrypoint import python_codeblock
 
 if os.environ.get("TZ") != "UTC":
     raise ValueError("Environmental variable 'TZ' must be set to 'UTC'")
+
+BASE_DIR = Path(__file__).parent.parent
 
 
 def quiet_py4j():
@@ -153,13 +156,21 @@ def helpers(s3_mock, spark_session):
     return Helpers(s3_mock, spark_session)
 
 
-@pytest.fixture
-def postgres_connection_details():
+@pytest.fixture(scope="module")
+def postgres_connection_details(db_port):
     return {
-        "dsn": "postgres://localhost:5432/testdb",
+        "dsn": f"postgres://localhost:{db_port}/testdb",
         "user": "dbadmin",
         "password": "mintkaka2010",
     }
+
+
+@pytest.fixture(scope="module", params=["db10", "db11", "db12", "db13"])
+def db_port(request):
+    docker_compose = BASE_DIR / "docker-compose.yaml"
+    assert docker_compose.exists(), "docker-compose.yaml not found"
+    dc = oyaml.safe_load(docker_compose.read_text())
+    return dc["services"][request.param]["ports"][0].split(":")[0]
 
 
 @pytest.fixture(scope="function")
