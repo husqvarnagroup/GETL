@@ -4,7 +4,7 @@ from pyspark.sql import DataFrame
 from getl.block import BlockConfig
 from getl.blocks.write.batch_delta import BatchDelta
 from getl.common.hive_table import HiveTable
-from getl.common.upsert import handle_postgres_upsert
+from getl.common.upsert import handle_mysql_upsert, handle_postgres_upsert
 from getl.logging import get_logger
 
 LOGGER = get_logger(__name__)
@@ -129,6 +129,58 @@ def batch_postgres_upsert(conf: BlockConfig) -> DataFrame:
     handle_postgres_upsert(
         dataframe=dataframe,
         dsn=conf.get("ConnUrl"),
+        user=conf.get("User"),
+        password=conf.get("Password"),
+        table=conf.get("Table"),
+        columns=conf.get("Columns"),
+        conflict_columns=conf.get("ConflictColumns"),
+        update_columns=conf.get("UpdateColumns", None),
+    )
+    return dataframe
+
+
+def batch_mysql_upsert(conf: BlockConfig) -> DataFrame:
+    """Batch upsert data with mysql-connector-python python package.
+    This package can be installed with the *mysql* extra:
+
+    ```sh
+    pip install getl[mysql]
+    ```
+
+    :param str Host: the host
+    :param int Port: the port
+    :param str Database: the database
+    :param str User: username to database
+    :param str Password: password to database
+    :param str Table: table to write to
+    :param list[str] Columns: the columns to try and insert from the dataframe, the database columns and dataframe columns bust match
+    :param list[str] ConflictColumns: when conflict on these columns occure, update instead
+    :param list[str] UpdateColumns=: columns to update in case of a conflict, the default value is all the Columns excluding the ConflictColumns
+
+    ```
+    SectionName:
+        Type: write::batch_mysql_upsert
+        Input: OtherSectionName
+        Properties:
+            Host: localhost
+            Port: 3306
+            Database: productapi
+            User: 'username'
+            Password: 'password'
+            Table: 'table_name'
+            Columns: ['file_path', 'count']
+            ConflictColumns: ['file_path']
+            UpdateColumns: ['count']
+    ```
+
+    """
+    dataframe = conf.history.get(conf.input)
+
+    handle_mysql_upsert(
+        dataframe=dataframe,
+        host=conf.get("Host"),
+        port=conf.get("Port", 3306),
+        database=conf.get("Database"),
         user=conf.get("User"),
         password=conf.get("Password"),
         table=conf.get("Table"),

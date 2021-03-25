@@ -5,6 +5,7 @@ from datetime import datetime
 from pathlib import Path
 
 import boto3
+import mysql.connector
 import oyaml
 import psycopg2
 import pytest
@@ -156,21 +157,23 @@ def helpers(s3_mock, spark_session):
     return Helpers(s3_mock, spark_session)
 
 
-@pytest.fixture(scope="module")
-def postgres_connection_details(db_port):
-    return {
-        "dsn": f"postgres://localhost:{db_port}/testdb",
-        "user": "dbadmin",
-        "password": "mintkaka2010",
-    }
-
-
-@pytest.fixture(scope="module", params=["db10", "db11", "db12", "db13"])
-def db_port(request):
+@pytest.fixture(
+    scope="module", params=["postgres10", "postgres11", "postgres12", "postgres13"]
+)
+def postgres_port(request):
     docker_compose = BASE_DIR / "docker-compose.yaml"
     assert docker_compose.exists(), "docker-compose.yaml not found"
     dc = oyaml.safe_load(docker_compose.read_text())
     return dc["services"][request.param]["ports"][0].split(":")[0]
+
+
+@pytest.fixture(scope="module")
+def postgres_connection_details(postgres_port):
+    return {
+        "dsn": f"postgres://localhost:{postgres_port}/testdb",
+        "user": "dbadmin",
+        "password": "mintkaka2010",
+    }
 
 
 @pytest.fixture(scope="function")
@@ -182,4 +185,35 @@ def postgres_connection(postgres_connection_details):
 @pytest.fixture
 def postgres_cursor(postgres_connection):
     with postgres_connection.cursor() as cursor:
+        yield cursor
+
+
+@pytest.fixture(scope="module", params=["mysql56", "mysql57", "mysql8"])
+def mysql_port(request):
+    docker_compose = BASE_DIR / "docker-compose.yaml"
+    assert docker_compose.exists(), "docker-compose.yaml not found"
+    dc = oyaml.safe_load(docker_compose.read_text())
+    return dc["services"][request.param]["ports"][0].split(":")[0]
+
+
+@pytest.fixture(scope="module")
+def mysql_connection_details(mysql_port):
+    return {
+        "host": "localhost",
+        "port": mysql_port,
+        "database": "testdb",
+        "user": "dbadmin",
+        "password": "mintkaka2010",
+    }
+
+
+@pytest.fixture(scope="function")
+def mysql_connection(mysql_connection_details):
+    with mysql.connector.connect(**mysql_connection_details) as conn:
+        yield conn
+
+
+@pytest.fixture(scope="function")
+def mysql_cursor(mysql_connection):
+    with mysql_connection.cursor() as cursor:
         yield cursor
