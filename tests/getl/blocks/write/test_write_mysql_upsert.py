@@ -5,8 +5,12 @@ from functools import partial
 import pytest
 from pyspark.sql import types as T
 
-from getl.blocks.write.entrypoint import batch_postgres_upsert
-from getl.common.upsert import handle_partition, postgres_connection_cursor
+from getl.blocks.write.entrypoint import batch_mysql_upsert
+from getl.common.upsert import (
+    MysqlUpsertQuery,
+    handle_partition,
+    mysql_connection_cursor,
+)
 
 
 def create_dataframe(spark_session, data):
@@ -20,41 +24,58 @@ def create_dataframe(spark_session, data):
     return spark_session.createDataFrame(data, schema)
 
 
+def test_mysql_connection(create_table, select_data, mysql_cursor):
+    create_table()
+    mysql_cursor.execute(
+        """
+    INSERT INTO filetable
+    (file_path, count)
+    VALUES
+    (%s, %s)
+    """,
+        ("path/to/file", 1),
+    )
+    assert select_data() == [("path/to/file", 1)]
+
+
 @pytest.fixture
-def create_table(postgres_cursor, postgres_connection):
+def create_table(mysql_cursor, mysql_connection):
     def inner():
-        postgres_cursor.execute("DROP TABLE IF EXISTS filetable")
-        postgres_cursor.execute(
+        mysql_cursor.execute("DROP TABLE IF EXISTS filetable")
+        mysql_cursor.execute(
             """
         CREATE TABLE filetable (
-            id serial PRIMARY KEY,
-            file_path varchar,
-            count int,
-            unique(file_path)
+            id int(11) NOT NULL AUTO_INCREMENT,
+            file_path varchar(255),
+            count int(11),
+            PRIMARY KEY(`id`), UNIQUE KEY (`file_path`)
         )
         """
         )
-        postgres_connection.commit()
+        mysql_connection.commit()
 
     return inner
 
 
 @pytest.fixture(scope="function")
-def select_data(postgres_cursor):
+def select_data(mysql_connection, mysql_cursor):
     def inner():
-        postgres_cursor.execute("select file_path, count from filetable")
-        return postgres_cursor.fetchall()
+        mysql_connection.commit()  # Refreshes query cache
+        mysql_cursor.execute("select file_path, count from filetable")
+        return mysql_cursor.fetchall()
 
     return inner
 
 
-def test_batch_postgres_upsert_no_update_columns(
-    helpers, spark_session, postgres_connection_details, create_table, select_data
+def test_batch_mysql_upsert_no_update_columns(
+    helpers, spark_session, mysql_connection_details, create_table, select_data
 ):
     props = {
-        "ConnUrl": postgres_connection_details["dsn"],
-        "User": postgres_connection_details["user"],
-        "Password": postgres_connection_details["password"],
+        "Host": mysql_connection_details["host"],
+        "Port": mysql_connection_details["port"],
+        "Database": mysql_connection_details["database"],
+        "User": mysql_connection_details["user"],
+        "Password": mysql_connection_details["password"],
         "Table": "filetable",
         "Columns": ["file_path", "count"],
         "ConflictColumns": ["file_path"],
@@ -68,7 +89,7 @@ def test_batch_postgres_upsert_no_update_columns(
     assert first_df.rdd.getNumPartitions() == 2
 
     bconf = helpers.create_block_conf(first_df, props)
-    batch_postgres_upsert(bconf)
+    batch_mysql_upsert(bconf)
     data = select_data()
     assert set(data) == {("path/to/file1", 1), ("path/to/file2", 4)}
 
@@ -78,7 +99,7 @@ def test_batch_postgres_upsert_no_update_columns(
     assert second_df.rdd.getNumPartitions() == 2
 
     bconf = helpers.create_block_conf(second_df, props)
-    batch_postgres_upsert(bconf)
+    batch_mysql_upsert(bconf)
     data = select_data()
     assert set(data) == {
         ("path/to/file1", 5),
@@ -87,17 +108,18 @@ def test_batch_postgres_upsert_no_update_columns(
     }
 
 
-def test_batch_postgres_upsert_chunked(
-    helpers, spark_session, postgres_connection_details, create_table, select_data
+def test_batch_mysql_upsert_chunked(
+    helpers, spark_session, mysql_connection_details, create_table, select_data
 ):
     props = {
-        "ConnUrl": postgres_connection_details["dsn"],
-        "User": postgres_connection_details["user"],
-        "Password": postgres_connection_details["password"],
+        "Host": mysql_connection_details["host"],
+        "Port": mysql_connection_details["port"],
+        "Database": mysql_connection_details["database"],
+        "User": mysql_connection_details["user"],
+        "Password": mysql_connection_details["password"],
         "Table": "filetable",
         "Columns": ["file_path", "count"],
         "ConflictColumns": ["file_path"],
-        "UpdateColumns": ["count"],
     }
 
     create_table()
@@ -107,7 +129,7 @@ def test_batch_postgres_upsert_chunked(
     assert df.rdd.getNumPartitions() == 2
 
     bconf = helpers.create_block_conf(df, props)
-    batch_postgres_upsert(bconf)
+    batch_mysql_upsert(bconf)
     data = select_data()
     assert set(data) == set(df_data)
 
@@ -117,25 +139,33 @@ def test_batch_postgres_upsert_chunked(
     assert df.rdd.getNumPartitions() == 2
 
     bconf = helpers.create_block_conf(df, props)
-    batch_postgres_upsert(bconf)
+    batch_mysql_upsert(bconf)
     data = select_data()
     assert set(data) == set(df_data)
 
 
 def test_handle_partition(
-    helpers, spark_session, postgres_connection_details, create_table, select_data
+    helpers,
+    spark_session,
+    mysql_connection_details,
+    create_table,
+    select_data,
+    mysql_connection,
 ):
     create_table()
 
     handle_partition_factory = partial(
         handle_partition,
-        postgres_connection_cursor_factory=partial(
-            postgres_connection_cursor, **postgres_connection_details
+        connection_cursor_factory=partial(
+            mysql_connection_cursor, **mysql_connection_details
         ),
-        table="filetable",
+        upsert_query_class=MysqlUpsertQuery(
+            table="filetable",
+            columns=["file_path", "count"],
+            conflict_columns=["file_path"],
+            update_columns=["count"],
+        ),
         columns=["file_path", "count"],
-        conflict_columns=["file_path"],
-        update_columns=["count"],
     )
 
     iterator = iter(
