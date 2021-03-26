@@ -14,7 +14,7 @@ pip install husqvarna-getl
 
 ### On a databricks cluster
 
-The GETL is tested on Databricks Runtime Version 7.3 (Apache Spark 3.0.1)
+The GETL is tested on Databricks Runtime Version 7.* (Apache Spark 3.0.1 and above)
 
 To install the GETL in databricks, the GETL will need to be added to the cluster Libraries.
 
