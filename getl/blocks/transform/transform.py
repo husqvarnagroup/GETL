@@ -129,6 +129,35 @@ def get_item(dataframe: DataFrame, col: str, new_col: str, index: any) -> DataFr
     return dataframe.withColumn(new_col, F.col(col).getItem(index))
 
 
+def get_json_object(
+    dataframe: DataFrame, col: str, new_col: str, path: str
+) -> DataFrame:
+    """Return DF with a column that is a value extracted from a json object column.
+
+    :param str col: name of the json column
+    :param str new_col: type of the new column
+    :param any path: the path key
+
+    Examples:
+
+    ```
+    SectionName:
+        Type: transform::generic
+        Input: InputBlock
+        Properties:
+        Functions:
+            - get_json_object:
+                col: context
+                new_col: context_type
+                path: type
+    ```
+    """
+    if not _column_present(dataframe, col):
+        raise AttributeError("Column '{}' not found in df".format(col))
+
+    return dataframe.withColumn(new_col, F.get_json_object(F.col(col), "$." + path))
+
+
 def cast_column(dataframe: DataFrame, col: str, new_type: T) -> DataFrame:
     """Return DF with the column cast to new type and with the columns in the same order.
 

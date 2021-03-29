@@ -657,7 +657,7 @@ def test_split_returns_df_successfully(
 
 @pytest.mark.spark
 def test_split_attribute_error(spark_session):
-    """substring returns attribute error when column not found."""
+    """split returns attribute error when column not found."""
     with pytest.raises(AttributeError) as column_not_found:
         tr.split(create_princess_df(spark_session), "columnNotPresent", "newCol", "#")
 
@@ -675,7 +675,7 @@ def test_split_attribute_error(spark_session):
 def test_get_item_returns_df_successfully(
     col, new_col, index, spark_session, value_new_col
 ):
-    """."""
+    """get_item"""
     # Arrange
     df = create_princess_df(spark_session)
     df = df.withColumn("arraycol", F.array(F.lit("a"), F.lit("b"), F.lit("c")))
@@ -694,8 +694,55 @@ def test_get_item_returns_df_successfully(
 
 @pytest.mark.spark
 def test_get_item_attribute_error(spark_session):
-    """substring returns attribute error when column not found."""
+    """get_item returns attribute error when column not found."""
     with pytest.raises(AttributeError) as column_not_found:
         tr.get_item(create_princess_df(spark_session), "columnNotPresent", "newCol", 0)
+
+    assert "Column 'columnNotPresent' not found in df" in str(column_not_found)
+
+
+###############
+# get_json_object tests #
+##############
+@pytest.mark.spark
+@pytest.mark.parametrize(
+    "col, new_col, path, value_new_col",
+    [
+        ("context", "context_type", "type", "RuleEvaluationContextRainForecast"),
+        ("context", "context_state", "internalState", "DONE_PROCEED"),
+    ],
+)
+def test_get_json_object_returns_df_successfully(
+    col, new_col, path, spark_session, value_new_col
+):
+    """test_get_json_object"""
+    # Arrange
+    df = create_princess_df(spark_session)
+    df = df.withColumn(
+        "context",
+        F.lit(
+            '{"type":"RuleEvaluationContextRainForecast","internalState":"DONE_PROCEED"}'
+        ),
+    )
+
+    # Act
+    result = tr.get_json_object(df, col, new_col, path)
+
+    # Assert
+    assert isinstance(result, DataFrame)
+    assert col in result.columns
+    assert new_col in result.columns
+
+    collect = result.collect()
+    assert collect[1][new_col] == value_new_col
+
+
+@pytest.mark.spark
+def test_get_json_object_attribute_error(spark_session):
+    """test_get_json_object returns attribute error when column not found."""
+    with pytest.raises(AttributeError) as column_not_found:
+        tr.get_json_object(
+            create_princess_df(spark_session), "columnNotPresent", "newCol", "path"
+        )
 
     assert "Column 'columnNotPresent' not found in df" in str(column_not_found)
