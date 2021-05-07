@@ -53,8 +53,7 @@ def rename_column(dataframe: DataFrame, col: str, new_name: str) -> DataFrame:
     :param str col: name of the column
     :param str new_name: new name of the column
     """
-    if not _column_present(dataframe, col):
-        raise AttributeError("Column '{}' not found in df".format(col))
+    _validate_column_exists(dataframe, col)
 
     return dataframe.withColumnRenamed(col, new_name)
 
@@ -69,8 +68,7 @@ def substring(
     :param int pos: substring starts at pos
     :param int length: length of substring
     """
-    if not _column_present(dataframe, col):
-        raise AttributeError("Column '{}' not found in df".format(col))
+    _validate_column_exists(dataframe, col)
 
     return dataframe.withColumn(new_col, F.substring(col, pos, length))
 
@@ -96,8 +94,7 @@ def split(dataframe: DataFrame, col: str, new_col: str, split_on: str) -> DataFr
                 split_on: ' '
     ```
     """
-    if not _column_present(dataframe, col):
-        raise AttributeError("Column '{}' not found in df".format(col))
+    _validate_column_exists(dataframe, col)
 
     return dataframe.withColumn(new_col, F.split(F.col(col), split_on))
 
@@ -123,8 +120,7 @@ def get_item(dataframe: DataFrame, col: str, new_col: str, index: any) -> DataFr
                 index: 2
     ```
     """
-    if not _column_present(dataframe, col):
-        raise AttributeError("Column '{}' not found in df".format(col))
+    _validate_column_exists(dataframe, col)
 
     return dataframe.withColumn(new_col, F.col(col).getItem(index))
 
@@ -152,8 +148,7 @@ def get_json_object(
                 path: type
     ```
     """
-    if not _column_present(dataframe, col):
-        raise AttributeError("Column '{}' not found in df".format(col))
+    _validate_column_exists(dataframe, col)
 
     return dataframe.withColumn(new_col, F.get_json_object(F.col(col), "$." + path))
 
@@ -164,8 +159,7 @@ def cast_column(dataframe: DataFrame, col: str, new_type: T) -> DataFrame:
     :param str col: name of the column
     :param T new_type: type of the column
     """
-    if not _column_present(dataframe, col):
-        raise AttributeError("Column '{}' not found in df".format(col))
+    _validate_column_exists(dataframe, col)
 
     return dataframe.withColumn(col, F.col(col).cast(new_type))
 
