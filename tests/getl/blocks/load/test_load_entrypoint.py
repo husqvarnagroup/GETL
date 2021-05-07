@@ -1,7 +1,7 @@
 """Unit test for GETL load method."""
 from os import environ
+from unittest.mock import Mock
 
-from mock import Mock
 from pyspark.sql import types as T
 
 from getl.blocks.load.entrypoint import (

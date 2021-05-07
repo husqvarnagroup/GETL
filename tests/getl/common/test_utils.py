@@ -131,7 +131,9 @@ def test_delete_files_success(s3_mock, paths, bucket, files, helpers):
 def test_delete_files_success_nofile(s3_mock, paths, bucket):
     """delete_files should run successfully even when files not found."""
     # Arrange
-    s3_mock.create_bucket(Bucket=bucket)
+    s3_mock.create_bucket(
+        Bucket=bucket, CreateBucketConfiguration={"LocationConstraint": "eu-west1"}
+    )
 
     # Act & Assert
     assert delete_files(paths) is None
@@ -139,8 +141,13 @@ def test_delete_files_success_nofile(s3_mock, paths, bucket):
 
 def test_copy_keys_passes_correct_parameters(s3_mock):
     """copy_keys is called with right parameters and in right order."""
-    s3_mock.create_bucket(Bucket="landingzone")
-    s3_mock.create_bucket(Bucket="datalake")
+    s3_mock.create_bucket(
+        Bucket="landingzone",
+        CreateBucketConfiguration={"LocationConstraint": "eu-west1"},
+    )
+    s3_mock.create_bucket(
+        Bucket="datalake", CreateBucketConfiguration={"LocationConstraint": "eu-west1"}
+    )
     S3Path("s3://landingzone/amc-connect/fake/key.json").write_text(
         '{"hello": "world"}'
     )
@@ -201,7 +208,11 @@ def test_copy_keys_successful(
     """copy_keys should copy files to target location."""
     # Arrange
     helpers.create_s3_files({f: f for f in files["create_files"]}, bucket=source_bucket)
-    s3_mock.create_bucket(Bucket=target_bucket)
+    if source_bucket != target_bucket:
+        s3_mock.create_bucket(
+            Bucket=target_bucket,
+            CreateBucketConfiguration={"LocationConstraint": "eu-west1"},
+        )
 
     # Act & Assert
     assert copy_keys(transactions) is None
@@ -233,8 +244,14 @@ def test_copy_keys_throws_exceptions(
 ):
     """copy_keys throws exception when files or bucket not found."""
     # Arrange
-    s3_mock.create_bucket(Bucket=target_bucket)
-    s3_mock.create_bucket(Bucket=source_bucket)
+    s3_mock.create_bucket(
+        Bucket=target_bucket,
+        CreateBucketConfiguration={"LocationConstraint": "eu-west1"},
+    )
+    s3_mock.create_bucket(
+        Bucket=source_bucket,
+        CreateBucketConfiguration={"LocationConstraint": "eu-west1"},
+    )
 
     # Act & Assert
     with pytest.raises(FileNotFoundError) as file_not_found:

@@ -148,7 +148,9 @@ class Helpers:
 
     def create_s3_files(self, files, bucket="tmp-bucket") -> None:
         """Create files in S3 bucket."""
-        self.s3_mock.create_bucket(Bucket=bucket)
+        self.s3_mock.create_bucket(
+            Bucket=bucket, CreateBucketConfiguration={"LocationConstraint": "eu-west1"}
+        )
         for key, body in files.items():
             body = body if body else b"Here we have some test data"
             self.s3_mock.put_object(Bucket=bucket, Key=key, Body=body)

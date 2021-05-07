@@ -1,7 +1,8 @@
 """Unit tests for the write entrypoint."""
 
+from unittest.mock import patch
+
 import pytest
-from mock import patch
 from pyspark.sql import types as T
 
 from getl.blocks.write.batch_delta import BatchDelta
