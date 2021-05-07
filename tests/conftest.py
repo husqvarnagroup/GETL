@@ -39,7 +39,9 @@ def spark_session():
     )
     spark_jars = []
 
-    spark_jars.append("./tests/testing-jars/delta-core_2.12-0.7.0.jar")
+    # Get latest delta core:
+    # https://mvnrepository.com/artifact/io.delta/delta-core
+    spark_jars.append("./tests/testing-jars/delta-core_2.12-0.8.0.jar")
     spark_jars.append("./tests/testing-jars/spark-xml_2.12-0.9.0.jar")
 
     spark_builder = (

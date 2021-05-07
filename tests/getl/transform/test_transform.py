@@ -405,12 +405,14 @@ def test_cast_returns_df_successfully(col, new_type, validation_type, spark_sess
 @pytest.mark.spark
 def test_cast_attribute_error(spark_session):
     """cast_column returns attribute error when column not found."""
-    with pytest.raises(AttributeError) as column_not_found:
+    with pytest.raises(ValueError) as column_not_found:
         tr.cast_column(
             create_princess_df(spark_session), "columnNotPresent", T.DateType()
         )
 
-    assert "Column 'columnNotPresent' not found in df" in str(column_not_found)
+    assert "Column 'columnNotPresent' is not present in the dataframes columns" in str(
+        column_not_found
+    )
 
 
 ################
@@ -620,12 +622,14 @@ def test_substring_returns_df_successfully(
 @pytest.mark.spark
 def test_substring_attribute_error(spark_session):
     """substring returns attribute error when column not found."""
-    with pytest.raises(AttributeError) as column_not_found:
+    with pytest.raises(ValueError) as column_not_found:
         tr.substring(
             create_princess_df(spark_session), "columnNotPresent", "newCol", 0, 1
         )
 
-    assert "Column 'columnNotPresent' not found in df" in str(column_not_found)
+    assert "Column 'columnNotPresent' is not present in the dataframes columns" in str(
+        column_not_found
+    )
 
 
 ##############
@@ -658,10 +662,12 @@ def test_split_returns_df_successfully(
 @pytest.mark.spark
 def test_split_attribute_error(spark_session):
     """split returns attribute error when column not found."""
-    with pytest.raises(AttributeError) as column_not_found:
+    with pytest.raises(ValueError) as column_not_found:
         tr.split(create_princess_df(spark_session), "columnNotPresent", "newCol", "#")
 
-    assert "Column 'columnNotPresent' not found in df" in str(column_not_found)
+    assert "Column 'columnNotPresent' is not present in the dataframes columns" in str(
+        column_not_found
+    )
 
 
 ###############
@@ -695,10 +701,12 @@ def test_get_item_returns_df_successfully(
 @pytest.mark.spark
 def test_get_item_attribute_error(spark_session):
     """get_item returns attribute error when column not found."""
-    with pytest.raises(AttributeError) as column_not_found:
+    with pytest.raises(ValueError) as column_not_found:
         tr.get_item(create_princess_df(spark_session), "columnNotPresent", "newCol", 0)
 
-    assert "Column 'columnNotPresent' not found in df" in str(column_not_found)
+    assert "Column 'columnNotPresent' is not present in the dataframes columns" in str(
+        column_not_found
+    )
 
 
 ###############
@@ -740,9 +748,11 @@ def test_get_json_object_returns_df_successfully(
 @pytest.mark.spark
 def test_get_json_object_attribute_error(spark_session):
     """test_get_json_object returns attribute error when column not found."""
-    with pytest.raises(AttributeError) as column_not_found:
+    with pytest.raises(ValueError) as column_not_found:
         tr.get_json_object(
             create_princess_df(spark_session), "columnNotPresent", "newCol", "path"
         )
 
-    assert "Column 'columnNotPresent' not found in df" in str(column_not_found)
+    assert "Column 'columnNotPresent' is not present in the dataframes columns" in str(
+        column_not_found
+    )
