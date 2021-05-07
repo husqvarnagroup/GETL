@@ -3,9 +3,9 @@ import json
 import tempfile
 from os import walk
 from pathlib import Path
+from unittest.mock import patch
 
 import pytest
-from mock import patch
 from pyspark.sql import functions as F
 
 from getl.fileregistry.s3_date_prefix_scan import S3DatePrefixScan

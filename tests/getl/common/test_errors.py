@@ -45,7 +45,10 @@ def test_no_bucket(s3_mock):
 
 
 def test_no_key(s3_mock):
-    s3_mock.create_bucket(Bucket="tmp-bucket")
+    s3_mock.create_bucket(
+        Bucket="tmp-bucket",
+        CreateBucketConfiguration={"LocationConstraint": "eu-west1"},
+    )
 
     with pytest.raises(FileNotFoundError):
         with handle_client_error():
@@ -53,7 +56,10 @@ def test_no_key(s3_mock):
 
 
 def test_has_key(s3_mock):
-    s3_mock.create_bucket(Bucket="tmp-bucket")
+    s3_mock.create_bucket(
+        Bucket="tmp-bucket",
+        CreateBucketConfiguration={"LocationConstraint": "eu-west1"},
+    )
     s3_mock.put_object(Bucket="tmp-bucket", Key="tmp-key", Body="tmp-body")
 
     with handle_client_error():
@@ -66,7 +72,10 @@ def test_has_key(s3_mock):
 
 
 def test_has_key2(s3_mock):
-    s3_mock.create_bucket(Bucket="tmp-bucket")
+    s3_mock.create_bucket(
+        Bucket="tmp-bucket",
+        CreateBucketConfiguration={"LocationConstraint": "eu-west1"},
+    )
     s3_mock.put_object(Bucket="tmp-bucket", Key="tmp-key", Body=b"tmp-body")
 
     with handle_client_error():

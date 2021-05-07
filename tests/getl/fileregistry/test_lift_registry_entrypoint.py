@@ -1,8 +1,8 @@
 """Unit tests for the custom code index function."""
 from datetime import datetime, timedelta
+from unittest.mock import Mock, patch
 
 import pytest
-from mock import Mock, patch
 from pyspark.sql import functions as F
 
 from getl.block import BlockConfig, BlockLog

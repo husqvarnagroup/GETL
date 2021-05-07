@@ -1,6 +1,7 @@
 """Testing module hive table."""
+from unittest.mock import Mock, call
+
 import pytest
-from mock import Mock, call
 
 from getl.common.hive_table import HiveTable
 

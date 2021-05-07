@@ -1,6 +1,7 @@
 """Testing the module batch delta."""
+from unittest.mock import Mock, call
+
 import pytest
-from mock import Mock, call
 
 from getl.blocks.write.batch_delta import BatchDelta
 
