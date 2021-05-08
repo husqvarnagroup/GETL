@@ -162,6 +162,8 @@ class MysqlUpsertQuery:
         # Though escaping isn't build into mysql, and maybe overkill for the use case here
         self.sql_table = table
         self.sql_columns = ", ".join(columns)
+        # This is actually not being used, but exists to have the same
+        # interface as PostgresUpsertQuery
         self.sql_conflict_columns = ", ".join(conflict_columns)
 
         # sql_update creates an update statement for the update_columns
@@ -183,7 +185,6 @@ class MysqlUpsertQuery:
             table=self.sql_table,
             columns=self.sql_columns,
             values=self.sql_values,
-            conflict_columns=self.sql_conflict_columns,
             update=self.sql_update,
         )
 
