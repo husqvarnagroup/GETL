@@ -6,6 +6,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 
 ## [Unreleased]
+### Fixed
+- Some codesmells according to SonarCloud
 
 ## [2.3.0] - 2021-03-29
 ### Added
