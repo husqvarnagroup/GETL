@@ -156,6 +156,7 @@ def batch_mysql_upsert(conf: BlockConfig) -> DataFrame:
     :param list[str] Columns: the columns to try and insert from the dataframe, the database columns and dataframe columns bust match
     :param list[str] ConflictColumns: when conflict on these columns occure, update instead
     :param list[str] UpdateColumns=: columns to update in case of a conflict, the default value is all the Columns excluding the ConflictColumns
+    :param bool SSLDisabled=False: disable ssl for the connection, needed in databricks for now
 
     ```
     SectionName:
@@ -171,6 +172,7 @@ def batch_mysql_upsert(conf: BlockConfig) -> DataFrame:
             Columns: ['file_path', 'count']
             ConflictColumns: ['file_path']
             UpdateColumns: ['count']
+            SSLDisabled: True
     ```
 
     """
@@ -187,6 +189,7 @@ def batch_mysql_upsert(conf: BlockConfig) -> DataFrame:
         columns=conf.get("Columns"),
         conflict_columns=conf.get("ConflictColumns"),
         update_columns=conf.get("UpdateColumns", None),
+        ssl_disabled=conf.get("SSLDisabled", False),
     )
     return dataframe
 

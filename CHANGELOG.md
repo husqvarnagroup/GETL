@@ -6,6 +6,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 
 ## [Unreleased]
+### Added
+- SSLDisabled bool for batch_mysql_upsert, setting this to True fixes a python crash bug for the mysql-connector package
+
 ### Fixed
 - Some codesmells according to SonarCloud
 
