@@ -229,3 +229,42 @@ def _random_string(string_length) -> str:
     """Generate a random string of fixed length."""
     letters = string.ascii_lowercase
     return "".join(random.choice(letters) for _ in range(string_length))
+
+
+def sql(conf: BlockConfig) -> DataFrame:
+    '''Execute SQL statement.
+
+    :param str Statement: the SQL statement to execute
+
+    **Example:**
+
+    ```python
+    yml_string = """
+    Parameters:
+        DbName:
+            Description: Database name
+        TableName:
+            Description: Table name
+
+    LiftJob:
+        OptimizeDb:
+            Type: custom::sql
+            Properties:
+                Statement: OPTIMIZE ${DbName}.${TableName} WHERE date >= current_date() - INTERVAL 7 DAYS ZORDER BY (id)
+    """
+
+
+    lift(
+        spark,
+        lift_def=yml_string,
+        parameters={
+            "DbName": "default",
+            "TableName": "mowers",
+        },
+    )
+    ```
+
+    '''
+    # Parameters are already resolved
+    statement = conf.props["Statement"]
+    return conf.spark.sql(statement)
