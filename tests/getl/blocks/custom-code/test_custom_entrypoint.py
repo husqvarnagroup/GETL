@@ -4,7 +4,21 @@ from pathlib import Path
 
 from pyspark.sql import functions as F
 
+from getl.lift import lift
+from tests.getl.data.samples import create_princess_df
+
 BASE_DIR = Path(__file__).parent / "data"
+SQL_LIFT_YAML = """
+Parameters:
+    Table:
+        Description: table name
+
+LiftJob:
+    ReadFromTable:
+        Type: custom::sql
+        Properties:
+            Statement: SELECT * FROM ${Table}
+"""
 
 
 def generate_test_data(path: Path):
@@ -51,3 +65,20 @@ def test_custom_code_passed_as_function(helpers, spark_session, s3_mock, tmp_pat
 
     # Assert
     assert "newColumn" in dataframe.columns
+
+
+def test_sql(spark_session):
+    # Arrange
+    df = create_princess_df(spark_session)
+    df.createOrReplaceTempView("princesses")
+
+    params = {
+        "Table": "princesses",
+    }
+
+    # Act
+    history = lift(spark=spark_session, lift_def=SQL_LIFT_YAML, parameters=params)
+
+    # Assert
+    dataframe = history.get("ReadFromTable")
+    assert sorted(df.collect()) == sorted(dataframe.collect())
