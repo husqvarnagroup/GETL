@@ -21,7 +21,7 @@ poetry run pre-commit install
 ## Running tests
 
 ```sh
-docker-compose up -d db
+docker-compose up -d
 poetry run pytest
 ```
 

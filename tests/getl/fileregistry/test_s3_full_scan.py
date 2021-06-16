@@ -171,7 +171,7 @@ def test_s3_full_scan_load_with_previous_data(spark_session, s3_mock, tmp_dir, h
         ("s3://husqvarna-datalake/file-registry/test", "test"),
     ],
 )
-def test_create_hive_table(path, table):
+def test_create_hive_table(path, table, spark_session):
     # Arrange
     spark = Mock()
     props = {

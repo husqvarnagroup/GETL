@@ -67,10 +67,10 @@ class S3FullScan(FileRegistry):
 
         # If file registry is found
         if not dataframe:
-            LOGGER.info("No registry found create one at %s", self.file_registry_path)
+            LOGGER.info(f"No registry found create one at {self.file_registry_path}")
             self._create_file_registry()
         else:
-            LOGGER.info("File registry found at %s", self.file_registry_path)
+            LOGGER.info(f"File registry found at {self.file_registry_path}")
 
         self.delta_table = DeltaTable(self.file_registry_path, self.spark)
 

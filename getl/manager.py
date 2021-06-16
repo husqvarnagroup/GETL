@@ -86,7 +86,7 @@ class Manager:
     ) -> BlockOutput:
         """Process each block and yield its result"""
         for section_name, params in blocks.items():
-            LOGGER.info("Process block %s with params %s", section_name, params)
+            LOGGER.info(f"Process block {section_name} with params {params}")
 
             # Fetch functions
             module, function_name = params["Type"].split("::")

@@ -6,6 +6,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 
 ## [Unreleased]
+### Added
+- Add secret word filter for logging
+
+### Fixed
+- Use f-string for logging statements
+- Update how to run test instructions
+- Make mysql library non extra
 
 ## [2.4.0] - 2021-05-18
 ### Added

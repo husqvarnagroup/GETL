@@ -1,11 +1,42 @@
 """Setup logging environment"""
 import logging
+import logging.config
+import re
 
-# Setup logger
-logging.basicConfig(
-    level=logging.INFO, format="%(asctime)s %(name)-1s:%(levelname)-8s %(message)s"
-)
 
+class SecretWordFilter(logging.Filter):
+    def __init__(self, param=None):
+        self.param = param
+
+    def filter(self, record):
+        for x in self.param:
+            if x in record.msg.lower():
+                word_finder = re.compile(rf"({x}':) (\S+)'", re.DOTALL | re.IGNORECASE)
+                record.msg = re.sub(word_finder, r"\1 #redacted#", record.msg)
+        return True
+
+
+LOGGING = {
+    "version": 1,
+    "formatters": {
+        "detailed": {
+            "class": "logging.Formatter",
+            "format": "%(asctime)s %(name)-1s:%(levelname)-8s %(message)s",
+        }
+    },
+    "filters": {
+        "myfilter": {
+            "()": SecretWordFilter,
+            "param": ["password", "secret", "connurl"],
+        }
+    },
+    "handlers": {
+        "console": {"class": "logging.StreamHandler", "filters": ["myfilter"]}
+    },
+    "root": {"level": "INFO", "handlers": ["console"]},
+}
+
+logging.config.dictConfig(LOGGING)
 # Setting the threshold of py4j.java_gateway to WARNING
 # To avoid spam in databricks logs
 logging.getLogger("py4j.java_gateway").setLevel(logging.WARNING)
