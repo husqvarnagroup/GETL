@@ -18,7 +18,7 @@ class HiveTable:
 
     def create(self, location: str, db_schema: str = "", columns: list = None) -> None:
         """Create hive table."""
-        LOGGER.info('Create Hive table: "%s.%s"', self.database_name, self.table_name)
+        LOGGER.info(f'Create Hive table: "{self.database_name}.{self.table_name}"')
         create_table = f"CREATE TABLE IF NOT EXISTS {self.table_name}"
 
         # Add a db schema if its specified

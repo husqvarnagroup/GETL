@@ -65,11 +65,11 @@ class S3DatePrefixScan(FileRegistry):
         dataframe = fr_utils.fetch_file_registry(self.file_registry_path, self.spark)
 
         if not dataframe:
-            LOGGER.info("No registry found create one at %s", self.file_registry_path)
+            LOGGER.info(f"No registry found create one at {self.file_registry_path}")
             self._create_file_registry()
             self.last_date = self.default_start
         else:
-            LOGGER.info("File registry found at %s", self.file_registry_path)
+            LOGGER.info(f"File registry found at {self.file_registry_path}")
             self.last_date = self._get_last_prefix_date(dataframe)
 
         self.delta_table = DeltaTable(self.file_registry_path, self.spark)
@@ -102,7 +102,8 @@ class S3DatePrefixScan(FileRegistry):
             base_s3path = S3Path(s3_path) / date
 
             keys = list(base_s3path.glob(suffix))
-            LOGGER.info("Search prefix %s for files. Found: %s", base_s3path, len(keys))
+            len_keys = len(keys)
+            LOGGER.info(f"Search prefix {base_s3path} for files. Found: {len_keys}")
 
             list_of_rows.extend(
                 FileRegistryRow(

@@ -66,7 +66,7 @@ class BatchDelta:
 
         try:
             if zorder_by:
-                LOGGER.info("%s With zorder_by: %s", log_desc, zorder_by)
+                LOGGER.info(f"{log_desc} With zorder_by: {zorder_by}")
                 spark.sql(f"{optimize_sql} ZORDER BY ({zorder_by})")
 
             else:

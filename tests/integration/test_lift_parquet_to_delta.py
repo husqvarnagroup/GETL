@@ -66,7 +66,7 @@ def get_file_names(path, suffix="parquet"):
 def test_lift_parquet_to_delta(
     m_hive_table, m_batch_read, spark_session, s3_mock, helpers, generate_data, tmp_dir,
 ):
-    """Lift parquet files to delta, with no previus file registry."""
+    """Lift parquet files to delta, with no previous file registry."""
     # Arrange
     base_path_filesystem = generate_data
     read_path = "s3://tmp-bucket{}".format(base_path_filesystem)
@@ -127,7 +127,7 @@ def test_no_new_data_to_lift(
     assert not m_batch_read.called
 
 
-def test_string_lift_def_yaml(spark_session, tmp_dir, generate_data):
+def test_string_lift_def_yaml(spark_session, tmp_dir, generate_data, caplog):
     """Try to lift data with a yaml file defined as a string."""
     # Arrange
     str_yaml = """
@@ -151,6 +151,7 @@ def test_string_lift_def_yaml(spark_session, tmp_dir, generate_data):
                 CustomFunction: ${CustomFunction}
                 CustomProps:
                     ColumnName: columnKing
+                    Password: P@ssw0rd!
 
     """
 
@@ -170,3 +171,5 @@ def test_string_lift_def_yaml(spark_session, tmp_dir, generate_data):
     dataframe = history.get("TransformData")
     assert "columnKing" in dataframe.columns
     assert dataframe.count() == 8
+    # Assert that log filter removes the secret password
+    assert "'Password': #redacted#" in caplog.records[2].msg
