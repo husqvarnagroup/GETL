@@ -2,11 +2,16 @@
 from pyspark.sql import SparkSession
 
 from getl.lift_definition import resolve_lift_definition
+from getl.logging import get_logger
 from getl.manager import Manager
+
+LOGGER = get_logger(__name__)
 
 
 def lift(spark: SparkSession, lift_def: str, parameters: dict) -> dict:
     """Lift function for doing ETL jobs."""
+    LOGGER.info("Parameters")
+    LOGGER.info(parameters)
     lift_def = resolve_lift_definition(lift_def, parameters)
 
     # Give lift definition to manager

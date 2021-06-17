@@ -6,6 +6,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 
 ## [Unreleased]
+### Added
+- Add logging of lift parametes and it values before starting lift
 
 ## [2.5.0] - 2021-06-17
 ### Added
