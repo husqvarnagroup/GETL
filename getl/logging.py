@@ -9,10 +9,11 @@ class SecretWordFilter(logging.Filter):
         self.param = param
 
     def filter(self, record):
+        msg = str(record.msg)
         for x in self.param:
-            if x in record.msg.lower():
+            if x in msg.lower():
                 word_finder = re.compile(rf"({x}':) (\S+)'", re.DOTALL | re.IGNORECASE)
-                record.msg = re.sub(word_finder, r"\1 #redacted#", record.msg)
+                record.msg = re.sub(word_finder, r"\1 #redacted#", msg)
         return True
 
 

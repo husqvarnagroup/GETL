@@ -136,6 +136,8 @@ def test_string_lift_def_yaml(spark_session, tmp_dir, generate_data, caplog):
             Description: The path given for the files in trusted
         CustomFunction:
             Description: The custom function that is needed for life on this plannet
+        Password:
+            Description: The password
 
     LiftJob:
         TrustedFiles:
@@ -151,7 +153,7 @@ def test_string_lift_def_yaml(spark_session, tmp_dir, generate_data, caplog):
                 CustomFunction: ${CustomFunction}
                 CustomProps:
                     ColumnName: columnKing
-                    Password: P@ssw0rd!
+                    Password: ${Password}
 
     """
 
@@ -162,6 +164,7 @@ def test_string_lift_def_yaml(spark_session, tmp_dir, generate_data, caplog):
     params = {
         "ReadPath": generate_data,
         "CustomFunction": custom_function,
+        "Password": "P@ssw0rd!",
     }
 
     # Act
@@ -172,4 +175,5 @@ def test_string_lift_def_yaml(spark_session, tmp_dir, generate_data, caplog):
     assert "columnKing" in dataframe.columns
     assert dataframe.count() == 8
     # Assert that log filter removes the secret password
-    assert "'Password': #redacted#" in caplog.records[2].msg
+    assert "'Password': #redacted#" in caplog.records[1].msg
+    assert "'Password': #redacted#" in caplog.records[4].msg
