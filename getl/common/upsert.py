@@ -1,3 +1,4 @@
+import time
 from contextlib import ExitStack, contextmanager
 from dataclasses import InitVar, dataclass, field
 from functools import partial
@@ -9,6 +10,8 @@ import mysql.connector
 import psycopg2
 from psycopg2.extras import execute_values
 from psycopg2.sql import SQL, Composed, Identifier, Placeholder
+
+SLEEPING_TIME = 60
 
 
 def handle_postgres_upsert(
@@ -72,11 +75,9 @@ def handle_partition(
     upsert_query_class: Any,
     columns: List[str],
 ):
-    with connection_cursor_factory() as cursor:
+    rows = map(itemgetter(*columns), iterator)
 
-        rows = map(itemgetter(*columns), iterator)
-
-        upsert_query_class.execute(cursor, rows, page_size=1000)
+    upsert_query_class.execute(connection_cursor_factory, rows, page_size=1000)
 
 
 @contextmanager
@@ -138,9 +139,27 @@ class PostgresUpsertQuery:
             update=self.sql_update,
         )
 
-    def execute(self, cursor, rows: Iterable[Any], page_size: int = 100) -> None:
+    def execute(
+        self, connection_cursor_factory, rows: Iterable[Any], page_size: int = 100
+    ) -> None:
         sql_query = self.build_query()
-        execute_values(cursor, sql_query, rows, page_size=page_size)
+        exception = Exception("Unknown error")
+
+        for chunk in chunked(rows, page_size):
+            for trial in range(10):
+                try:
+                    with connection_cursor_factory() as cursor:
+                        execute_values(cursor, sql_query, chunk)
+                    break
+                except psycopg2.OperationalError as e:
+                    exception = e
+                    print(f"Error: {e}")
+                    print(f"Sleeping for {SLEEPING_TIME}")
+                    time.sleep(SLEEPING_TIME)
+                except Exception:
+                    raise
+            else:
+                raise exception
 
 
 @dataclass
@@ -188,10 +207,25 @@ class MysqlUpsertQuery:
             update=self.sql_update,
         )
 
-    def execute(self, cursor, rows: Iterable[Any], page_size: int = 100) -> None:
+    def execute(
+        self, connection_cursor_factory, rows: Iterable[Any], page_size: int = 100
+    ) -> None:
         sql_query = self.build_query()
         for chunk in chunked(rows, page_size):
-            cursor.executemany(sql_query, chunk)
+            for trial in range(10):
+                try:
+                    with connection_cursor_factory() as cursor:
+                        cursor.executemany(sql_query, chunk)
+                    break
+                except mysql.connector.Error as e:
+                    exception = e
+                    print(f"Error: {e}")
+                    print(f"Sleeping for {SLEEPING_TIME}")
+                    time.sleep(SLEEPING_TIME)
+                except Exception:
+                    raise
+            else:
+                raise exception
 
 
 def chunked(iterator, size):
