@@ -8,6 +8,7 @@ import boto3
 import mysql.connector
 import oyaml
 import psycopg2
+import pyspark
 import pytest
 from moto import mock_s3
 from pyspark.sql import SparkSession
@@ -41,7 +42,10 @@ def spark_session():
 
     # Get latest delta core:
     # https://mvnrepository.com/artifact/io.delta/delta-core
-    spark_jars.append("./tests/testing-jars/delta-core_2.12-0.8.0.jar")
+    if pyspark.__version__ >= "3.1":
+        spark_jars.append("./tests/testing-jars/delta-core_2.12-1.0.0.jar")
+    else:
+        spark_jars.append("./tests/testing-jars/delta-core_2.12-0.8.0.jar")
     spark_jars.append("./tests/testing-jars/spark-xml_2.12-0.9.0.jar")
 
     spark_builder = (
