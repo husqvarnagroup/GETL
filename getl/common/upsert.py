@@ -146,7 +146,7 @@ class PostgresUpsertQuery:
         exception = Exception("Unknown error")
 
         for chunk in chunked(rows, page_size):
-            for trial in range(10):
+            for _ in range(10):
                 try:
                     with connection_cursor_factory() as cursor:
                         execute_values(cursor, sql_query, chunk)
@@ -156,8 +156,6 @@ class PostgresUpsertQuery:
                     print(f"Error: {e}")
                     print(f"Sleeping for {SLEEPING_TIME}")
                     time.sleep(SLEEPING_TIME)
-                except Exception:
-                    raise
             else:
                 raise exception
 
@@ -212,7 +210,7 @@ class MysqlUpsertQuery:
     ) -> None:
         sql_query = self.build_query()
         for chunk in chunked(rows, page_size):
-            for trial in range(10):
+            for _ in range(10):
                 try:
                     with connection_cursor_factory() as cursor:
                         cursor.executemany(sql_query, chunk)
@@ -222,8 +220,6 @@ class MysqlUpsertQuery:
                     print(f"Error: {e}")
                     print(f"Sleeping for {SLEEPING_TIME}")
                     time.sleep(SLEEPING_TIME)
-                except Exception:
-                    raise
             else:
                 raise exception
 
