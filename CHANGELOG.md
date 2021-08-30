@@ -6,6 +6,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 
 ## [Unreleased]
+
+## [2.7.0] - 2021-08-30
 ### Added
 - Support for pyspark 3.1
 
@@ -172,7 +174,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - prefix_based_date fileregistry.
 
 
-[Unreleased]: https://github.com/husqvarnagroup/GETL/compare/v2.6.0...HEAD
+[Unreleased]: https://github.com/husqvarnagroup/GETL/compare/v2.7.0...HEAD
+[2.7.0]: https://github.com/husqvarnagroup/GETL/compare/v2.6.0...v2.7.0
 [2.6.0]: https://github.com/husqvarnagroup/GETL/compare/v2.5.1...v2.6.0
 [2.5.1]: https://github.com/husqvarnagroup/GETL/compare/v2.5.0...v2.5.1
 [2.5.0]: https://github.com/husqvarnagroup/GETL/compare/v2.4.0...v2.5.0
