@@ -32,7 +32,11 @@ LOGGING = {
         }
     },
     "handlers": {
-        "console": {"class": "logging.StreamHandler", "filters": ["myfilter"]}
+        "console": {
+            "class": "logging.StreamHandler",
+            "filters": ["myfilter"],
+            "formatter": "detailed",
+        }
     },
     "root": {"level": "INFO", "handlers": ["console"]},
 }
