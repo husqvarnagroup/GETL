@@ -6,6 +6,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 
 ## [Unreleased]
+
+## [2.7.2] - 2021-11-11
 - Add mergeSchema option to delta write block
 
 ## [2.7.1] - 2021-09-30
@@ -182,7 +184,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - prefix_based_date fileregistry.
 
 
-[Unreleased]: https://github.com/husqvarnagroup/GETL/compare/v2.7.1...HEAD
+[Unreleased]: https://github.com/husqvarnagroup/GETL/compare/v2.7.2...HEAD
+[2.7.2]: https://github.com/husqvarnagroup/GETL/compare/v2.7.1...v2.7.2
 [2.7.1]: https://github.com/husqvarnagroup/GETL/compare/v2.7.0...v2.7.1
 [2.7.0]: https://github.com/husqvarnagroup/GETL/compare/v2.6.0...v2.7.0
 [2.6.0]: https://github.com/husqvarnagroup/GETL/compare/v2.5.1...v2.6.0
