@@ -119,7 +119,8 @@ class S3FullScan(FileRegistry):
     def _create_hive_table(self, file_registry_path: str):
         hive = HiveTable(self.spark, self.hive_database_name, self.hive_table_name)
         hive.create(
-            file_registry_path, db_schema=self.db_schema,
+            file_registry_path,
+            db_schema=self.db_schema,
         )
 
     def _rows_to_dataframe(self, rows: List[FileRegistryRow]) -> DataFrame:

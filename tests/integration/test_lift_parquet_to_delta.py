@@ -56,7 +56,7 @@ def get_file_names(path, suffix="parquet"):
     for (dirpath, dirnames, filenames) in walk(path):
         for filename in filenames:
             if filename.endswith(suffix):
-                files["{}/{}".format(dirpath, filename)] = None
+                files["{}/{}".format(dirpath.lstrip("/"), filename)] = None
 
     return files
 
@@ -64,23 +64,26 @@ def get_file_names(path, suffix="parquet"):
 @patch("getl.blocks.load.entrypoint._batch_read")
 @patch.object(S3DatePrefixScan, "_create_hive_table")
 def test_lift_parquet_to_delta(
-    m_hive_table, m_batch_read, spark_session, s3_mock, helpers, generate_data, tmp_dir,
+    m_hive_table,
+    m_batch_read,
+    spark_session,
+    s3_mock,
+    helpers,
+    generate_data,
+    tmp_dir,
 ):
     """Lift parquet files to delta, with no previous file registry."""
     # Arrange
-    base_path_filesystem = generate_data
-    read_path = "s3://tmp-bucket{}".format(base_path_filesystem)
-    write_path = "{}/files".format(tmp_dir)
-    file_registry_path = "{}/file_registry/{}".format(tmp_dir, base_path_filesystem)
+    read_path = f"s3://tmp-bucket{generate_data}"
+    write_path = f"{tmp_dir}/files"
+    file_registry_path = f"{tmp_dir}/file_registry{generate_data}"
 
     # Mock spark load
-    m_batch_read.return_value = spark_session.read.load(
-        base_path_filesystem, format="parquet"
-    )
+    m_batch_read.return_value = spark_session.read.load(generate_data, format="parquet")
 
     # Configure s3 mock
     helpers.create_s3_files(
-        {"lift.yaml": LIFT_YAML.read_text(), **get_file_names(base_path_filesystem)}
+        {"lift.yaml": LIFT_YAML.read_text(), **get_file_names(generate_data)}
     )
 
     params = {

@@ -88,8 +88,10 @@ def test_where_throws_col_not_found(predicate, col_name, spark_session):
 def test_where_throws_invalid_operator(m_df, logical_predicate, operator):
     """Where throws invalid operator when passing an invalid LogicalPredicate."""
     # Arrange
-    error_message = "Only 'AND/OR' allowed in LogicalPredicate. But '{}' was provided".format(
-        operator
+    error_message = (
+        "Only 'AND/OR' allowed in LogicalPredicate. But '{}' was provided".format(
+            operator
+        )
     )
 
     # Act
@@ -186,8 +188,10 @@ def test_predicate_to_sql_raises_value_error(args, error):
     """predicate_to_sql raises value error for illegal operand datatypes."""
     # Arrange
     allowable_types = [int, float, str, list, bool]
-    error_message = "Expected format: (tuple, str, tuple) or any of, {}. But, got {}".format(
-        [(str, str, dt) for dt in allowable_types], args if error is None else error
+    error_message = (
+        "Expected format: (tuple, str, tuple) or any of, {}. But, got {}".format(
+            [(str, str, dt) for dt in allowable_types], args if error is None else error
+        )
     )
 
     # Act # Assert

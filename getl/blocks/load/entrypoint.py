@@ -138,7 +138,12 @@ def batch_xml(conf: BlockConfig) -> DataFrame:
             yield file_paths[i : i + batch_size]
 
     def xml_batch_read(path: str, options: dict) -> DataFrame:
-        return _batch_read(conf.spark, path, file_format="xml", options=options,)
+        return _batch_read(
+            conf.spark,
+            path,
+            file_format="xml",
+            options=options,
+        )
 
     # Get the paths to process
     path = _process_path(conf, suffix=conf.get("Suffix", ".xml"))

@@ -344,7 +344,7 @@ def _validate_predicate(predicate: PredicateType) -> None:
 
 
 def _column_present(dataframe: DataFrame, column: str) -> bool:
-    """"Validate if the column exists in the dataframe."""
+    """Validate if the column exists in the dataframe."""
     try:
         dataframe[column]
         return True

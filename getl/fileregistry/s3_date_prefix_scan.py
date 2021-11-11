@@ -134,7 +134,8 @@ class S3DatePrefixScan(FileRegistry):
     def _create_hive_table(self):
         hive = HiveTable(self.spark, self.hive_database_name, self.hive_table_name)
         hive.create(
-            self.file_registry_path, db_schema=self.db_schema,
+            self.file_registry_path,
+            db_schema=self.db_schema,
         )
 
     def _rows_to_dataframe(self, rows: List[FileRegistryRow]) -> DataFrame:

@@ -52,6 +52,7 @@ def test_batch_delta_partitionby(
         "Path": tmp_dir,
         "Mode": "overwrite",
         "PartitionBy": {"Columns": ["year", "month"]},
+        "MergeSchema": True,
     }
     bconf = helpers.create_block_conf(
         create_dataframe(
@@ -65,7 +66,7 @@ def test_batch_delta_partitionby(
     batch_delta(bconf)
 
     # Assert
-    m_write.assert_called_once_with(tmp_dir, "overwrite", ["year", "month"])
+    m_write.assert_called_once_with(tmp_dir, "overwrite", ["year", "month"], True)
     assert not m_hive_table.called
 
 
@@ -175,7 +176,7 @@ def test_batch_clean_write(m_write, s3_mock, helpers):
     # Act & Assert: Second time we  do an upsert when files exist
     bconf = helpers.create_block_conf(None, props)
     batch_delta(bconf)
-    m_write.assert_called_once_with("s3://tmp-bucket/", "overwrite", None)
+    m_write.assert_called_once_with("s3://tmp-bucket/", "overwrite", None, False)
     assert (
         s3_mock.list_objects_v2(Bucket="tmp-bucket", Prefix="prefix")["KeyCount"] == 0
     )
