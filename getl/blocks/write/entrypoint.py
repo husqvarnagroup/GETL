@@ -206,6 +206,7 @@ def batch_delta(conf: BlockConfig) -> DataFrame:
     :param str HiveTable.DatabaseName=: name of hive table
     :param str HiveTable.TableName=: name of the hive table
     :param str HiveTable.Schema=: schema of the hive table
+    :param bool MergeSchema=False: enable delta table mergeSchema option
 
     ```
     SectionName:
@@ -230,11 +231,14 @@ def batch_delta(conf: BlockConfig) -> DataFrame:
                 Schema: >-
                     file_path STRING NOT NULL
                     date_lifted TIMESTAMP
+            MergeSchema: True
+
     ```
     """
     path = conf.get("Path")
     mode = conf.get("Mode")
     columns = conf.get("PartitionBy.Columns", None)
+    merge_schema = conf.get("MergeSchema", False)
     dataframe = conf.history.get(conf.input)
     batch = BatchDelta(dataframe, conf.spark)
     htable = None
@@ -252,9 +256,9 @@ def batch_delta(conf: BlockConfig) -> DataFrame:
     if mode == UPSERT_MODE:
         batch.upsert(path, conf.get("Upsert.MergeStatement"), columns)
     elif mode == CLEAN_WRITE_MODE:
-        batch.clean_write(path, columns)
+        batch.clean_write(path, columns, merge_schema)
     else:
-        batch.write(path, mode, columns)
+        batch.write(path, mode, columns, merge_schema)
 
     # Optimize the delta files
     if conf.get("Optimize.Enabled", False):

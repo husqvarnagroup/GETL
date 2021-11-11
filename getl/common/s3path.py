@@ -69,7 +69,9 @@ class S3Path:
     def write_bytes(self, data: bytes):
         with handle_client_error():
             self._s3_client.put_object(
-                Bucket=self.bucket, Key=self.key, Body=data,
+                Bucket=self.bucket,
+                Key=self.key,
+                Body=data,
             )
 
     def write_text(self, data: str, encoding="utf-8"):
@@ -110,7 +112,9 @@ class S3Path:
         # Copy the file from the source key to the target key
         with handle_client_error():
             self._s3_client.copy(
-                {"Bucket": self.bucket, "Key": self.key}, target.bucket, target.key,
+                {"Bucket": self.bucket, "Key": self.key},
+                target.bucket,
+                target.key,
             )
 
     def delete(self) -> None:

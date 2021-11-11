@@ -43,7 +43,9 @@ class DataWriter:
 
     def write(self, data: List[Tuple]):
         self.spark_session.createDataFrame(data, self.columns).write.save(
-            path=self.path, format="delta", mode="overwrite",
+            path=self.path,
+            format="delta",
+            mode="overwrite",
         )
 
 
