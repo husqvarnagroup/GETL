@@ -269,10 +269,7 @@ def test_batch_csv(spark_session, helpers):
 def test_batch_delta(spark_session, helpers):
     conf = helpers.create_block_conf(
         "",
-        {
-            "Path": helpers.relative_path(__file__, "./data/sample-delta"),
-            "Options": {"inferSchema": True, "header": True},
-        },
+        {"Path": helpers.relative_path(__file__, "./data/sample-delta")},
     )
 
     # Act
@@ -295,7 +292,6 @@ def test_batch_delta_no_files(spark_session, helpers):
         "",
         {
             "Path": helpers.relative_path(__file__, "./data/sample-delta-nofiles"),
-            "Options": {"inferSchema": True, "header": True},
         },
     )
 

@@ -175,6 +175,11 @@ def batch_delta(conf: BlockConfig) -> DataFrame:
 
     :param str Path: path to the data files
     :param str Alias=: an alias for the dataframe that is loaded
+    :param bool ReadChangeFeed=False: Read delta table change feed
+    :param str StartingTimestamp=: To read the changes from a timestamp. The start timestamps are inclusive in the query.
+    this option only has an effect when the `ReadChangeFeed: True` has been set
+
+    Change Data Feed feature details https://docs.databricks.com/delta/delta-change-data-feed.html
 
     ```
     SectionName:
@@ -182,6 +187,8 @@ def batch_delta(conf: BlockConfig) -> DataFrame:
         Properties:
             Path: s3://bucket-name/trusted/live
             Alias: settings
+            ReadChangeFeed: True
+            StartingTimestamp: 2021-11-15
     ```
 
     """
@@ -190,6 +197,14 @@ def batch_delta(conf: BlockConfig) -> DataFrame:
         if conf.exists("FileRegistry"):
             file_registry = conf.file_registry.get(conf.get("FileRegistry"))
             return file_registry.load_new_rows_only(path)
+        if conf.get("ReadChangeFeed", False):
+            # Change Data Feed is only available on Databricks platform
+            starting_timestamp = conf.get("StartingTimestamp")
+            return (
+                conf.spark.read.option("readChangeFeed", "true")
+                .option("startingTimestamp", starting_timestamp)
+                .load(path)
+            )
 
         df = conf.spark.read.load(path, format="delta")
         return df

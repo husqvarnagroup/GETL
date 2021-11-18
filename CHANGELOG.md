@@ -6,6 +6,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 
 ## [Unreleased]
+- Add support to read the Delta change data feed when running on Databricks platform
 
 ## [2.7.2] - 2021-11-11
 - Add mergeSchema option to delta write block
