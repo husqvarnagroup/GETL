@@ -78,7 +78,9 @@ def batch_json(conf: BlockConfig) -> DataFrame:
     :param str FileRegistry=: name of the fileregistry to use
     :param str Alias=: an alias for the dataframe that is loaded
     :param str Suffix=.json: the suffix of the file
-    :param str JsonSchemaPath=: the file schema in json format, if no schema is submitted, inferSchema will be set to true
+    :param str JsonSchemaPath=: path to a file with schema in json format, if no path is submitted, inferSchema will be set to true
+    :param dict JsonSchema=: the file schema in json format, if no schema is submitted, inferSchema will be set to true
+    :param StructType PySparkSchema=: the file schema in PySpark StructType format, if no schema is submitted, inferSchema will be set to true
     :param dict Options: [options](https://spark.apache.org/docs/latest/api/python/pyspark.sql.html#pyspark.sql.DataFrameReader.json) to be passed to the reader
 
 
@@ -91,15 +93,24 @@ def batch_json(conf: BlockConfig) -> DataFrame:
             Alias: settings
             Suffix: .json
             JsonSchemaPath: s3://bucket-name/schema.json
+            JsonSchema: dict
+            PySparkSchema: StructType
     ```
 
     """
     paths = _process_path(conf, suffix=conf.get("Suffix", ".json"))
     schema_path = conf.get("JsonSchemaPath", None)
+    schema = conf.get("JsonSchema", None)
+    pyspark_schema = conf.get("PySparkSchema", None)
+
     options = conf.get("Options", {})
     if schema_path:
         schema = json.loads(S3Path(schema_path).read_text())
         options["schema"] = json_to_spark_schema(schema)
+    elif schema:
+        options["schema"] = json_to_spark_schema(schema)
+    elif pyspark_schema:
+        options["schema"] = pyspark_schema
     else:
         options["inferSchema"] = "true"
 

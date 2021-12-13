@@ -46,9 +46,87 @@ def test_batch_json(spark_session, helpers):
     result_df = resolve(batch_json, conf)
 
     # Assert
-    assert result_df.collect()[0][0] == "Mark Steelspitter"
-    assert result_df.collect()[1][0] == "Mark Two"
-    assert result_df.collect()[2][1] == 11
+    actual = result_df.collect()
+    assert actual[0][0] == "Mark Steelspitter"
+    assert actual[1][0] == "Mark Two"
+    assert actual[2][1] == 11
+    assert result_df.count() == 3
+
+
+def test_batch_json_schema(spark_session, helpers):
+    """batch_json should be able to load json files to a dataframe using json schema object."""
+    # Arrange
+    schema = {
+        "fields": [
+            {"metadata": {}, "name": "name", "nullable": False, "type": "string"},
+            {"metadata": {}, "name": "empid", "nullable": True, "type": "integer"},
+            {"metadata": {}, "name": "happy", "nullable": True, "type": "boolean"},
+            {"metadata": {}, "name": "gear", "nullable": False, "type": "string"},
+        ],
+        "type": "struct",
+    }
+    conf = helpers.create_block_conf(
+        "",
+        {
+            "Path": helpers.relative_path(__file__, "./data/sample.json"),
+            "JsonSchema": schema,
+            "Alias": "alias",
+        },
+    )
+
+    # Act
+    result_df = resolve(batch_json, conf)
+
+    # Assert
+    actual = result_df.collect()
+    assert actual[0][0] == "Mark Steelspitter"
+    assert actual[1][0] == "Mark Two"
+    assert actual[2][1] == 11
+    assert result_df.count() == 3
+
+
+def test_batch_pyspark_schema(spark_session, helpers):
+    """batch_json should be able to load json files to a dataframe using json schema object."""
+    # Arrange
+    _schema = T.StructType(
+        (
+            T.StructField("name", T.StringType(), False),
+            T.StructField("empid", T.LongType(), False),
+            T.StructField(
+                "gear",
+                T.StructType(
+                    (
+                        T.StructField("armor", T.StringType(), True),
+                        T.StructField("helmet", T.StringType(), True),
+                        T.StructField("shoulder-pads", T.StringType(), True),
+                    )
+                ),
+                True,
+            ),
+            T.StructField("happy", T.BooleanType(), False),
+        )
+    )
+    conf = helpers.create_block_conf(
+        "",
+        {
+            "Path": helpers.relative_path(__file__, "./data/sample.json"),
+            "PySparkSchema": _schema,
+            "Alias": "alias",
+        },
+    )
+
+    # Act
+    result_df = resolve(batch_json, conf)
+
+    # Assert
+    actual = result_df.collect()
+
+    assert actual[0][0] == "Mark Steelspitter"
+    assert actual[0][2][0] is None
+    assert actual[0][3] is False
+    assert actual[1][0] == "Mark Two"
+    assert actual[2][1] == 11
+    assert actual[2][2][2] == "sturdyleather"
     assert result_df.count() == 3
 
 

@@ -80,7 +80,8 @@ jobs:
         -Dsonar.projectKey=GETL \
         -Dsonar.sources=. \
         -Dsonar.host.url=https://sonarcloud.io \
-        -Dsonar.login=$(SONAR_TOKEN)
+        -Dsonar.login=$(SONAR_TOKEN) \
+        -Dsonar.python.version=3
     displayName: 'Sonar scanner'
 
 - job: Publish
