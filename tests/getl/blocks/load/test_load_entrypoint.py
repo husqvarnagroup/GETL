@@ -204,13 +204,13 @@ def test_batch_json_no_schema(spark_session, helpers):
 
 def test_batch_xml(spark_session, helpers):
     """Check if the batch_xml loader can load XML documents."""
-    helpers.create_s3_files({"schema.xml": SCHEMA.json()})
+    helpers.create_s3_files({"schema.json": SCHEMA.json()})
 
     conf = helpers.create_block_conf(
         "",
         {
             "Path": helpers.relative_path(__file__, "./data/employee.xml"),
-            "JsonSchemaPath": "s3://tmp-bucket/schema.xml",
+            "JsonSchemaPath": "s3://tmp-bucket/schema.json",
             "RowTag": "employee",
         },
     )
@@ -318,6 +318,70 @@ def test_batch_xml_fileregistry(spark_session, helpers):
     assert result_df.count() == 3
     file_registry_mock.get.assert_called_with("SuperReg")
     file_registry_mock.get.return_value.load.assert_called_with("base_path", ".xml")
+
+
+def test_batch_xml_json_schema(spark_session, helpers):
+    """batch_json should be able to load xml files to a dataframe using json schema object."""
+    # Arrange
+    schema = {
+        "fields": [
+            {"metadata": {}, "name": "name", "nullable": False, "type": "string"},
+            {"metadata": {}, "name": "empid", "nullable": True, "type": "integer"},
+            {"metadata": {}, "name": "happy", "nullable": True, "type": "boolean"},
+        ],
+        "type": "struct",
+    }
+    conf = helpers.create_block_conf(
+        "",
+        {
+            "Path": helpers.relative_path(__file__, "./data/employee.xml"),
+            "JsonSchema": schema,
+            "RowTag": "employee",
+        },
+    )
+
+    # Act
+    result_df = resolve(batch_xml, conf)
+
+    # Assert
+    actual = result_df.collect()
+    assert actual[0][0] == "name1"
+    assert actual[1][0] == "name2"
+    assert actual[2][1] == 456
+    assert result_df.count() == 3
+
+
+def test_batch_xml_pyspark_schema(spark_session, helpers):
+    """batch_json should be able to load xml files to a dataframe using pyspark schema."""
+    # Arrange
+    _schema = T.StructType(
+        (
+            T.StructField("name", T.StringType(), False),
+            T.StructField("empid", T.LongType(), False),
+            T.StructField("happy", T.BooleanType(), True),
+        )
+    )
+    conf = helpers.create_block_conf(
+        "",
+        {
+            "Path": helpers.relative_path(__file__, "./data/employee.xml"),
+            "PySparkSchema": _schema,
+            "RowTag": "employee",
+        },
+    )
+
+    # Act
+    result_df = resolve(batch_xml, conf)
+
+    # Assert
+    actual = result_df.collect()
+
+    assert actual[0][0] == "name1"
+    assert actual[0][2] is True
+    assert actual[1][0] == "name2"
+    assert actual[1][2] is None
+    assert actual[2][1] == 456
+    assert result_df.count() == 3
 
 
 def test_batch_csv(spark_session, helpers):

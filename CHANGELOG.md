@@ -6,9 +6,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 
 ## [Unreleased]
+- Add possibility to define JSON schema with JSON or PySpark code when reading XML files
 
 ## [2.8.0] - 2021-12-13
-- Add possibility to define JSON schema with JSON or PySpark code
+- Add possibility to define JSON schema with JSON or PySpark code when reading JSON files
 
 ## [2.7.3] - 2021-11-18
 - Add support to read the Delta change data feed when running on Databricks platform
