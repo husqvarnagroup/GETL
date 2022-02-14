@@ -5,7 +5,7 @@ import click
 
 @click.command(help="Run isort and black over the whole project")
 def cli():
-    run_command("isort", "isort", "-y")
+    run_command("isort", "isort", ".")
     run_command("black", "black", ".")
 
 
