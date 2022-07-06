@@ -203,8 +203,8 @@ def batch_delta(conf: BlockConfig) -> DataFrame:
     :param int Vacuum.RetainHours=168: number of days we keep version, default is 7 days, cannot be set lower
     :param str Upsert.MergeStatement=: statement to merge the new data `updates.{col}` with the old data `source.{col}`,
     this option only has an effect when the `Mode: upsert` has been set
-    :param str HiveTable.DatabaseName=: name of hive table
-    :param str HiveTable.TableName=: name of the hive table
+    :param str HiveTable.DatabaseName: name of hive table
+    :param str HiveTable.TableName: name of the hive table
     :param str HiveTable.Schema=: schema of the hive table
     :param bool MergeSchema=False: enable delta table mergeSchema option
 
@@ -243,18 +243,20 @@ def batch_delta(conf: BlockConfig) -> DataFrame:
     batch = BatchDelta(dataframe, conf.spark)
     htable = None
 
-    # If hive variables exists create hive table
-    if conf.exists("HiveTable"):
-        dbname = conf.get("HiveTable.DatabaseName")
-        tablename = conf.get("HiveTable.TableName")
-        schema = conf.get("HiveTable.Schema", "")
-
-        htable = HiveTable(spark=conf.spark, database_name=dbname, table_name=tablename)
-        htable.create(path, schema, columns)
+    # For UC. Hive database and table must be specifed
+    # TODO: Add catalog name
+    dbname = conf.get("HiveTable.DatabaseName")
+    tablename = conf.get("HiveTable.TableName")
+    # Schema is still optional
+    schema = conf.get("HiveTable.Schema", "")
+    htable = HiveTable(spark=conf.spark, database_name=dbname, table_name=tablename)
+    htable.create(path, schema, columns)
 
     # Chose one of the batch delta modes
     if mode == UPSERT_MODE:
-        batch.upsert(path, conf.get("Upsert.MergeStatement"), columns)
+        batch.upsert(
+            path, dbname, tablename, conf.get("Upsert.MergeStatement"), columns
+        )
     elif mode == CLEAN_WRITE_MODE:
         batch.clean_write(path, columns, merge_schema)
     else:
@@ -262,11 +264,15 @@ def batch_delta(conf: BlockConfig) -> DataFrame:
 
     # Optimize the delta files
     if conf.get("Optimize.Enabled", False):
-        BatchDelta.optimize(conf.spark, path, conf.get("Optimize.ZorderBy", None))
+        BatchDelta.optimize(
+            conf.spark, dbname, tablename, conf.get("Optimize.ZorderBy", None)
+        )
 
     # Vacuum the delta files so that we do not keep all versions indefinitly
     if conf.get("Vacuum.Enabled", False):
-        BatchDelta.vacuum(conf.spark, path, conf.get("Vacuum.RetainHours", 7 * 24))
+        BatchDelta.vacuum(
+            conf.spark, dbname, tablename, conf.get("Vacuum.RetainHours", 7 * 24)
+        )
 
     return dataframe
 

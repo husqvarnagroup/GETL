@@ -2,6 +2,7 @@
 from dataclasses import dataclass
 
 from pyspark.sql import DataFrame, SparkSession
+from pyspark.sql.utils import AnalysisException
 
 from getl.logging import get_logger
 
@@ -14,6 +15,8 @@ class DeltaTable:
 
     path: str
     spark: SparkSession
+    hive_database_name: str = None
+    hive_table_name: str = None
 
     def __post_init__(self) -> None:
         """Initialize the delta table."""
@@ -42,4 +45,14 @@ class DeltaTable:
         """Create a delta table from a path"""
         import delta.tables
 
-        return delta.tables.DeltaTable.forPath(self.spark, self.path)
+        try:
+            return delta.tables.DeltaTable.forPath(self.spark, self.path)
+        except AnalysisException:
+            if self.hive_database_name and self.hive_table_name:
+                try:
+                    return delta.tables.DeltaTable.forName(
+                        self.spark, f"{self.hive_database_name}.{self.hive_table_name}"
+                    )
+                except AnalysisException as error:
+                    LOGGER.error(error.desc)
+                    raise error

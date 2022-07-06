@@ -9,10 +9,10 @@ from getl.blocks.write.batch_delta import BatchDelta
 @pytest.mark.parametrize(
     "params, calls",
     [
-        ({}, [call('OPTIMIZE "path/to/delta/files"')]),
+        ({}, [call("OPTIMIZE default.table")]),
         (
             {"zorder_by": "columnking"},
-            [call('OPTIMIZE "path/to/delta/files" ZORDER BY (columnking)')],
+            [call("OPTIMIZE default.table ZORDER BY (columnking)")],
         ),
     ],
 )
@@ -22,7 +22,7 @@ def test_optimize_hive_table(params, calls):
     spark_session = Mock()
 
     # Act
-    BatchDelta.optimize(spark_session, "path/to/delta/files", **params)
+    BatchDelta.optimize(spark_session, "default", "table", **params)
 
     # Assert
     assert spark_session.sql.call_count == 1
@@ -32,10 +32,10 @@ def test_optimize_hive_table(params, calls):
 @pytest.mark.parametrize(
     "params, calls",
     [
-        ({}, [call('VACUUM "path/to/delta/files" RETAIN 168 HOURS')]),
+        ({}, [call("VACUUM default.table RETAIN 168 HOURS")]),
         (
             {"retain_hours": 1000},
-            [call('VACUUM "path/to/delta/files" RETAIN 1000 HOURS')],
+            [call("VACUUM default.table RETAIN 1000 HOURS")],
         ),
     ],
 )
@@ -45,7 +45,7 @@ def test_vacuum_hive_table(params, calls):
     spark_session = Mock()
 
     # Act
-    BatchDelta.vacuum(spark_session, "path/to/delta/files", **params)
+    BatchDelta.vacuum(spark_session, "default", "table", **params)
 
     # Assert
     assert spark_session.sql.call_count == 1

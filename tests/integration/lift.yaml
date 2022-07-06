@@ -15,7 +15,7 @@ FileRegistry:
       UpdateAfter: WriteToS3
       HiveDatabaseName: file_registry_dev
       HiveTableName: example
-      DefaultStartDate: "2020-01-01"
+      DefaultStartDate: "2022-05-01"
       PartitionFormat: year=%Y/month=%m/day=%d
 
 LiftJob:
@@ -31,3 +31,6 @@ LiftJob:
     Properties:
       Path: ${WritePath}
       Mode: overwrite
+      HiveTable:
+        DatabaseName: default
+        TableName: table

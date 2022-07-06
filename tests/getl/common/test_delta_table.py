@@ -16,7 +16,7 @@ def create_dataframe(spark_session, data):
 
 
 def test_upsert_all(spark_session, tmp_dir):
-    """Correct parameters are passed to the upsert all fuction."""
+    """Correct parameters are passed to the upsert all function."""
     # ARRANGE
     create_dataframe(
         spark_session,

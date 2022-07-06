@@ -6,6 +6,7 @@ from operator import itemgetter
 from typing import Iterator, List
 
 from pyspark.sql import DataFrame, functions as F, types as T
+from pyspark.sql.utils import ParseException
 
 import getl.fileregistry.fileregistry_utils as fr_utils
 from getl.block import BlockConfig
@@ -72,7 +73,12 @@ class S3DatePrefixScan(FileRegistry):
             LOGGER.info(f"File registry found at {self.file_registry_path}")
             self.last_date = self._get_last_prefix_date(dataframe)
 
-        self.delta_table = DeltaTable(self.file_registry_path, self.spark)
+        self.delta_table = DeltaTable(
+            self.file_registry_path,
+            self.spark,
+            self.hive_database_name,
+            self.hive_table_name,
+        )
 
     @staticmethod
     def _get_files_to_lift(dataframe: DataFrame) -> List[str]:
@@ -92,6 +98,21 @@ class S3DatePrefixScan(FileRegistry):
             updates_df, "source.file_path = updates.file_path"
         )
 
+    def _get_list(self, path: str) -> List[str]:
+        return [row for row in self.spark.sql(f"LIST '{path}';").collect()]
+
+    def _get_all_files(self, path: str, suffix: str) -> List[str]:
+        all_files = []
+        for p in self._get_list(path):
+            if p.size == 0:
+                var = self._get_all_files(p.path, suffix)
+                for f in var:
+                    all_files.append(f)
+            else:
+                if p.path.endswith(suffix):
+                    all_files.append(p.path)
+        return all_files
+
     def _get_new_s3_files(self, s3_path: str, suffix: str) -> List[FileRegistryRow]:
         """Get all new files in s3 from start to now as a dataframe."""
         list_of_rows = []
@@ -100,8 +121,12 @@ class S3DatePrefixScan(FileRegistry):
             self.last_date, datetime.now(), self.partition_format
         ):
             base_s3path = S3Path(s3_path) / date
+            try:
+                keys = self._get_all_files(base_s3path, suffix)
+            except ParseException:
+                LOGGER.warning("Unity catalog list is not supported here")
+                keys = list(base_s3path.glob(suffix))
 
-            keys = list(base_s3path.glob(suffix))
             len_keys = len(keys)
             LOGGER.info(f"Search prefix {base_s3path} for files. Found: {len_keys}")
 

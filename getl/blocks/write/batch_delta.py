@@ -34,12 +34,24 @@ class BatchDelta:
         else:
             self.dataframe.write.save(path=path, format=self._format, mode=mode)
 
-    def upsert(self, path: str, merge_statement: str, columns: list = None) -> None:
+    def upsert(
+        self,
+        path: str,
+        dbname: str,
+        tablename: str,
+        merge_statement: str,
+        columns: list = None,
+    ) -> None:
         """Write data to path if not exists otherwise do an upsert."""
         if not self._dataset_exists(path):
             self.write(path, "overwrite", columns)
         else:
-            delta_table = DeltaTable(path, spark=self.spark)
+            delta_table = DeltaTable(
+                path,
+                spark=self.spark,
+                hive_database_name=dbname,
+                hive_table_name=tablename,
+            )
             delta_table.upsert_all(self.dataframe, merge_statement)
 
     def clean_write(
@@ -67,10 +79,12 @@ class BatchDelta:
             return False
 
     @staticmethod
-    def optimize(spark: SparkSession, path: str, zorder_by: str = None) -> None:
+    def optimize(
+        spark: SparkSession, dbname: str, tablename: str, zorder_by: str = None
+    ) -> None:
         """Optimize delta table."""
-        log_desc = f"Optimize data located at: {path}."
-        optimize_sql = f'OPTIMIZE "{path}"'
+        log_desc = f"Optimize table: {dbname}.{tablename}"
+        optimize_sql = f"OPTIMIZE {dbname}.{tablename}"
 
         try:
             if zorder_by:
@@ -85,9 +99,11 @@ class BatchDelta:
             LOGGER.warning("Optimize command is not supported in this environmnet")
 
     @staticmethod
-    def vacuum(spark: SparkSession, path: str, retain_hours: int = 168):
+    def vacuum(
+        spark: SparkSession, dbname: str, tablename: str, retain_hours: int = 168
+    ):
         """Remove old versions of the delta table, by default retain the last 7 days of versions."""
-        LOGGER.info(f"Vacuum the delta tables at: {path}")
+        LOGGER.info(f"Vacuum the delta table {dbname}.{tablename}")
         try:
             if retain_hours < 168:
                 # Delta Lake has a safety check to prevent you from running a dangerous vacuum command.
@@ -99,6 +115,6 @@ class BatchDelta:
                 spark.sql(
                     "set spark.databricks.delta.retentionDurationCheck.enabled = false"
                 )
-            spark.sql(f'VACUUM "{path}" RETAIN {retain_hours} HOURS')
+            spark.sql(f"VACUUM {dbname}.{tablename} RETAIN {retain_hours} HOURS")
         except ParseException:
             LOGGER.warning("Vacuum command is not supported in this environmnet")
