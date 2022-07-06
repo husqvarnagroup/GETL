@@ -2,6 +2,7 @@
 import json
 from collections import OrderedDict
 from pathlib import Path
+from unittest.mock import patch
 
 from getl.manager import Manager
 
@@ -83,7 +84,8 @@ def split_ab(params: dict):
     }
 
 
-def test_multi_output(spark_session, tmp_path, helpers):
+@patch("getl.blocks.write.entrypoint.HiveTable")
+def test_multi_output(m_hive_table, spark_session, tmp_path, helpers):
     """Load json file and write it to another location as parquet."""
     # Arrange
     json_path = tmp_path / "json"
@@ -118,6 +120,7 @@ def test_multi_output(spark_session, tmp_path, helpers):
                     "Properties": {
                         "Path": str(tmp_path / "alfred_delta"),
                         "Mode": "overwrite",
+                        "HiveTable": {"DatabaseName": "default", "TableName": "table"},
                     },
                 },
             ),
@@ -129,6 +132,7 @@ def test_multi_output(spark_session, tmp_path, helpers):
                     "Properties": {
                         "Path": str(tmp_path / "bobbette_delta"),
                         "Mode": "overwrite",
+                        "HiveTable": {"DatabaseName": "default", "TableName": "table"},
                     },
                 },
             ),

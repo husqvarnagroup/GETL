@@ -6,6 +6,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 
 ## [Unreleased]
+- Breaking change: HiveTable.DatabaseName and HiveTable.TableName is mandatory
+- Add: Support for Databricks Unity Catalog
+- Change: file registry date scan now use SQL LIST for UC
 
 ## [2.8.1] - 2021-12-17
 - Add possibility to define JSON schema with JSON or PySpark code when reading XML files

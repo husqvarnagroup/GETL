@@ -21,14 +21,14 @@ def generate_data(spark_session):
     sc = spark_session.sparkContext
 
     data = [
-        {"from": "London", "to": "Brussels", "date": "2020-01-5"},
-        {"from": "Brussels", "to": "Stockholm", "date": "2020-01-10"},
-        {"from": "Stockholm", "to": "HQ", "date": "2020-02-13"},
-        {"from": "HQ", "to": "Stockholm", "date": "2020-02-13"},
-        {"from": "Stockholm", "to": "HQ", "date": "2020-02-14"},
-        {"from": "HQ", "to": "Stockholm", "date": "2020-02-14"},
-        {"from": "Stockholm", "to": "HQ", "date": "2020-02-15"},
-        {"from": "HQ", "to": "Stockholm", "date": "2020-02-15"},
+        {"from": "London", "to": "Brussels", "date": "2022-05-5"},
+        {"from": "Brussels", "to": "Stockholm", "date": "2022-05-10"},
+        {"from": "Stockholm", "to": "HQ", "date": "2022-06-13"},
+        {"from": "HQ", "to": "Stockholm", "date": "2022-06-13"},
+        {"from": "Stockholm", "to": "HQ", "date": "2022-06-14"},
+        {"from": "HQ", "to": "Stockholm", "date": "2022-06-14"},
+        {"from": "Stockholm", "to": "HQ", "date": "2022-06-15"},
+        {"from": "HQ", "to": "Stockholm", "date": "2022-06-15"},
     ]
 
     with tempfile.TemporaryDirectory() as tmp_path:
@@ -63,7 +63,9 @@ def get_file_names(path, suffix="parquet"):
 
 @patch("getl.blocks.load.entrypoint._batch_read")
 @patch.object(S3DatePrefixScan, "_create_hive_table")
+@patch("getl.blocks.write.entrypoint.HiveTable")
 def test_lift_parquet_to_delta(
+    m_entry_hive,
     m_hive_table,
     m_batch_read,
     spark_session,

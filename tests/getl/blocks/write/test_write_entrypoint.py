@@ -27,7 +27,11 @@ def create_dataframe(spark_session, data):
 def test_batch_delta_overwrite(m_hive_table, helpers, spark_session, tmp_dir):
     """Batch write delta files."""
     # Arrange
-    props = {"Path": tmp_dir, "Mode": "overwrite"}
+    props = {
+        "Path": tmp_dir,
+        "Mode": "overwrite",
+        "HiveTable": {"DatabaseName": "default", "TableName": "table"},
+    }
     bconf = helpers.create_block_conf(
         create_dataframe(spark_session, [("abc", 1, 2020, 10), ("qwe", 2, 2020, 10)]),
         props,
@@ -38,7 +42,7 @@ def test_batch_delta_overwrite(m_hive_table, helpers, spark_session, tmp_dir):
 
     # Assert
     assert spark_session.read.load(tmp_dir, format="delta").count() == 2
-    assert not m_hive_table.called
+    assert m_hive_table.called
 
 
 @patch("getl.blocks.write.entrypoint.HiveTable")
@@ -53,6 +57,7 @@ def test_batch_delta_partitionby(
         "Mode": "overwrite",
         "PartitionBy": {"Columns": ["year", "month"]},
         "MergeSchema": True,
+        "HiveTable": {"DatabaseName": "default", "TableName": "table"},
     }
     bconf = helpers.create_block_conf(
         create_dataframe(
@@ -67,7 +72,7 @@ def test_batch_delta_partitionby(
 
     # Assert
     m_write.assert_called_once_with(tmp_dir, "overwrite", ["year", "month"], True)
-    assert not m_hive_table.called
+    assert m_hive_table.called
 
 
 @pytest.mark.parametrize(
@@ -86,7 +91,12 @@ def test_batch_delta_optimize(
 ):
     """While writing create a hive table with and without ZOPTIMIZE."""
     # Arrange
-    props = {"Path": tmp_dir, "Mode": "overwrite", **params}
+    props = {
+        "Path": tmp_dir,
+        "Mode": "overwrite",
+        "HiveTable": {"DatabaseName": "default", "TableName": "table"},
+        **params,
+    }
     bconf = helpers.create_block_conf(
         create_dataframe(spark_session, [("abc", 1, 2020, 10)]), props
     )
@@ -96,7 +106,7 @@ def test_batch_delta_optimize(
 
     # Assert
     if calls:
-        m_optimize.assert_called_once_with(bconf.spark, tmp_dir, *calls)
+        m_optimize.assert_called_once_with(bconf.spark, "default", "table", *calls)
     else:
         assert not m_optimize.called
 
@@ -117,7 +127,12 @@ def test_batch_delta_vacuum(
 ):
     """Test the batch delta vacuum proprety."""
     # Arrange
-    props = {"Path": tmp_dir, "Mode": "overwrite", **params}
+    props = {
+        "Path": tmp_dir,
+        "Mode": "overwrite",
+        "HiveTable": {"DatabaseName": "default", "TableName": "table"},
+        **params,
+    }
     bconf = helpers.create_block_conf(
         create_dataframe(spark_session, [("abc", 1, 2020, 10)]), props
     )
@@ -127,18 +142,20 @@ def test_batch_delta_vacuum(
 
     # Assert
     if calls:
-        m_vacuum.assert_called_once_with(bconf.spark, tmp_dir, *calls)
+        m_vacuum.assert_called_once_with(bconf.spark, "default", "table", *calls)
     else:
         assert not m_vacuum.called
 
 
-def test_batch_delta_upsert(tmp_dir, helpers, spark_session):
+@patch("getl.blocks.write.entrypoint.HiveTable")
+def test_batch_delta_upsert(m_hive_table, tmp_dir, helpers, spark_session):
     """Insert of update delta files when keys match."""
     # Arrange
     props = {
         "Path": tmp_dir,
         "Mode": "upsert",
         "Upsert": {"MergeStatement": "source.file_path = updates.file_path"},
+        "HiveTable": {"DatabaseName": "default", "TableName": "table"},
     }
     first_df = create_dataframe(
         spark_session, [("path/to/file1", 1, 2020, 10), ("path/to/file2", 4, 2020, 10)]
@@ -159,12 +176,14 @@ def test_batch_delta_upsert(tmp_dir, helpers, spark_session):
 
 
 @patch.object(BatchDelta, "write")
-def test_batch_clean_write(m_write, s3_mock, helpers):
+@patch("getl.blocks.write.entrypoint.HiveTable")
+def test_batch_clean_write(m_hive_table, m_write, s3_mock, helpers):
     """Insert of update delta files when keys match."""
     # Arrange
     props = {
         "Path": "s3://tmp-bucket/",
         "Mode": "clean_write",
+        "HiveTable": {"DatabaseName": "default", "TableName": "table"},
     }
     helpers.create_s3_files(
         {
@@ -189,6 +208,7 @@ def test_write_batch_json(helpers, spark_session, tmp_path):
         "Path": str(tmp_path),
         "Mode": "overwrite",
         # "PartitionBy": {"Columns": ["year", "month"]},
+        "HiveTable": {"DatabaseName": "default", "TableName": "table"},
     }
     df = create_dataframe(
         spark_session,
@@ -212,6 +232,7 @@ def test_write_batch_json_partitionBy(helpers, spark_session, tmp_path):
         "Path": str(tmp_path),
         "Mode": "overwrite",
         "PartitionBy": {"Columns": ["year", "month"]},
+        "HiveTable": {"DatabaseName": "default", "TableName": "table"},
     }
     df = create_dataframe(
         spark_session,

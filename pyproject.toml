@@ -26,7 +26,7 @@ python = "^3.7"
 boto3 = "^1.13.24"
 pyspark = ">=2.4.4,<3.2"
 oyaml = ">=0.9,<1.1"
-psycopg2-binary = {version = "^2.8", optional = true}
+psycopg2-binary = {version = "^2.8"}
 typeguard = "^2.10.0"
 mysql-connector-python = {version = "^8.0.23"}
 
