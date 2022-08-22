@@ -6,6 +6,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 
 ## [Unreleased]
+
+## [3.0.0] - 2022-08-22
 - Breaking change: HiveTable.DatabaseName and HiveTable.TableName is mandatory
 - Add: Support for Databricks Unity Catalog
 - Change: file registry date scan now use SQL LIST for UC
@@ -196,7 +198,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - prefix_based_date fileregistry.
 
 
-[Unreleased]: https://github.com/husqvarnagroup/GETL/compare/v2.8.1...HEAD
+[Unreleased]: https://github.com/husqvarnagroup/GETL/compare/v3.0.0...HEAD
+[3.0.0]: https://github.com/husqvarnagroup/GETL/compare/v2.8.1...v3.0.0
 [2.8.1]: https://github.com/husqvarnagroup/GETL/compare/v2.8.0...v2.8.1
 [2.8.0]: https://github.com/husqvarnagroup/GETL/compare/v2.7.3...v2.8.0
 [2.7.3]: https://github.com/husqvarnagroup/GETL/compare/v2.7.2...v2.7.3
