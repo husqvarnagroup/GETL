@@ -1,5 +1,6 @@
 """Module for handling delta table operations."""
 from dataclasses import dataclass
+from typing import Optional
 
 from pyspark.sql import DataFrame, SparkSession
 from pyspark.sql.utils import AnalysisException
@@ -15,8 +16,8 @@ class DeltaTable:
 
     path: str
     spark: SparkSession
-    hive_database_name: str = None
-    hive_table_name: str = None
+    hive_database_name: Optional[str] = None
+    hive_table_name: Optional[str] = None
 
     def __post_init__(self) -> None:
         """Initialize the delta table."""

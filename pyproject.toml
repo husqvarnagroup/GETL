@@ -23,27 +23,23 @@ packages = [
 
 [tool.poetry.dependencies]
 python = "^3.7"
-boto3 = "^1.13.24"
-pyspark = ">=2.4.4,<3.2"
-oyaml = ">=0.9,<1.1"
-psycopg2-binary = {version = "^2.8"}
-typeguard = "^2.10.0"
-mysql-connector-python = {version = "^8.0.23"}
+boto3 = "*"
+pyspark = ">=3.2,<3.4"
+oyaml = "*"
+psycopg2-binary = "*"
+typeguard = "*"
+mysql-connector-python = "*"
 
 [tool.poetry.dev-dependencies]
-pytest = "^6.1.1"
-mkdocs = "^1.1.2"
-pytest-cov = "^2.10.1"
-black = "^21.10b0"
-isort = "^5.6.4"
-flake8 = "^3.8.3"
-pre-commit = "^2.7.1"
-click = "^7.1"
-moto = {version = "^2.0.6", extras = ["all"]}
-
-[tool.poetry.extras]
-postgres = ["psycopg2-binary"]
-mysql = ["mysql-connector-python"]
+pytest = "*"
+mkdocs = "*"
+pytest-cov = "*"
+black = "*"
+isort = "*"
+flake8 = "*"
+pre-commit = "*"
+click = "*"
+moto = {version = "*", extras = ["all"]}
 
 [tool.poetry.plugins."mkdocs.plugins"]
 RootFiles = "mkdocs_plugins:RootFiles"

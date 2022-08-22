@@ -12,7 +12,7 @@ Install GETL by running:
 
 ```sh
 # Install dependencies and dev dependencies
-poetry install --extras postgres
+poetry install
 
 # Install the git pre-commit hooks
 poetry run pre-commit install

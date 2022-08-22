@@ -118,10 +118,5 @@ class S3Path:
             )
 
     def delete(self) -> None:
-        if "husqvarna-datalake/raw/" in self.key:
-            # TODO: this check is Husqvarna dependent, remove me
-            raise PermissionError(
-                "Access Denied: Not possible to remove files from raw layer"
-            )
         with handle_client_error():
             self._s3_client.delete_object(Bucket=self.bucket, Key=self.key)

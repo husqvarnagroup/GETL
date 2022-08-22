@@ -42,10 +42,12 @@ def spark_session():
 
     # Get latest delta core:
     # https://mvnrepository.com/artifact/io.delta/delta-core
-    if pyspark.__version__ >= "3.1":
-        spark_jars.append("./tests/testing-jars/delta-core_2.12-1.0.0.jar")
+    if pyspark.__version__ >= "3.3":
+        spark_jars.append("./tests/testing-jars/delta-core_2.12-2.0.0.jar")
+        spark_jars.append("./tests/testing-jars/delta-storage-2.0.0.jar")
     else:
-        spark_jars.append("./tests/testing-jars/delta-core_2.12-0.8.0.jar")
+        spark_jars.append("./tests/testing-jars/delta-core_2.12-1.2.1.jar")
+        spark_jars.append("./tests/testing-jars/delta-storage-1.2.1.jar")
     spark_jars.append("./tests/testing-jars/spark-xml_2.12-0.9.0.jar")
 
     spark_builder = (
@@ -166,7 +168,7 @@ def helpers(s3_mock, spark_session):
 
 
 @pytest.fixture(
-    scope="module", params=["postgres10", "postgres11", "postgres12", "postgres13"]
+    scope="module", params=["postgres11", "postgres12", "postgres13", "postgres14"]
 )
 def postgres_port(request):
     docker_compose = BASE_DIR / "docker-compose.yaml"
@@ -196,7 +198,7 @@ def postgres_cursor(postgres_connection):
         yield cursor
 
 
-@pytest.fixture(scope="module", params=["mysql56", "mysql57", "mysql8"])
+@pytest.fixture(scope="module", params=["mysql5", "mysql8"])
 def mysql_port(request):
     docker_compose = BASE_DIR / "docker-compose.yaml"
     assert docker_compose.exists(), "docker-compose.yaml not found"

@@ -67,12 +67,6 @@ def delete_files(paths: List[str]) -> None:
         delete_files(['s3://landingzone/amc-connect/file.txt', 's3://datalake/amc/raw/file.txt'])
 
     """
-    # TODO: remove me
-    if any("husqvarna-datalake/raw/" in path for path in paths):
-        raise PermissionError(
-            "Access Denied: Not possible to remove files from raw layer"
-        )
-
     for path in paths:
         s3path = S3Path(path)
         s3path.delete()
@@ -115,10 +109,8 @@ def copy_keys(paths: List[Tuple[str]]) -> None:
         copy_keys([('landingzone/amc-connect/file.txt', 'datalake/amc/raw/file.txt')])
 
     """
-    # TODO: Remove me
-
-    for path in paths:
-        source = S3Path(path[0])
-        target = S3Path(path[1])
+    for path1, path2 in paths:
+        source = S3Path(path1)
+        target = S3Path(path2)
 
         source.copy(target)

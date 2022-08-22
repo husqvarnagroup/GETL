@@ -83,7 +83,7 @@ class BlockConfig:
 
         return tmp_props
 
-    def copy(self, *args) -> "BlockConfig":
+    def copy(self) -> "BlockConfig":
         return self.__class__(
             self.section_name,
             self.spark,

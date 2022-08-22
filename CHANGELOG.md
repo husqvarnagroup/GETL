@@ -6,6 +6,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 
 ## [Unreleased]
+### Changed
+- Test with latest 2 pyspark versions only
 
 ## [3.0.0] - 2022-08-22
 - Breaking change: HiveTable.DatabaseName and HiveTable.TableName is mandatory
