@@ -17,24 +17,12 @@ jobs:
     vmImage: 'ubuntu-latest'
   strategy:
     matrix:
-      Python37-spark30:
-        python.version: '3.7'
-        TOXENV: py37-spark30
-      Python38-spark30:
-        python.version: '3.8'
-        TOXENV: py38-spark30
-      Python39-spark30:
+      Python39-spark32:
         python.version: '3.9'
-        TOXENV: py39-spark30
-      Python37-spark31:
-        python.version: '3.7'
-        TOXENV: py37-spark31
-      Python38-spark31:
-        python.version: '3.8'
-        TOXENV: py38-spark31
-      Python39-spark31:
+        TOXENV: py39-spark32
+      Python39-spark33:
         python.version: '3.9'
-        TOXENV: py39-spark31
+        TOXENV: py39-spark33
 
   steps:
   - task: UsePythonVersion@0
@@ -44,7 +32,7 @@ jobs:
 
   - script: |
       python -m pip install --upgrade pip poetry tox
-      poetry install --extras "postgres"
+      poetry install
     displayName: 'Install dependencies'
 
   - script: |

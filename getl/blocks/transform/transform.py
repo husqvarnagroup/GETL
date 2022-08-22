@@ -335,7 +335,7 @@ def _validate_logical_predicate(predicate) -> None:
 def _validate_predicate(predicate: PredicateType) -> None:
     """Raise value error if the parameters does not confirm to allowed data types."""
     allowable_types = [int, float, str, list, bool]
-    if not tuple(map(type, predicate)) in [(str, str, dt) for dt in allowable_types]:
+    if tuple(map(type, predicate)) not in [(str, str, dt) for dt in allowable_types]:
         raise ValueError(
             "Expected format: (tuple, str, tuple) or any of, {}. But, got {}".format(
                 [(str, str, dt) for dt in allowable_types], predicate

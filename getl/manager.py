@@ -2,7 +2,7 @@
 from collections import OrderedDict
 from importlib import import_module
 from types import FunctionType, ModuleType
-from typing import Dict, Iterator, Tuple, Union
+from typing import Callable, Dict, Iterator, Tuple, Union
 
 from pyspark.sql import DataFrame, SparkSession
 
@@ -83,7 +83,7 @@ class Manager:
 
     def _process_blocks(
         self, blocks: OrderedDict, base_import_path: str
-    ) -> BlockOutput:
+    ) -> Iterator[Tuple[BlockOutput, Callable]]:
         """Process each block and yield its result"""
         for section_name, params in blocks.items():
             LOGGER.info(f"Process block {section_name} with params {params}")

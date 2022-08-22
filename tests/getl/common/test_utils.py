@@ -68,25 +68,6 @@ def test_json_to_spark_invalid_json(invalid_json):
 
 
 @pytest.mark.parametrize(
-    "paths",
-    [
-        ["husqvarna-datalake/raw/including/not_present.txt"],
-        [
-            "my/key/including/n_present.txt",
-            "husqvarna-datalake/raw/including/not_present.txt",
-        ],
-    ],
-)
-def test_delete_files_not_possible_from_raw(paths):
-    """delete_files returns PermissionError when deleting files from raw."""
-    # Act & Assert
-    with pytest.raises(PermissionError) as excinfo:
-        delete_files(paths)
-
-    assert "Access Denied: Not possible to remove files from raw layer" in str(excinfo)
-
-
-@pytest.mark.parametrize(
     "paths, bucket, files",
     [
         ([], "landingzone", []),
