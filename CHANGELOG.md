@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [3.2.0] - 2022-10-06
+- Delta core and delta storage 2.1
+- Use bool param mergeSchema for all delta writes
+
 ## [3.1.0] - 2022-10-04
 ### Changed
 - Test with latest 2 pyspark versions only
@@ -202,7 +206,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - prefix_based_date fileregistry.
 
 
-[Unreleased]: https://github.com/husqvarnagroup/GETL/compare/v3.1.0...HEAD
+[Unreleased]: https://github.com/husqvarnagroup/GETL/compare/v3.2.0...HEAD
+[3.2.0]: https://github.com/husqvarnagroup/GETL/compare/v3.1.0...v3.2.0
 [3.1.0]: https://github.com/husqvarnagroup/GETL/compare/v3.0.0...v3.1.0
 [3.0.0]: https://github.com/husqvarnagroup/GETL/compare/v2.8.1...v3.0.0
 [2.8.1]: https://github.com/husqvarnagroup/GETL/compare/v2.8.0...v2.8.1
