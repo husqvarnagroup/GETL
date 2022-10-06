@@ -48,6 +48,7 @@ def handle_delta_files_dont_exist():
             "Incompatible format detected",
             "doesn't exist",
             "is not a Delta table",
+            "Path does not exist:",
         ]
 
         if any(e in str(spark_exception) for e in exceptions):
