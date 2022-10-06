@@ -73,6 +73,7 @@ class BatchDelta:
                 "Incompatible format detected",
                 "doesn't exist",
                 "is not a Delta table",
+                "Path does not exist:",
             ]
 
             if not any([e in str(spark_exception) for e in exceptions]):
