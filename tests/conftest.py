@@ -43,8 +43,8 @@ def spark_session():
     # Get latest delta core:
     # https://mvnrepository.com/artifact/io.delta/delta-core
     if pyspark.__version__ >= "3.3":
-        spark_jars.append("./tests/testing-jars/delta-core_2.12-2.1.0.jar")
-        spark_jars.append("./tests/testing-jars/delta-storage-2.1.0.jar")
+        spark_jars.append("./tests/testing-jars/delta-core_2.12-2.0.0.jar")
+        spark_jars.append("./tests/testing-jars/delta-storage-2.0.0.jar")
     else:
         spark_jars.append("./tests/testing-jars/delta-core_2.12-1.2.1.jar")
         spark_jars.append("./tests/testing-jars/delta-storage-1.2.1.jar")

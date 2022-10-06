@@ -32,9 +32,7 @@ class BatchDelta:
                 mergeSchema=merge_schema,
             )
         else:
-            self.dataframe.write.save(
-                path=path, format=self._format, mode=mode, mergeSchema=merge_schema
-            )
+            self.dataframe.write.save(path=path, format=self._format, mode=mode)
 
     def upsert(
         self,

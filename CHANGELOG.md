@@ -6,8 +6,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 
 ## [Unreleased]
-- Fix error handling for spark 3.3 and test with delta core 2.1
-- Add mergeSchema option for clean_write option
 
 ## [3.1.0] - 2022-10-04
 ### Changed

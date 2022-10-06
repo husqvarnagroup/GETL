@@ -68,9 +68,7 @@ def test_where_success_nested_df(spark_session):
 def test_where_throws_col_not_found(predicate, col_name, spark_session):
     """Spark throws column not found exception."""
     # Arrange
-    error_message = (
-        f"Column '{col_name}' does not exist. Did you mean one of the following? ["
-    )
+    error_message = f"cannot resolve '{col_name}' given input columns: ["
     # Act
     with pytest.raises(ValueError) as col_not_found:
         tr.where(create_princess_df(spark_session), predicate)
