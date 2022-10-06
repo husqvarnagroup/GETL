@@ -7,6 +7,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [3.2.2] - 2022-10-06
+Bugfix: Add new exception for delta table read errors
+
 ## [3.2.1] - 2022-10-06
 -  Add new exception for delta table read errors
 
@@ -209,7 +212,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - prefix_based_date fileregistry.
 
 
-[Unreleased]: https://github.com/husqvarnagroup/GETL/compare/v3.2.1...HEAD
+[Unreleased]: https://github.com/husqvarnagroup/GETL/compare/v3.2.2...HEAD
+[3.2.2]: https://github.com/husqvarnagroup/GETL/compare/v3.2.1...v3.2.2
 [3.2.1]: https://github.com/husqvarnagroup/GETL/compare/v3.2.0...v3.2.1
 [3.2.0]: https://github.com/husqvarnagroup/GETL/compare/v3.1.0...v3.2.0
 [3.1.0]: https://github.com/husqvarnagroup/GETL/compare/v3.0.0...v3.1.0
