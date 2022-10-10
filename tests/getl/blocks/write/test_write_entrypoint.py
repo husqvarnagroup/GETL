@@ -185,20 +185,10 @@ def test_batch_clean_write(m_hive_table, m_write, s3_mock, helpers):
         "Mode": "clean_write",
         "HiveTable": {"DatabaseName": "default", "TableName": "table"},
     }
-    helpers.create_s3_files(
-        {
-            "prefix/to/file1.json": None,
-            "prefix/to/file2.json": None,
-            "prefix/to/file3.json": None,
-        }
-    )
-    # Act & Assert: Second time we  do an upsert when files exist
+    # Act & Assert:
     bconf = helpers.create_block_conf(None, props)
     batch_delta(bconf)
     m_write.assert_called_once_with("s3://tmp-bucket/", "overwrite", None, False)
-    assert (
-        s3_mock.list_objects_v2(Bucket="tmp-bucket", Prefix="prefix")["KeyCount"] == 0
-    )
 
 
 def test_write_batch_json(helpers, spark_session, tmp_path):

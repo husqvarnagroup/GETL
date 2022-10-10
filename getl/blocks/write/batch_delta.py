@@ -5,7 +5,6 @@ from pyspark.sql import DataFrame, SparkSession
 from pyspark.sql.utils import AnalysisException, ParseException
 
 from getl.common.delta_table import DeltaTable
-from getl.common.s3path import S3Path
 from getl.logging import get_logger
 
 LOGGER = get_logger(__name__)
@@ -59,9 +58,7 @@ class BatchDelta:
     def clean_write(
         self, path: str, columns: list = None, merge_schema: bool = False
     ) -> None:
-        """Write to delta files to a clean location."""
-        for s3path in S3Path(path).glob():
-            s3path.delete()
+        """Write as delta table with overwrite mode."""
         self.write(path, "overwrite", columns, merge_schema)
 
     def _dataset_exists(self, path: str) -> bool:
