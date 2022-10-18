@@ -6,6 +6,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 
 ## [Unreleased]
+### Fixed
+- s3_date_prefix_scan won't error when a path is not found
 
 ## [3.2.3] - 2022-10-10
 - Do not delete files, just overwrite the delta tbale with mode overwrite in delta_write block
