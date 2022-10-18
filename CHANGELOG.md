@@ -6,6 +6,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 
 ## [Unreleased]
+
+## [3.2.4] - 2022-10-18
 ### Fixed
 - s3_date_prefix_scan won't error when a path is not found
 
@@ -217,7 +219,8 @@ Bugfix: Add new exception for delta table read errors
 - prefix_based_date fileregistry.
 
 
-[Unreleased]: https://github.com/husqvarnagroup/GETL/compare/v3.2.3...HEAD
+[Unreleased]: https://github.com/husqvarnagroup/GETL/compare/v3.2.4...HEAD
+[3.2.4]: https://github.com/husqvarnagroup/GETL/compare/v3.2.3...v3.2.4
 [3.2.3]: https://github.com/husqvarnagroup/GETL/compare/v3.2.2...v3.2.3
 [3.2.2]: https://github.com/husqvarnagroup/GETL/compare/v3.2.1...v3.2.2
 [3.2.1]: https://github.com/husqvarnagroup/GETL/compare/v3.2.0...v3.2.1
