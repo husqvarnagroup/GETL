@@ -6,7 +6,7 @@ from operator import itemgetter
 from typing import Iterator, List
 
 from pyspark.sql import DataFrame, functions as F, types as T
-from pyspark.sql.utils import ParseException
+from pyspark.sql.utils import AnalysisException, ParseException
 
 import getl.fileregistry.fileregistry_utils as fr_utils
 from getl.block import BlockConfig
@@ -98,20 +98,13 @@ class S3DatePrefixScan(FileRegistry):
             updates_df, "source.file_path = updates.file_path"
         )
 
-    def _get_list(self, path: str) -> List[str]:
-        return [row for row in self.spark.sql(f"LIST '{path}';").collect()]
-
     def _get_all_files(self, path: str, suffix: str) -> List[str]:
-        all_files = []
-        for p in self._get_list(path):
+        for p in self.spark.sql(f"LIST '{path}';").collect():
             if p.size == 0:
-                var = self._get_all_files(p.path, suffix)
-                for f in var:
-                    all_files.append(f)
+                yield from self._get_all_files(p.path, suffix)
             else:
                 if p.path.endswith(suffix):
-                    all_files.append(p.path)
-        return all_files
+                    yield p.path
 
     def _get_new_s3_files(self, s3_path: str, suffix: str) -> List[FileRegistryRow]:
         """Get all new files in s3 from start to now as a dataframe."""
@@ -122,10 +115,14 @@ class S3DatePrefixScan(FileRegistry):
         ):
             base_s3path = S3Path(s3_path) / date
             try:
-                keys = self._get_all_files(base_s3path, suffix)
+                keys = list(self._get_all_files(base_s3path, suffix))
             except ParseException:
                 LOGGER.warning("Unity catalog list is not supported here")
                 keys = list(base_s3path.glob(suffix))
+            except AnalysisException as e:
+                if "RESOURCE_DOES_NOT_EXIST" in str(e):
+                    continue
+                raise
 
             len_keys = len(keys)
             LOGGER.info(f"Search prefix {base_s3path} for files. Found: {len_keys}")
