@@ -17,7 +17,6 @@ LIFT_YAML = Path(__file__).parent / "lift.yaml"
 
 @pytest.fixture(scope="session")
 def generate_data(spark_session):
-
     sc = spark_session.sparkContext
 
     data = [
@@ -53,7 +52,7 @@ def generate_data(spark_session):
 def get_file_names(path, suffix="parquet"):
     """Get all file names recursivly from path:"""
     files = {}
-    for (dirpath, dirnames, filenames) in walk(path):
+    for dirpath, dirnames, filenames in walk(path):
         for filename in filenames:
             if filename.endswith(suffix):
                 files["{}/{}".format(dirpath.lstrip("/"), filename)] = None

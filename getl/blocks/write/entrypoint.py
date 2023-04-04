@@ -258,9 +258,18 @@ def batch_delta(conf: BlockConfig) -> DataFrame:
             path, dbname, tablename, conf.get("Upsert.MergeStatement"), columns
         )
     elif mode == CLEAN_WRITE_MODE:
-        batch.clean_write(path, columns, merge_schema)
+        batch.clean_write(
+            path, columns, merge_schema, database_name=dbname, table_name=tablename
+        )
     else:
-        batch.write(path, mode, columns, merge_schema)
+        batch.write(
+            path,
+            mode,
+            columns,
+            merge_schema,
+            database_name=dbname,
+            table_name=tablename,
+        )
 
     # Optimize the delta files
     if conf.get("Optimize.Enabled", False):

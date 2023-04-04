@@ -19,11 +19,19 @@ class BatchDelta:
     _format: str = "delta"
 
     def write(
-        self, path: str, mode: str, columns: list = None, merge_schema: bool = False
+        self,
+        path: str,
+        mode: str,
+        columns: list = None,
+        merge_schema: bool = False,
+        *,
+        database_name: str,
+        table_name: str,
     ) -> None:
         """Write to delta files to a location."""
         if columns:
-            self.dataframe.write.save(
+            self.dataframe.write.saveAsTable(
+                f"{database_name}.{table_name}",
                 path=path,
                 format=self._format,
                 mode=mode,
@@ -31,8 +39,12 @@ class BatchDelta:
                 mergeSchema=merge_schema,
             )
         else:
-            self.dataframe.write.save(
-                path=path, format=self._format, mode=mode, mergeSchema=merge_schema
+            self.dataframe.write.saveAsTable(
+                f"{database_name}.{table_name}",
+                path=path,
+                format=self._format,
+                mode=mode,
+                mergeSchema=merge_schema,
             )
 
     def upsert(
@@ -42,10 +54,19 @@ class BatchDelta:
         tablename: str,
         merge_statement: str,
         columns: list = None,
+        *,
+        database_name: str,
+        table_name: str,
     ) -> None:
         """Write data to path if not exists otherwise do an upsert."""
         if not self._dataset_exists(path):
-            self.write(path, "overwrite", columns)
+            self.write(
+                path,
+                "overwrite",
+                columns,
+                database_name=database_name,
+                table_name=table_name,
+            )
         else:
             delta_table = DeltaTable(
                 path,
@@ -56,10 +77,23 @@ class BatchDelta:
             delta_table.upsert_all(self.dataframe, merge_statement)
 
     def clean_write(
-        self, path: str, columns: list = None, merge_schema: bool = False
+        self,
+        path: str,
+        columns: list = None,
+        merge_schema: bool = False,
+        *,
+        database_name: str,
+        table_name: str,
     ) -> None:
         """Write as delta table with overwrite mode."""
-        self.write(path, "overwrite", columns, merge_schema)
+        self.write(
+            path,
+            "overwrite",
+            columns,
+            merge_schema,
+            database_name=database_name,
+            table_name=table_name,
+        )
 
     def _dataset_exists(self, path: str) -> bool:
         """Validate if the dataset exists."""
