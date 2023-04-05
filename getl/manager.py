@@ -8,7 +8,6 @@ from pyspark.sql import DataFrame, SparkSession
 
 from getl.block import BlockConfig, FileRegistryLog, LiftJobLog
 from getl.common.errors import NoDataToProcess
-from getl.common.type_checker import is_type
 from getl.logging import get_logger
 
 LOGGER = get_logger(__name__)
@@ -54,7 +53,7 @@ class Manager:
         self, bconf: BlockConfig, dataframe: Union[DataFrame, DictDataFrames]
     ) -> BlockOutput:
         # Check output type
-        if is_type(dataframe, DictDataFrames) and bconf.exists("Output"):
+        if isinstance(dataframe, dict) and bconf.exists("Output"):
             # Iterate over the dataframes in the dictionary
             for sub_section_name, df in dataframe.items():
                 if sub_section_name in bconf.get("Output"):

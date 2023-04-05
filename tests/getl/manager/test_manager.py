@@ -132,7 +132,7 @@ def test_multi_output(m_hive_table, spark_session, tmp_path, helpers):
                     "Properties": {
                         "Path": str(tmp_path / "bobbette_delta"),
                         "Mode": "overwrite",
-                        "HiveTable": {"DatabaseName": "default", "TableName": "table"},
+                        "HiveTable": {"DatabaseName": "default", "TableName": "table2"},
                     },
                 },
             ),

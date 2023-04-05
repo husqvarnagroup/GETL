@@ -1,29 +1,5 @@
 version: '3.8'
 services:
-    postgres11:
-        image: postgres:11-alpine
-        environment:
-            - POSTGRES_DB=testdb
-            - POSTGRES_USER=dbadmin
-            - POSTGRES_PASSWORD=mintkaka2010
-        ports:
-            - 54011:5432
-    postgres12:
-        image: postgres:12-alpine
-        environment:
-            - POSTGRES_DB=testdb
-            - POSTGRES_USER=dbadmin
-            - POSTGRES_PASSWORD=mintkaka2010
-        ports:
-            - 54012:5432
-    postgres13:
-        image: postgres:13-alpine
-        environment:
-            - POSTGRES_DB=testdb
-            - POSTGRES_USER=dbadmin
-            - POSTGRES_PASSWORD=mintkaka2010
-        ports:
-            - 54013:5432
     postgres14:
         image: postgres:14-alpine
         environment:
@@ -33,15 +9,6 @@ services:
         ports:
             - 54014:5432
 
-    mysql5:
-        image: mysql:5
-        environment:
-            - MYSQL_DATABASE=testdb
-            - MYSQL_USER=dbadmin
-            - MYSQL_PASSWORD=mintkaka2010
-            - MYSQL_RANDOM_ROOT_PASSWORD=1
-        ports:
-            - 33062:3306
     mysql8:
         image: mysql:8
         environment:
