@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "husqvarna-getl"
-version = "3.2.4"
+version = "3.3.0"
 description = "An elegant way to ETL'ing"
 documentation = "https://getl.readthedocs.io/"
 repository = "https://github.com/husqvarnagroup/GETL/"
