@@ -71,7 +71,14 @@ def test_batch_delta_partitionby(
     batch_delta(bconf)
 
     # Assert
-    m_write.assert_called_once_with(tmp_dir, "overwrite", ["year", "month"], True)
+    m_write.assert_called_once_with(
+        tmp_dir,
+        "overwrite",
+        ["year", "month"],
+        True,
+        database_name="default",
+        table_name="table",
+    )
     assert m_hive_table.called
 
 
@@ -188,7 +195,14 @@ def test_batch_clean_write(m_hive_table, m_write, s3_mock, helpers):
     # Act & Assert:
     bconf = helpers.create_block_conf(None, props)
     batch_delta(bconf)
-    m_write.assert_called_once_with("s3://tmp-bucket/", "overwrite", None, False)
+    m_write.assert_called_once_with(
+        "s3://tmp-bucket/",
+        "overwrite",
+        None,
+        False,
+        database_name="default",
+        table_name="table",
+    )
 
 
 def test_write_batch_json(helpers, spark_session, tmp_path):

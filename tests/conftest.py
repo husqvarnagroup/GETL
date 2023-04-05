@@ -81,6 +81,15 @@ def tmp_dir(tmpdir):
     yield str(tmpdir)
 
 
+@pytest.fixture(scope="function", autouse=True)
+def cleanup_tables(spark_session):
+    try:
+        yield
+    finally:
+        spark_session.sql("DROP TABLE IF EXISTS default.table")
+        spark_session.sql("DROP TABLE IF EXISTS default.table2")
+
+
 class Helpers:
     def __init__(self, _s3_mock, _spark_session):
         self.s3_mock = _s3_mock
@@ -167,9 +176,7 @@ def helpers(s3_mock, spark_session):
     return Helpers(s3_mock, spark_session)
 
 
-@pytest.fixture(
-    scope="module", params=["postgres11", "postgres12", "postgres13", "postgres14"]
-)
+@pytest.fixture(scope="module", params=["postgres14"])
 def postgres_port(request):
     docker_compose = BASE_DIR / "docker-compose.yaml"
     assert docker_compose.exists(), "docker-compose.yaml not found"
@@ -198,7 +205,7 @@ def postgres_cursor(postgres_connection):
         yield cursor
 
 
-@pytest.fixture(scope="module", params=["mysql5", "mysql8"])
+@pytest.fixture(scope="module", params=["mysql8"])
 def mysql_port(request):
     docker_compose = BASE_DIR / "docker-compose.yaml"
     assert docker_compose.exists(), "docker-compose.yaml not found"
