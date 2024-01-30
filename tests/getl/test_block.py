@@ -1,4 +1,5 @@
 """Unit tests for the manager class that is the controller of the ETL process."""
+
 import pytest
 
 from getl.block import BlockConfig, BlockLog

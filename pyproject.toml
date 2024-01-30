@@ -13,18 +13,18 @@ license = "MIT"
 classifiers = [
     "Development Status :: 3 - Alpha",
     "Programming Language :: Python",
-    "Programming Language :: Python :: 3.7",
     "Programming Language :: Python :: 3.8",
     "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
 ]
 packages = [
     { include="getl" },
 ]
 
 [tool.poetry.dependencies]
-python = "^3.7"
+python = "^3.8"
 boto3 = "*"
-pyspark = ">=3.2,<3.4"
+pyspark = ">=3.2,<3.6"
 oyaml = "*"
 psycopg2-binary = "*"
 typeguard = "*"

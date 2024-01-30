@@ -1,4 +1,5 @@
 """Custom errors for the GETL module."""
+
 from contextlib import contextmanager
 from typing import Dict, Tuple, Type
 

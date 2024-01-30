@@ -1,4 +1,5 @@
 """Unit tests helper functions for lift file."""
+
 import getl.lift_definition as liftdef
 
 

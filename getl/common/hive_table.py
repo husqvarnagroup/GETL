@@ -1,4 +1,5 @@
 """Module for handling hive table operations."""
+
 from dataclasses import dataclass
 
 from pyspark.sql import SparkSession

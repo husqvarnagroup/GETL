@@ -1,4 +1,5 @@
 """Testing the module batch delta."""
+
 from unittest.mock import Mock, call
 
 import pytest

@@ -1,4 +1,5 @@
 """Unit test for GETL utils function."""
+
 from unittest import mock
 
 import pytest

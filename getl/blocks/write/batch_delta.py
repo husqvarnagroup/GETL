@@ -1,4 +1,5 @@
 """Module for writing files to s3 as delta files."""
+
 from dataclasses import dataclass
 
 from pyspark.sql import DataFrame, SparkSession

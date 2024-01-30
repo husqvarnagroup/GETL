@@ -1,4 +1,5 @@
 """Entry point for using the getl."""
+
 from pyspark.sql import SparkSession
 
 from getl.lift_definition import resolve_lift_definition

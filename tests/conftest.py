@@ -1,4 +1,5 @@
 """ConfTest fixture for SparkSession and logger."""
+
 import logging
 import os
 from datetime import datetime
@@ -10,7 +11,7 @@ import oyaml
 import psycopg2
 import pyspark
 import pytest
-from moto import mock_s3
+from moto import mock_aws
 from pyspark.sql import SparkSession
 
 from getl.block import BlockConfig, BlockLog
@@ -42,7 +43,10 @@ def spark_session():
 
     # Get latest delta core:
     # https://mvnrepository.com/artifact/io.delta/delta-core
-    if pyspark.__version__ >= "3.3":
+    if pyspark.__version__ >= "3.5":
+        spark_jars.append("./tests/testing-jars/delta-spark_2.12-3.0.0.jar")
+        spark_jars.append("./tests/testing-jars/delta-storage-2.1.0.jar")
+    elif pyspark.__version__ >= "3.3":
         spark_jars.append("./tests/testing-jars/delta-core_2.12-2.1.0.jar")
         spark_jars.append("./tests/testing-jars/delta-storage-2.1.0.jar")
     else:
@@ -71,8 +75,8 @@ def spark_session():
 @pytest.fixture(scope="function")
 def s3_mock():
     """Mock boto3 using moto library."""
-    with mock_s3():
-        yield boto3.client("s3")
+    with mock_aws():
+        yield boto3.client("s3", region_name="eu-west-1")
 
 
 @pytest.fixture(scope="function")

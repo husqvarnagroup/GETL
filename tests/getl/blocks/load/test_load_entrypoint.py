@@ -1,4 +1,5 @@
 """Unit test for GETL load method."""
+
 from os import environ
 from unittest.mock import Mock
 
@@ -13,9 +14,9 @@ from getl.blocks.load.entrypoint import (
 )
 
 # TODO: Need to adapt to different xml version depending on spark version
-environ[
-    "PYSPARK_SUBMIT_ARGS"
-] = "--packages com.databricks:spark-xml_2.11:0.9.0 pyspark-shell"
+environ["PYSPARK_SUBMIT_ARGS"] = (
+    "--packages com.databricks:spark-xml_2.11:0.9.0 pyspark-shell"
+)
 SCHEMA = T.StructType(
     [
         T.StructField("name", T.StringType(), True),

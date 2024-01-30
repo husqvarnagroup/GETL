@@ -1,4 +1,5 @@
 """Entrypoint for the write block."""
+
 from pyspark.sql import DataFrame
 
 from getl.block import BlockConfig

@@ -1,4 +1,5 @@
 """Unit test for GETL transform function."""
+
 # pylint: disable=W0212
 
 import json
@@ -522,7 +523,14 @@ def test_union_returns_df_successfully(spark_session):
 def test_union_fail_incompatible_types(spark_session):
     """Union should fail if the types are different."""
     # Arrange
-    error_msg = "Union can only be performed on tables with the compatible column types"
+    if spark_session.version == "3.5.0":
+        error_msg = (
+            "UNION can only be performed on tables with compatible column types."
+        )
+    else:
+        error_msg = (
+            "Union can only be performed on tables with the compatible column types"
+        )
     df1 = create_princess_df(spark_session).select("name", "age", "happy")
     df2 = df1.select(["name", "age", df1.happy.cast(T.StringType())])
 
@@ -537,7 +545,14 @@ def test_union_fail_incompatible_types(spark_session):
 def test_union_fail_incorrect_num_col(spark_session):
     """Union should fail if we have the incorrect number of columns."""
     # Arrange
-    error_msg = "Union can only be performed on tables with the same number of columns"
+    if spark_session.version >= "3.5.0":
+        error_msg = (
+            "UNION can only be performed on inputs with the same number of columns"
+        )
+    else:
+        error_msg = (
+            "Union can only be performed on tables with the same number of columns"
+        )
     df1 = create_princess_df(spark_session)
     df2 = df1.drop("name")
 

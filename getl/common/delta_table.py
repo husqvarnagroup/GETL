@@ -1,4 +1,5 @@
 """Module for handling delta table operations."""
+
 from dataclasses import dataclass
 from typing import Optional
 

@@ -1,4 +1,5 @@
 """Module containing classes that are used by the blocks."""
+
 from collections import OrderedDict
 from typing import Any, List, Union
 

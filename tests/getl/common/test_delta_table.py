@@ -1,4 +1,5 @@
 """Testing the module delta tables."""
+
 from pyspark.sql import types as T
 
 from getl.common.delta_table import DeltaTable

@@ -1,4 +1,5 @@
 """File registry that works with YYYY/MM/DD prefixed files in s3."""
+
 from collections import namedtuple
 from datetime import datetime, timedelta
 from itertools import groupby

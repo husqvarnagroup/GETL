@@ -6,7 +6,7 @@
 trigger:
   branches:
     include:
-      - '*'
+      - 'master'
   tags:
     include:
       - '*'
@@ -23,6 +23,9 @@ jobs:
       Python39-spark33:
         python.version: '3.9'
         TOXENV: py39-spark33
+      Python310-spark35:
+        python.version: '3.10'
+        TOXENV: py310-spark35
 
   steps:
   - task: UsePythonVersion@0
@@ -57,7 +60,7 @@ jobs:
     displayName: 'Generate coverage xml file'
 
   - script: |
-      export SONAR_SCANNER_VERSION=4.4.0.2170
+      export SONAR_SCANNER_VERSION=5.0.1.3006
       export SONAR_SCANNER_HOME=$HOME/.sonar/sonar-scanner-$SONAR_SCANNER_VERSION-linux
       curl --create-dirs -sSLo $HOME/.sonar/sonar-scanner.zip https://binaries.sonarsource.com/Distribution/sonar-scanner-cli/sonar-scanner-cli-$SONAR_SCANNER_VERSION-linux.zip
       unzip -o $HOME/.sonar/sonar-scanner.zip -d $HOME/.sonar/
@@ -79,8 +82,8 @@ jobs:
     vmImage: 'ubuntu-latest'
   strategy:
     matrix:
-      Python38:
-        python.version: '3.8'
+      Python310:
+        python.version: '3.10'
 
   steps:
   - task: UsePythonVersion@0

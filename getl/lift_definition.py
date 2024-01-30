@@ -1,4 +1,5 @@
 """Validating and preprocessing lift definitions."""
+
 import re
 import string
 from typing import Union

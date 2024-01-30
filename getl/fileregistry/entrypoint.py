@@ -1,4 +1,5 @@
 """Entry point for the metadata blocks."""
+
 from types import FunctionType
 
 from getl.block import BlockConfig

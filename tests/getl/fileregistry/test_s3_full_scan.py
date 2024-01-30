@@ -1,4 +1,5 @@
 """Unit tests for the custom code index function."""
+
 from unittest.mock import Mock, patch
 
 import pytest
