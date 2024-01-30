@@ -1,4 +1,5 @@
 """Testing module hive table."""
+
 from unittest.mock import Mock, call
 
 import pytest

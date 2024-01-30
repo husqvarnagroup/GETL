@@ -1,4 +1,5 @@
 """Manager class that executes lift definitions."""
+
 from collections import OrderedDict
 from importlib import import_module
 from types import FunctionType, ModuleType

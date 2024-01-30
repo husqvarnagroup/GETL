@@ -1,6 +1,7 @@
 """
 Entrypoint for the generic transform block.
 """
+
 from importlib import import_module
 from typing import Callable, Dict, Optional, Tuple
 

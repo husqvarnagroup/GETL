@@ -1,4 +1,5 @@
 """File registry that works with a prefix in S3."""
+
 from collections import namedtuple
 from typing import List
 

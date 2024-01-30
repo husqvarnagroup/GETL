@@ -1,4 +1,5 @@
 """Setup logging environment"""
+
 import logging
 import logging.config
 import re

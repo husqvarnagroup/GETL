@@ -1,4 +1,5 @@
 """Common base class for file registry."""
+
 from abc import ABC, abstractmethod
 
 

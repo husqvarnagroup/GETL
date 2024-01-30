@@ -1,4 +1,5 @@
 """Entrypoint for the custom code block."""
+
 import importlib
 import random
 import string  # pylint: disable=deprecated-module

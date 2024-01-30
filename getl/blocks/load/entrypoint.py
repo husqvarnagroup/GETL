@@ -1,4 +1,5 @@
 """Entrypoint for the load block."""
+
 import functools
 import json
 from typing import Iterator, List

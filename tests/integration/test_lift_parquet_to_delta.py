@@ -1,4 +1,5 @@
 """Integration test for lifting parquet files to delta files."""
+
 import json
 import tempfile
 from os import walk

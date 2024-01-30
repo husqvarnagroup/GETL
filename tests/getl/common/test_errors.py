@@ -1,17 +1,26 @@
+import os
 from contextlib import contextmanager
 
 import boto3
 import pytest
 from botocore.exceptions import ClientError
-from moto import mock_s3
+from moto import mock_aws
 
 
-@mock_s3
 @pytest.fixture(scope="function")
-def s3_mock():
-    """Mock boto3 using moto library."""
-    mock_s3().start()
-    yield boto3.client("s3")
+def aws_credentials():
+    """Mocked AWS Credentials for moto."""
+    os.environ["AWS_ACCESS_KEY_ID"] = "testing"
+    os.environ["AWS_SECRET_ACCESS_KEY"] = "testing"
+    os.environ["AWS_SECURITY_TOKEN"] = "testing"
+    os.environ["AWS_SESSION_TOKEN"] = "testing"
+    os.environ["AWS_DEFAULT_REGION"] = "eu-west-1"
+
+
+@pytest.fixture(scope="function")
+def aws_mock(aws_credentials):
+    with mock_aws():
+        yield boto3.client("s3", region_name="eu-west-1")
 
 
 @contextmanager
@@ -38,49 +47,49 @@ def handle_client_error():
         raise client_error
 
 
-def test_no_bucket(s3_mock):
+def test_no_bucket(aws_mock):
     with pytest.raises(FileNotFoundError):
         with handle_client_error():
-            s3_mock.get_object(Bucket="tmp-bucket", Key="tmp-key")
+            aws_mock.get_object(Bucket="tmp-bucket", Key="tmp-key")
 
 
-def test_no_key(s3_mock):
-    s3_mock.create_bucket(
+def test_no_key(aws_mock):
+    aws_mock.create_bucket(
         Bucket="tmp-bucket",
         CreateBucketConfiguration={"LocationConstraint": "eu-west1"},
     )
 
     with pytest.raises(FileNotFoundError):
         with handle_client_error():
-            print(s3_mock.get_object(Bucket="tmp-bucket", Key="tmp-key"))
+            print(aws_mock.get_object(Bucket="tmp-bucket", Key="tmp-key"))
 
 
-def test_has_key(s3_mock):
-    s3_mock.create_bucket(
+def test_has_key(aws_mock):
+    aws_mock.create_bucket(
         Bucket="tmp-bucket",
         CreateBucketConfiguration={"LocationConstraint": "eu-west1"},
     )
-    s3_mock.put_object(Bucket="tmp-bucket", Key="tmp-key", Body="tmp-body")
+    aws_mock.put_object(Bucket="tmp-bucket", Key="tmp-key", Body="tmp-body")
 
     with handle_client_error():
         assert (
-            s3_mock.get_object(Bucket="tmp-bucket", Key="tmp-key")["Body"]
+            aws_mock.get_object(Bucket="tmp-bucket", Key="tmp-key")["Body"]
             .read()
             .decode()
             == "tmp-body"
         )
 
 
-def test_has_key2(s3_mock):
-    s3_mock.create_bucket(
+def test_has_key2(aws_mock):
+    aws_mock.create_bucket(
         Bucket="tmp-bucket",
         CreateBucketConfiguration={"LocationConstraint": "eu-west1"},
     )
-    s3_mock.put_object(Bucket="tmp-bucket", Key="tmp-key", Body=b"tmp-body")
+    aws_mock.put_object(Bucket="tmp-bucket", Key="tmp-key", Body=b"tmp-body")
 
     with handle_client_error():
         assert (
-            s3_mock.get_object(Bucket="tmp-bucket", Key="tmp-key")["Body"]
+            aws_mock.get_object(Bucket="tmp-bucket", Key="tmp-key")["Body"]
             .read()
             .decode()
             == "tmp-body"
